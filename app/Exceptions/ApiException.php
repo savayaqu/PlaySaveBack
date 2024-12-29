@@ -6,15 +6,16 @@ use Illuminate\Http\Exceptions\HttpResponseException;
 
 class ApiException extends HttpResponseException
 {
-    public function __construct(string $message = "",int $code = 0, $errors = [])
+    public function __construct(string $message = "",int $code = 500, $errors = [], $data = [])
     {
-        $response = [
-            'message' => $message,
+        $body = [
             'code' => $code,
+            'message' => $message,
         ];
-        if(!empty($errors)){
-            $response['errors'] = $errors;
-        }
-        parent::__construct(response()->json($response)->setStatusCode($code));
+        if(count($errors))
+            $body['errors'] = $errors;
+        if($data)
+            array_push($body, ...$data);
+        parent::__construct(response()->json($body, $code));
     }
 }
