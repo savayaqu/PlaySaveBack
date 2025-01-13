@@ -14,6 +14,9 @@ class UserCloudService extends Model
         'cloud_service_id',
         'user_id',
     ];
+    protected $casts = [
+      'expires_at' => 'datetime',
+    ];
     public function user()
     {
         return $this->belongsTo(User::class);
