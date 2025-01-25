@@ -20,7 +20,7 @@ return new class extends Migration
             $table->text('description')->nullable();
             $table->foreignId('user_id')->constrained();
             $table->foreignId('game_id')->nullable()->constrained();
-            $table->foreignId('user_cloud_service_id')->constrained();
+            $table->foreignId('user_cloud_service_id')->constrained('user_cloud_service', 'id');
             $table->foreignId('custom_game_id')->nullable()->constrained();
             $table->timestamps();
         });

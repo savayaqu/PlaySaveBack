@@ -13,6 +13,7 @@ return new class extends Migration
     {
         Schema::create('games', function (Blueprint $table) {
             $table->id();
+            $table->bigInteger('steam_id')->unsigned()->nullable()->unique();
             $table->string('name')->unique();
             $table->string('image')->nullable();
             $table->foreignId('publisher_id')->nullable()->constrained();
