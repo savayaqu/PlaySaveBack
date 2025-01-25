@@ -50,6 +50,7 @@ class GamePublisherSeeder extends Seeder
                             // Сохраняем или обновляем игру
                             Game::updateOrCreate(
                                 [
+                                    'steam_id' => $gameSteamId,
                                     'name' => $name,
                                     'publisher_id' => $publisher->id,
                                     'image' => "https://cdn.cloudflare.steamstatic.com/steam/apps/$gameSteamId/library_600x900.jpg"
@@ -58,7 +59,7 @@ class GamePublisherSeeder extends Seeder
                         }
                     }
                 } catch (\Exception $e) {
-                    $this->command->error("Ошибка обработки файла {$file}: {$e->getMessage()}");
+                    //$this->command->error("Ошибка обработки файла {$file}: {$e->getMessage()}");
                 }
             }
             // Обновляем прогресс-бар

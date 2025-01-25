@@ -1,15 +1,13 @@
 <?php
 
-use App\Http\Controllers\GoogleDriveController;
-use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\AuthController;
-use App\Http\Controllers\Api\SaveController;
 use App\Http\Controllers\Api\CloudServiceController;
 use App\Http\Controllers\Api\CustomGameController;
 use App\Http\Controllers\Api\GameController;
 use App\Http\Controllers\Api\PublisherController;
+use App\Http\Controllers\Api\SaveController;
 use App\Http\Controllers\Api\UserController;
-use App\Http\Controllers\Api\UserCloudServiceController;
+use Illuminate\Support\Facades\Route;
 
 
 // AUTH
@@ -65,6 +63,7 @@ Route::middleware('auth:sanctum')->group(function () {
 // Игры
     Route::middleware('auth:sanctum')->group(function () {
         Route::controller(GameController::class)->group(function () {
+            Route::get('games', 'index')->withoutMiddleware('auth:sanctum'); // просмотр игр
             Route::post('games', 'createGame'); // Создание игры
             Route::put('games/{id}', 'updateGame'); // Редактирование игры
             Route::delete('games/{id}', 'deleteGame'); // Удаление игры
@@ -92,8 +91,4 @@ Route::post('uploadToServer', [SaveController::class, 'upload'])->middleware('au
 //TODO: так как будет в wpf то хз чё выбрать. хотя привязку на сайте можно сделать и уже готовая будет, ДА-ДА-ДА
 
 //TODO: в общем сделать вебку с сессиями для привязки гугл диска
-Route::middleware(['web'])->group(function () {
-    Route::get('/google-drive/auth-url', [GoogleDriveController::class, 'getAuthUrl']);
-    Route::get('/google-drive/callback', [GoogleDriveController::class, 'callback']);
-});
-Route::post('/google-drive/upload', [GoogleDriveController::class, 'uploadFile'])->middleware('auth:sanctum');
+

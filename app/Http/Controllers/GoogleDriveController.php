@@ -8,7 +8,6 @@ use Google\Client;
 use Google\Service\Drive;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Crypt;
 
 class GoogleDriveController extends Controller
 {
@@ -33,10 +32,10 @@ class GoogleDriveController extends Controller
 
         $cloudService = CloudService::query()->where('name', 'Google Drive')->first();
         $token = $client->fetchAccessTokenWithAuthCode($request->get('code'));
-
+        $userId = Auth::id();
         // Попытка найти запись
         $userCloudService = UserCloudService::query()->where([
-            'user_id' => 1, // TODO: заменить на реальный ID пользователя
+            'user_id' => $userId,
             'cloud_service_id' => $cloudService->id,
         ])->first();
 
@@ -51,14 +50,14 @@ class GoogleDriveController extends Controller
             // Если запись не найдена, создаем
             UserCloudService::query()->create([
                 'cloud_service_id' => $cloudService->id,
-                'user_id' => 1, // TODO: заменить на реальный ID пользователя
+                'user_id' => $userId,
                 'access_token' => $token['access_token'],
                 'refresh_token' => $token['refresh_token'] ?? null,
                 'expires_at' => now()->addSeconds($token['expires_in']),
             ]);
         }
 
-        return response()->json(['status' => 'success']);
+        return redirect(route('profile'));
     }
 
     public function uploadFile(Request $request)

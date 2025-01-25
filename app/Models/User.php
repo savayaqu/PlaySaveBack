@@ -53,4 +53,8 @@ class User extends Authenticatable
     {
         return $this->hasMany(UserCloudService::class);
     }
+    public static function profileImage()
+    {
+        return asset('assets/images/profile-icon.svg');
+    }
 }
