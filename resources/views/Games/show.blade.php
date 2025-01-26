@@ -9,10 +9,26 @@
                 <div class="col-md-6">
                     <img src="{{ $gameDetails['header_image'] }}" class="img-fluid" alt="{{ $game->name }}">
                 </div>
-                @auth()
-                    <div class="col-md-5">
-                        <button>Добавить в библиотеку</button>
-                    </div>
+                @auth
+                    @if($isInCollection)
+
+                        <div class="col-md-5">
+                            <form action="{{ route('collections.remove') }}" method="POST">
+                                @csrf
+                                <input type="hidden" name="game_id" value="{{ $game->id }}">
+                                <button type="submit" class="btn btn-danger">Удалить из коллекции</button>
+                            </form>
+                            <a href="{{ route('collections.index') }}" class="btn btn-primary">Перейти в коллекцию</a>
+                        </div>
+                    @else
+                        <div class="col-md-5">
+                            <form action="{{ route('collections.add') }}" method="POST">
+                                @csrf
+                                <input type="hidden" name="game_id" value="{{ $game->id }}">
+                                <button type="submit" class="btn btn-success">Добавить в коллекцию</button>
+                            </form>
+                        </div>
+                    @endif
                 @endauth
                 <div class="col-md-6">
                     <h3>Разработчик: {{ implode(', ', $gameDetails['developers']) }}</h3>

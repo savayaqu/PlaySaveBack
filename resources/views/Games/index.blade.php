@@ -21,7 +21,7 @@
                 <div class="col-md-4 mb-4">
                     <div class="card h-100">
                         <img
-                            src="{{ "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/$game->steam_id/capsule_231x87.jpg" }}"
+                            src="{{"https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/$game->steam_id/capsule_231x87.jpg"}}"
                             class="card-img-top"
                             alt="{{ $game->name }}"
                         >

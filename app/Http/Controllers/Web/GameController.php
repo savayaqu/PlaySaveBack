@@ -11,7 +11,7 @@ class GameController extends Controller
 {
     public function index(Request $request)
     {
-        $perPage = $request->input('per_page', 10); // Количество игр на странице
+        $perPage = $request->input('per_page', 21); // Количество игр на странице
         $search = $request->input('search'); // Параметр поиска
 
         $query = Game::query();
@@ -42,8 +42,11 @@ class GameController extends Controller
         } else {
             $gameDetails = null;
         }
+        // Проверяем, есть ли игра в коллекции пользователя
+        $isInCollection = auth()->user()?->collections()->where('game_id', $game->id)->exists();
+
         // Отправляем данные в представление
-        return view('games.show', compact('game', 'gameDetails'));
+        return view('games.show', compact('game', 'gameDetails', 'isInCollection'));
     }
 
 }

@@ -10,7 +10,6 @@
     <title>@yield('title', 'PlaySaveBack')</title>
 </head>
 <body>
-<div class="wrapper">
     <header class="bg-dark text-white py-3">
         <div class="container d-flex justify-content-between align-items-center">
             <a class="btn btn-outline-light mr-2" href="{{route('home')}}">PlaySaveBack</a>
@@ -30,7 +29,7 @@
         </div>
     </header>
 
-    <main class="content container my-5">
+    <main class="content">
         @yield('content')
     </main>
 
@@ -39,6 +38,5 @@
             <p class="mb-0">&copy; {{date('Y')}} PlaySaveBack. Все права защищены.</p>
         </div>
     </footer>
-</div>
 </body>
 </html>

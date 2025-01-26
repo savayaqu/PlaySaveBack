@@ -15,4 +15,8 @@ class Game extends Model
     {
         return $this->hasMany(Save::class);
     }
+    public function collections()
+    {
+        return $this->hasMany(Collection::class);
+    }
 }
