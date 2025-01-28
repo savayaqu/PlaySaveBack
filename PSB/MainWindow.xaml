@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Window
+    x:Class="PSB.MainWindow"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:local="using:PSB"
+    xmlns:vm="using:PSB.ViewModels"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    mc:Ignorable="d"
+    Title="PSB">
+        <NavigationView
+            x:Name="nvSample"
+            IsBackEnabled="True"
+            AlwaysShowHeader="True"
+            PaneTitle="Menu"
+            PaneDisplayMode="Left"
+            ExpandedModeThresholdWidth="500"
+            SelectionFollowsFocus="Disabled"
+            IsTabStop="False"
+            IsBackButtonVisible="Collapsed"
+            IsSettingsVisible="False"
+            SelectionChanged="NavigationView_SelectionChanged">
+
+            <!-- Заголовок с кнопкой "Назад" -->
+            <NavigationView.Header>
+                <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                    <Button x:Name="BackButton" 
+                            Content="&#xE72B;" 
+                            FontFamily="Segoe MDL2 Assets" 
+                            FontSize="16"
+                            Margin="0,0,10,0"
+                            Click="BackButton_Click"/>
+                <TextBlock x:Name="HeaderText" 
+                   Text="HomePage" 
+                   VerticalAlignment="Center" 
+                   FontSize="16"/>
+            </StackPanel>
+            </NavigationView.Header>
+
+            <NavigationView.MenuItems>
+            <NavigationViewItemHeader Content="Привет"/>
+            <NavigationViewItem Margin="0, 10, 0, 10" Height="50" Content="Login Page" Tag="LoginPage" Icon="Contact" x:Name="AuthNav"/>
+                <NavigationViewItem Content="Home Page" Tag="HomePage" Icon="Home" IsSelected="True"/>
+                <NavigationViewItem Content="Catalog" Tag="CatalogPage">
+                    <NavigationViewItem.Icon>
+                        <FontIcon Glyph="&#xF0E2;"/>
+                    </NavigationViewItem.Icon>
+                </NavigationViewItem>
+                <NavigationViewItem Content="Settings" Tag="SettingsPage" Icon="Setting"/>
+                <NavigationViewItemHeader Content="БИБЛИОТЕКА" />
+                <AutoSuggestBox QueryIcon="Find"/>
+            </NavigationView.MenuItems>
+
+            <Frame x:Name="ContentFrame" />
+        </NavigationView>
+</Window>

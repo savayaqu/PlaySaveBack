@@ -6,6 +6,7 @@ use App\Exceptions\ApiException;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Api\SignInRequest;
 use App\Http\Requests\Api\SignUpRequest;
+use App\Http\Resources\UserResource;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -19,7 +20,7 @@ class AuthController extends Controller
         $validated = $request->validated();
         $user = User::query()->create([...$validated]);
         $token = $user->createToken(Str::random(100))->plainTextToken;
-        return response()->json(['user' => $user, 'token' => $token]);
+        return response()->json(['user' => UserResource::make($user), 'token' => $token]);
     }
     public function signIn(SignInRequest $request): JsonResponse
     {
@@ -27,7 +28,7 @@ class AuthController extends Controller
             throw new ApiException('Invalid credentials', 401);
         $user = Auth::user();
         $token = $user->createToken(Str::random(100))->plainTextToken;
-        return response()->json(['user' => $user, 'token' => $token]);
+        return response()->json(['user' => UserResource::make($user), 'token' => $token]);
     }
     public function logout(Request $request): JsonResponse
     {

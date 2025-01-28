@@ -1,0 +1,10 @@
+{
+  "profiles": {
+    "PSB (Package)": {
+      "commandName": "MsixPackage"
+    },
+    "PSB (Unpackaged)": {
+      "commandName": "Project"
+    }
+  }
+}
