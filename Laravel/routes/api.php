@@ -3,12 +3,21 @@
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\CloudServiceController;
 use App\Http\Controllers\Api\CustomGameController;
+use App\Http\Controllers\Api\CollectionController;
 use App\Http\Controllers\Api\GameController;
 use App\Http\Controllers\Api\PublisherController;
 use App\Http\Controllers\Api\SaveController;
 use App\Http\Controllers\Api\UserController;
 use Illuminate\Support\Facades\Route;
 
+
+//TODO: лучше сразу продумать логику и всю апиху, чтобы потом не отвлекаться
+//TODO: можно попробовать придерживаться тактики постранично
+//TODO: (сделал хорошо блок здесь - идешь winui3 делать)
+Route::controller(CollectionController::class)
+    ->middleware('auth:sanctum')->group(function () {
+   Route::get('/collections', 'index');
+});
 
 // AUTH
 Route::controller(AuthController::class)->group(function () {

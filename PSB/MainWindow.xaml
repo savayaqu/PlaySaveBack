@@ -5,6 +5,7 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:local="using:PSB"
     xmlns:vm="using:PSB.ViewModels"
+    xmlns:rescol="using:PSB.Api.Response"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     mc:Ignorable="d"
@@ -50,7 +51,8 @@
                 <NavigationViewItem Content="Settings" Tag="SettingsPage" Icon="Setting"/>
                 <NavigationViewItemHeader Content="БИБЛИОТЕКА" />
                 <AutoSuggestBox QueryIcon="Find"/>
-            </NavigationView.MenuItems>
+            
+        </NavigationView.MenuItems>
 
             <Frame x:Name="ContentFrame" />
         </NavigationView>

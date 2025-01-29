@@ -4,12 +4,36 @@
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:local="using:PSB.Views"
+    xmlns:utils="using:PSB.Utils"
+    xmlns:rescol="using:PSB.Api.Response"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     mc:Ignorable="d"
     Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
 
-    <Grid>
-        <Button Command="{x:Bind ViewModel.LogoutCommand, Mode=OneTime}" Content="Выйти" MaxHeight="50" MaxWidth="250"/>
-    </Grid>
+    <StackPanel>
+        <StackPanel Orientation="Horizontal" MinHeight="150" VerticalAlignment="Center" >
+            <Viewbox Height="150" Width="150">
+                <Image Source="{x:Bind ProfileViewModel.User.Avatar}" Stretch="Fill"/>
+            </Viewbox>
+            <Image Stretch="UniformToFill" Height="150" Width="150" Source="{x:Bind ProfileViewModel.User.Avatar}"/>
+            <TextBlock Text="{x:Bind ProfileViewModel.User.Nickname}" VerticalAlignment="Center"/>
+        </StackPanel>
+        <StackPanel Orientation="Vertical">
+            <Button Command="{x:Bind ProfileViewModel.LogoutCommand, Mode=OneTime}" Content="Выйти" MaxHeight="50" MaxWidth="250"/>
+            <Button Command="{x:Bind ProfileViewModel.LoadCollectionsCommand, Mode=OneTime}" Content="коллекции" MaxHeight="50" MaxWidth="250"/>
+        </StackPanel>
+        
+        <ItemsRepeater ItemsSource="{x:Bind ProfileViewModel.Collections}">
+            <ItemsRepeater.ItemTemplate>
+                <DataTemplate x:DataType="rescol:CollectionResponse">
+                    <StackPanel>
+                        <TextBlock Width="1000" Text="{x:Bind Game.Name}" VerticalAlignment="Center" />
+                        <!--<Image Source="{x:Bind Game.Image}" Width="50" Height="50"/>-->
+                    </StackPanel>
+                </DataTemplate>
+            </ItemsRepeater.ItemTemplate>
+        </ItemsRepeater>
+    </StackPanel>
+        
 </Page>

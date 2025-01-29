@@ -17,8 +17,14 @@ class AuthController extends Controller
 {
     public function signUp(SignUpRequest $request): JsonResponse
     {
-        $validated = $request->validated();
-        $user = User::query()->create([...$validated]);
+        if ($request->hasFile('avatar'))
+            $path = $request
+                ->file('avatar')
+                ->store("avatars/$request->nickname", 'public');
+        $user = User::query()->create([
+            ...$request->validated(),
+            'avatar' => $path ?? null,
+        ]);
         $token = $user->createToken(Str::random(100))->plainTextToken;
         return response()->json(['user' => UserResource::make($user), 'token' => $token]);
     }

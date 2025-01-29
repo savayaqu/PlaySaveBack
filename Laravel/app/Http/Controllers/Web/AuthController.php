@@ -14,14 +14,13 @@ class AuthController extends Controller
 {
     public function signup(SignupRequest $request)
     {
-        $path = null;
         if ($request->hasFile('avatar'))
             $path = $request
                 ->file('avatar')
                 ->store("avatars/$request->nickname", 'public');
         $user = User::create([
             ...$request->validated(),
-            'avatar' => $path,
+            'avatar' => $path ?? null,
         ]);
 
         Auth::login($user);

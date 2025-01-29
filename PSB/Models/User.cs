@@ -12,7 +12,7 @@ namespace PSB.Models
         [JsonPropertyName("id")] public required ulong Id { get; set; }
         [JsonPropertyName("email")] public required string Email { get; set; }
         [JsonPropertyName("password")] public string? Password { get; set; }
-        [JsonPropertyName("avatar")] public string? Avatar { get; set; }
+        [JsonPropertyName("avatar")] public required string Avatar { get; set; }
         [JsonPropertyName("is_admin")] public int? IsAdmin { get; set; }
         [JsonPropertyName("nickname")] public required string Nickname { get; set; }
     }

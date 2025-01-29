@@ -15,7 +15,7 @@ return new class extends Migration
             $table->id();
             $table->bigInteger('steam_id')->unsigned()->nullable()->unique();
             $table->string('name')->unique();
-            $table->string('image')->nullable();
+            $table->string('icon_hash')->nullable();
             $table->foreignId('publisher_id')->nullable()->constrained();
             $table->timestamps();
         });

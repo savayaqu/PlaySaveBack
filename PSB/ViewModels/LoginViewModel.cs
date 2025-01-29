@@ -19,11 +19,11 @@ namespace PSB.ViewModels
 {
     public partial class LoginViewModel : ObservableObject
     {
-        [ObservableProperty] [NotifyCanExecuteChangedFor(nameof(LoginCommand))] private string? email = "";
-        [ObservableProperty] [NotifyCanExecuteChangedFor(nameof(LoginCommand))] private string? password = "";
-        [ObservableProperty] private ErrorResponse errors = new();
-        [ObservableProperty] private string? error = null;
-        [ObservableProperty] [NotifyCanExecuteChangedFor(nameof(LoginCommand))] private bool isFetch = false;
+        [ObservableProperty] [NotifyCanExecuteChangedFor(nameof(LoginCommand))] public partial string? Email { get; set; } = "";
+        [ObservableProperty] [NotifyCanExecuteChangedFor(nameof(LoginCommand))] public partial string? Password { get; set; } = "";
+        [ObservableProperty] public partial ErrorResponse Errors { get; set; } = new();
+        [ObservableProperty] public partial string? Error { get; set; } = null;
+        [ObservableProperty] [NotifyCanExecuteChangedFor(nameof(LoginCommand))] public partial bool IsFetch { get; set; } = false;
         private Task HandleValidationErrors(string errorResponse)
         {
             var parsedErrors = JsonSerializer.Deserialize<ErrorResponse>(errorResponse);
