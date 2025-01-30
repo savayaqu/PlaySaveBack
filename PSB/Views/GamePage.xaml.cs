@@ -12,6 +12,8 @@ using Microsoft.UI.Xaml.Data;
 using Microsoft.UI.Xaml.Input;
 using Microsoft.UI.Xaml.Media;
 using Microsoft.UI.Xaml.Navigation;
+using PSB.ViewModels;
+using System.Threading.Tasks;
 
 // To learn more about WinUI, the WinUI project structure,
 // and more about our project templates, see: http://aka.ms/winui-project-info.
@@ -23,9 +25,18 @@ namespace PSB.Views
     /// </summary>
     public sealed partial class GamePage : Page
     {
+        public required GameViewModel GameViewModel { get; set; }
         public GamePage()
         {
             this.InitializeComponent();
+        }
+        protected override void OnNavigatedTo(NavigationEventArgs e)
+        {
+            base.OnNavigatedTo(e);
+            if (e.Parameter is ulong gameId)
+            {
+                GameViewModel = new GameViewModel(gameId);
+            }
         }
     }
 }

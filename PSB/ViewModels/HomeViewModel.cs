@@ -3,10 +3,12 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using CommunityToolkit.Mvvm.ComponentModel;
 
 namespace PSB.ViewModels
 {
-    internal class HomeViewModel
+    public partial class HomeViewModel : ObservableObject
     {
+
     }
 }

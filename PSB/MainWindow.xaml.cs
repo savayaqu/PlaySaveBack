@@ -1,5 +1,8 @@
 using System;
+using System.Diagnostics;
 using System.Linq;
+using System.Reflection.Metadata;
+using System.Threading.Tasks;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Media;
@@ -7,6 +10,7 @@ using Microsoft.UI.Xaml.Media.Imaging;
 using Microsoft.UI.Xaml.Navigation;
 using PSB.Utils;
 using PSB.ViewModels;
+using PSB.Views;
 using Windows.Storage;
 
 namespace PSB
@@ -24,7 +28,7 @@ namespace PSB
             //ContentFrame.Navigate(typeof(Views.HomePage));
             ContentFrame.Navigated += ContentFrame_Navigated; // Подписываемся на событие Navigated
             ProfileViewModel = new ProfileViewModel();
-            UpdateAuthNav();
+            _ = UpdateAuthNavAsync();
             
         }
         private void UpdateLibraryMenu()
@@ -43,21 +47,15 @@ namespace PSB
             // Добавляем игры
             foreach (var game in ProfileViewModel.Collections)
             {
+                if(game != null)
+                {
+
+                }
                 var gameItem = new NavigationViewItem
                 {
-                    Content = game.Game.Name,
-                    Tag = $"LibraryGame_{game.Game.Id}"
+                    Content = game?.Game?.Name,
+                    Tag = $"LibraryGame_{game?.Game?.Id}"
                 };
-                //var icon = new BitmapIcon
-                //{
-                //    UriSource = new Uri($"https://cdn.cloudflare.steamstatic.com/steam/apps/{game.Game.SteamId}/logo.png"),
-                //    Height = 40,
-                //    Width = 40,
-                //    ShowAsMonochrome = false,
-
-
-                //};
-                //gameItem.Icon = new SymbolIcon(Symbol.World);
                 nvSample.MenuItems.Add(gameItem);
             }
         }
@@ -68,34 +66,44 @@ namespace PSB
             {
                 ContentFrame.Navigate(pageType);
             }
+            else if(pageTag.StartsWith("LibraryGame_"))
+            {
+                Debug.WriteLine("pageTag" + pageTag);
+                ulong gameId = Convert.ToUInt64( pageTag.Replace("LibraryGame_", ""));
+                Debug.WriteLine("gameId" + gameId);
+                ContentFrame.Navigate(Type.GetType("PSB.Views.GamePage"), gameId);
+            }
             else
             {
                 // Можно добавить сообщение об ошибке или обработку ситуации
                 ContentFrame.Content = new TextBlock { Text = "Page not found" };
             }
         }
-        public void UpdateAuthNav()
+        public void GameNav(string pageTag, string gameId)
         {
-            UpdateLibraryMenu();
+            Type? pageType = Type.GetType($"PSB.Views.{pageTag}");
+            if (pageType != null)
+            {
+                new GamePage();
+                ContentFrame.Navigate(pageType);
+            }
+        }
+        public async Task UpdateAuthNavAsync()
+        {
+            // Подписываемся на изменения коллекции
+            ProfileViewModel.Collections.CollectionChanged += (s, e) => UpdateLibraryMenu();
 
             if (AuthData.User != null && AuthData.Token != null)
             {
-                // Загружаем коллекции пользователя
-                this.Activated += async (s, e) =>
-                {
-                    await ProfileViewModel.LoadCollectionsAsync();
-                    UpdateLibraryMenu();
-                };
-                // Подписываемся на изменения коллекции
-                ProfileViewModel.Collections.CollectionChanged += (s, e) => UpdateLibraryMenu();
+                await ProfileViewModel.LoadCollectionsAsync();
                 // Если пользователь авторизован, меняем элемент навигации на профиль
                 AuthNav.Tag = "ProfilePage";
                 AuthNav.Content = AuthData.User.Nickname;
             }
             else
             {
-                UpdateLibraryMenu();
-                // Если пользователь не авторизован, возвращаемся к LoginPage
+                ProfileViewModel.Collections.Clear();
+                    // Если пользователь не авторизован, возвращаемся к LoginPage
                 AuthNav.Tag = "LoginPage";
                 AuthNav.Content = "LoginPage";
             }

@@ -45,9 +45,12 @@ namespace PSB.ViewModels
             });
             // Очистка коллекции и добавление новых элементов
             Collections.Clear();
-            foreach (var item in body)
+            if (body != null)
             {
-                Collections.Add(item);
+                foreach (var item in body)
+                {
+                    Collections.Add(item);
+                }
             }
         }
     }

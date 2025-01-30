@@ -26,7 +26,7 @@ namespace PSB.Utils
         {
             Token = token;
             User = user;
-            MainWindow.Instance?.UpdateAuthNav(); // Обновляем состояние навигации
+            MainWindow.Instance?.UpdateAuthNavAsync(); // Обновляем состояние навигации
             MainWindow.Instance?.Nav("ProfilePage");
         }
         public static async Task ExitAndNavigate(Action<bool>? setIsFetch = null)
@@ -34,7 +34,7 @@ namespace PSB.Utils
             await FetchAsync(HttpMethod.Get, "logout", setIsFetch);
             Token = null;
             User = null;
-            MainWindow.Instance?.UpdateAuthNav(); // Обновляем состояние навигации
+            MainWindow.Instance?.UpdateAuthNavAsync(); // Обновляем состояние навигации
             MainWindow.Instance?.Nav("LoginPage");
         }
         private static string? _token = null;
