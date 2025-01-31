@@ -28,7 +28,9 @@ class Game extends Model
         }
 
         $steamApiUrl = "https://store.steampowered.com/api/appdetails?appids={$steamId}&l=ru";
-        $response = Http::get($steamApiUrl);
+        $response = Http::withHeaders([
+            'Accept-Language' => 'ru'
+        ])->get($steamApiUrl);
         $steamData = $response->json();
 
         if (!isset($steamData[$steamId]) || !$steamData[$steamId]['success']) {

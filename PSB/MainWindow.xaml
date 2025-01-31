@@ -16,7 +16,6 @@
             AlwaysShowHeader="True"
             PaneTitle="Menu"
             PaneDisplayMode="Left"
-            ExpandedModeThresholdWidth="500"
             SelectionFollowsFocus="Disabled"
             IsTabStop="False"
             IsBackButtonVisible="Collapsed"

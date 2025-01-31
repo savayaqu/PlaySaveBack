@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Text.Json.Serialization;
 using System.Threading.Tasks;
+using Windows.Media.Core;
 
 namespace PSB.Models
 {
@@ -37,6 +38,8 @@ namespace PSB.Models
         [JsonPropertyName("webm")] public required VideoFormats Webm { get; set; }
         [JsonPropertyName("mp4")] public required VideoFormats Mp4 { get; set; }
         [JsonPropertyName("highlight")] public bool Highlight { get; set; }
+        public MediaSource VideoSource => MediaSource.CreateFromUri(new Uri(Mp4.ResolutionMax));
+
     }
     public class VideoFormats
     {
