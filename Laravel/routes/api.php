@@ -76,6 +76,7 @@ Route::middleware('auth:sanctum')->group(function () {
             Route::post('games', 'createGame'); // Создание игры
             Route::put('games/{id}', 'updateGame'); // Редактирование игры
             Route::delete('games/{id}', 'deleteGame'); // Удаление игры
+            Route::get('games/{id}', 'showGame')->withoutMiddleware('auth:sanctum');; // Просмотр игры
         });
     });
 

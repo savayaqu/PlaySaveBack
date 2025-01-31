@@ -5,11 +5,30 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:local="using:PSB.Views"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" xmlns:models="using:PSB.Models"
     mc:Ignorable="d"
     Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
 
-    <Grid>
+    <StackPanel>
 
-    </Grid>
+        <ScrollViewer HorizontalScrollMode="Auto" 
+              HorizontalScrollBarVisibility="Auto"
+              VerticalScrollMode="Disabled"
+              VerticalScrollBarVisibility="Hidden">
+            <ItemsControl ItemsSource="{x:Bind GameViewModel.SteamGame.Screenshots, Mode=OneWay}">
+                <ItemsControl.ItemsPanel>
+                    <ItemsPanelTemplate>
+                        <StackPanel Orientation="Horizontal"/>
+                    </ItemsPanelTemplate>
+                </ItemsControl.ItemsPanel>
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate x:DataType="models:Screenshot">
+                        <Image Source="{x:Bind PathThumbnail}" 
+                       Width="200" Height="120" 
+                       Margin="5" Stretch="UniformToFill"/>
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
+        </ScrollViewer>
+    </StackPanel>
 </Page>

@@ -71,21 +71,17 @@ namespace PSB
                 Debug.WriteLine("pageTag" + pageTag);
                 ulong gameId = Convert.ToUInt64( pageTag.Replace("LibraryGame_", ""));
                 Debug.WriteLine("gameId" + gameId);
+                var currentItem = nvSample.MenuItems
+                .OfType<NavigationViewItem>()
+                .FirstOrDefault(item => item.Tag == pageTag);
                 ContentFrame.Navigate(Type.GetType("PSB.Views.GamePage"), gameId);
+                HeaderText.Text = currentItem.Content.ToString();
+
             }
             else
             {
                 // Можно добавить сообщение об ошибке или обработку ситуации
                 ContentFrame.Content = new TextBlock { Text = "Page not found" };
-            }
-        }
-        public void GameNav(string pageTag, string gameId)
-        {
-            Type? pageType = Type.GetType($"PSB.Views.{pageTag}");
-            if (pageType != null)
-            {
-                new GamePage();
-                ContentFrame.Navigate(pageType);
             }
         }
         public async Task UpdateAuthNavAsync()

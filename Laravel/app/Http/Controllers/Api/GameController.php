@@ -26,5 +26,14 @@ class GameController extends Controller
         // Возвращаем JSON-ответ
         return response()->json($games);
     }
+    public function showGame($gameId)
+    {
+        $game = Game::query()->findOrFail($gameId);
+        $steamGame = $game->steamGame();
+        return response()->json([
+            'game' => $game,
+            'steamGame' => $steamGame,
+        ]);
+    }
 
 }
