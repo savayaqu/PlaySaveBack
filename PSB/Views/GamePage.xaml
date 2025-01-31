@@ -8,27 +8,30 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" xmlns:models="using:PSB.Models"
     mc:Ignorable="d"
     Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
+    <ScrollViewer VerticalScrollBarVisibility="Auto" 
+                  HorizontalScrollBarVisibility="Disabled">
+        <StackPanel>
+            <ContentControl Content="{x:Bind GameViewModel.GameDescriptionXaml, Mode=OneWay}"/>
 
-    <StackPanel>
-
-        <ScrollViewer HorizontalScrollMode="Auto" 
+            <ScrollViewer HorizontalScrollMode="Auto" 
               HorizontalScrollBarVisibility="Auto"
               VerticalScrollMode="Disabled"
               VerticalScrollBarVisibility="Hidden">
-            <ItemsControl ItemsSource="{x:Bind GameViewModel.SteamGame.Screenshots, Mode=OneWay}">
-                <ItemsControl.ItemsPanel>
-                    <ItemsPanelTemplate>
-                        <StackPanel Orientation="Horizontal"/>
-                    </ItemsPanelTemplate>
-                </ItemsControl.ItemsPanel>
-                <ItemsControl.ItemTemplate>
-                    <DataTemplate x:DataType="models:Screenshot">
-                        <Image Source="{x:Bind PathThumbnail}" 
+                <ItemsControl ItemsSource="{x:Bind GameViewModel.SteamGame.Screenshots, Mode=OneWay}">
+                    <ItemsControl.ItemsPanel>
+                        <ItemsPanelTemplate>
+                            <StackPanel Orientation="Horizontal"/>
+                        </ItemsPanelTemplate>
+                    </ItemsControl.ItemsPanel>
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate x:DataType="models:Screenshot">
+                            <Image Source="{x:Bind PathThumbnail}" 
                        Width="200" Height="120" 
                        Margin="5" Stretch="UniformToFill"/>
-                    </DataTemplate>
-                </ItemsControl.ItemTemplate>
-            </ItemsControl>
-        </ScrollViewer>
-    </StackPanel>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+            </ScrollViewer>
+        </StackPanel>
+    </ScrollViewer>
 </Page>

@@ -9,8 +9,10 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Microsoft.UI.Xaml.Controls;
 using PSB.Api.Response;
+using PSB.Converters;
 using PSB.Models;
 using PSB.Utils;
+
 using static PSB.Utils.Fetch;
 
 namespace PSB.ViewModels
@@ -18,7 +20,8 @@ namespace PSB.ViewModels
     public partial class GameViewModel : ObservableObject
     {
         [ObservableProperty] public partial ulong GameId {  get; set; }
-        [ObservableProperty] public partial SteamGame SteamGame {  get; set; }
+        [ObservableProperty] public partial SteamGame? SteamGame {  get; set; }
+        [ObservableProperty] public partial RichTextBlock GameDescriptionXaml {  get; set; }
         public GameViewModel(ulong gameId) 
         {
             GameId = gameId;
@@ -32,13 +35,17 @@ namespace PSB.ViewModels
             );
             if (!res.IsSuccessStatusCode)
                 return;
-            // Сериализуем объект body в строку JSON для вывода в консоль
-            string bodyJson = JsonSerializer.Serialize(body, new JsonSerializerOptions
+            SteamGame = body!.SteamGame;
+            if (SteamGame?.AboutTheGame != null)
             {
-                WriteIndented = true // Удобное форматирование
-            });
-            SteamGame = body.SteamGame;
-            Debug.WriteLine("GameDescriptionHtml" + SteamGame.AboutTheGame);
+                string htmlContent = SteamGame.AboutTheGame.Trim();
+                if (!htmlContent.StartsWith("<"))
+                {
+                    htmlContent = $"<p>{htmlContent}</p>";
+                }
+                GameDescriptionXaml = HtmlToXamlConverter.ConvertHtmlToXaml(htmlContent);
+            }
+                
         }
     }
 }
