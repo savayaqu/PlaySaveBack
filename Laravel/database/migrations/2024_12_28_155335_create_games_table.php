@@ -13,10 +13,17 @@ return new class extends Migration
     {
         Schema::create('games', function (Blueprint $table) {
             $table->id();
-            $table->bigInteger('steam_id')->unsigned()->nullable()->unique();
             $table->string('name')->unique();
-            $table->string('icon_hash')->nullable();
-            $table->foreignId('publisher_id')->nullable()->constrained();
+            $table->text('about_the_game')->nullable();
+            $table->date('release_date')->nullable();
+            $table->text('pc_requirements')->nullable();
+            $table->text('screenshots')->nullable();
+            $table->text('movies')->nullable();
+            $table->string('header_image')->nullable();
+            $table->string('collection_image')->nullable();
+            $table->foreignId('platform_id')->nullable()->constrained();
+            $table->bigInteger('platform_game_id');
+            $table->unique(['platform_id', 'platform_game_id']);
             $table->timestamps();
         });
     }
