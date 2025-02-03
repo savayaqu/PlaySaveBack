@@ -3,37 +3,36 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Api\Game\AddGameRequest;
+use App\Http\Requests\Api\Game\EditGameRequest;
 use App\Models\Game;
-use Illuminate\Http\Request;
 
 class GameController extends Controller
 {
-    public function index(Request $request)
+    public function getGames()
     {
-        $perPage = $request->input('per_page', 10); // Количество игр на странице
-        $search = $request->input('search'); // Параметр поиска
-
-        $query = Game::query();
-
-        // Если есть параметр поиска, фильтруем по названию
-        if (!empty($search)) {
-            $query->where('name', 'like', '%' . $search . '%');
-        }
-
-        // Пагинация
-        $games = $query->paginate($perPage);
-
-        // Возвращаем JSON-ответ
+        $user = auth()->user();
+        $games = Game::query()->where('user_id', $user->id)->get();
         return response()->json($games);
     }
-    public function showGame($gameId)
+    public function getGame(Game $game)
     {
-        $game = Game::query()->findOrFail($gameId);
-        $steamGame = $game->steamGame();
-        return response()->json([
-            'game' => $game,
-            'steamGame' => $steamGame,
-        ]);
+        $user = auth()->user();
+        return response()->json($game);
     }
-
+    public function addGame(AddGameRequest $request)
+    {
+        $user = auth()->user();
+        $validated = $request->validated();
+        $game = Game::query()->create([
+            ...$validated,
+            'user_id' => $user->id,
+        ]);
+        return response()->json($game, 201);
+    }
+    public function editGame(Game $game, EditGameRequest $request)
+    {
+        $game->update($request->all());
+        return response()->json($game);
+    }
 }

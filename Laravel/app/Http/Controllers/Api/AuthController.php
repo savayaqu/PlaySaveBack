@@ -4,14 +4,14 @@ namespace App\Http\Controllers\Api;
 
 use App\Exceptions\ApiException;
 use App\Http\Controllers\Controller;
-use App\Http\Requests\Api\SignInRequest;
-use App\Http\Requests\Api\SignUpRequest;
+use App\Http\Requests\Api\Auth\SignInRequest;
+use App\Http\Requests\Api\Auth\SignUpRequest;
 use App\Http\Resources\UserResource;
 use App\Models\User;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
-use Illuminate\Http\JsonResponse;
 
 class AuthController extends Controller
 {
@@ -26,7 +26,7 @@ class AuthController extends Controller
             'avatar' => $path ?? null,
         ]);
         $token = $user->createToken(Str::random(100))->plainTextToken;
-        return response()->json(['user' => UserResource::make($user), 'token' => $token]);
+        return response()->json(['user' => UserResource::make($user), 'token' => $token], 201);
     }
     public function signIn(SignInRequest $request): JsonResponse
     {
