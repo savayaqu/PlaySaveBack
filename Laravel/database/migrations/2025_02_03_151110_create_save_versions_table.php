@@ -11,11 +11,11 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('custom_games', function (Blueprint $table) {
+        Schema::create('save_versions', function (Blueprint $table) {
             $table->id();
-            $table->string('name');
-            $table->text('description')->nullable();
-            $table->foreignId('user_id')->constrained();
+            $table->string('save_id');
+            $table->string('version');
+            $table->text('file_path');
             $table->timestamps();
         });
     }
@@ -25,6 +25,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('custom_games');
+        Schema::dropIfExists('save_versions');
     }
 };

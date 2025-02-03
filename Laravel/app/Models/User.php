@@ -42,10 +42,6 @@ class User extends Authenticatable
             'password' => 'hashed',
         ];
     }
-    public function customGames()
-    {
-        return $this->hasMany(CustomGame::class);
-    }
     public function saves()
     {
         return $this->hasMany(Save::class);
@@ -54,16 +50,12 @@ class User extends Authenticatable
     {
         return $this->hasMany(UserCloudService::class);
     }
-    public function collections()
+    public function games()
     {
-        return $this->hasMany(Collection::class);
+        return $this->hasMany(Game::class);
     }
-    public function profileImage()
+    public function saveAccesses()
     {
-        if(!$this->avatar)
-        {
-            return asset('assets/images/profile-icon.svg');
-        }
-        return url(Storage::url($this->avatar));
+        return $this->hasMany(SaveAccess::class);
     }
 }
