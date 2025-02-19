@@ -13,14 +13,10 @@ return new class extends Migration
     {
         Schema::create('games', function (Blueprint $table) {
             $table->id();
-            $table->string('name');
-            $table->text('path_to_exe')->nullable();
-            $table->text('path_to_icon')->nullable();
-            $table->boolean('hidden')->default(false);
-            $table->date('last_played_at')->nullable();
-            $table->unsignedBigInteger('total_time')->default(0);
-            $table->foreignId('user_id')->constrained();
-            $table->unique(['user_id', 'name']);
+            $table->string('name')->unique();
+            $table->string('icon');
+            $table->string('header');
+            $table->text('description');
             $table->timestamps();
         });
     }
