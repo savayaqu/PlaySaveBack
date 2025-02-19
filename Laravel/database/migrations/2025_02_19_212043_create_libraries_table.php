@@ -18,7 +18,7 @@ return new class extends Migration
             $table->unique(['user_id', 'game_id']);
             $table->dateTime('last_played_at')->nullable();
             $table->time('time_played')->nullable();
-            $table->boolean('is_favourite')->default(false);
+            $table->boolean('is_favorite')->default(false);
             $table->timestamps();
         });
     }
