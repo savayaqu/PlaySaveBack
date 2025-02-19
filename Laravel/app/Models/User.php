@@ -15,9 +15,10 @@ class User extends Authenticatable
     protected $fillable = [
         'email',
         'password',
-        'is_admin',
         'nickname',
         'avatar',
+        'login',
+        'header',
     ];
 
     /**
@@ -50,12 +51,12 @@ class User extends Authenticatable
     {
         return $this->hasMany(UserCloudService::class);
     }
-    public function games()
-    {
-        return $this->hasMany(Game::class);
-    }
     public function saveAccesses()
     {
         return $this->hasMany(SaveAccess::class);
+    }
+    public function libraries()
+    {
+        return $this->hasMany(Library::class);
     }
 }
