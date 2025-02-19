@@ -17,20 +17,15 @@ class AuthController extends Controller
 {
     public function signUp(SignUpRequest $request): JsonResponse
     {
-        if ($request->hasFile('avatar'))
-            $path = $request
-                ->file('avatar')
-                ->store("avatars/$request->nickname", 'public');
         $user = User::query()->create([
             ...$request->validated(),
-            'avatar' => $path ?? null,
         ]);
         $token = $user->createToken(Str::random(100))->plainTextToken;
         return response()->json(['user' => UserResource::make($user), 'token' => $token], 201);
     }
     public function signIn(SignInRequest $request): JsonResponse
     {
-        if(!Auth::attempt($request->only(['email', 'password'])))
+        if(!Auth::attempt($request->only(['email', 'login', 'password'])))
             throw new ApiException('Invalid credentials', 401);
         $user = Auth::user();
         $token = $user->createToken(Str::random(100))->plainTextToken;
