@@ -22,5 +22,6 @@ return Application::configure(basePath: dirname(__DIR__))
             if ($request->is('api/*')) {
                 throw new NotFoundException();
             }
+            return response()->view('home');
         });
     })->create();
