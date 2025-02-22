@@ -17,8 +17,8 @@ return new class extends Migration
             $table->foreignId('game_id')->constrained('games');
             $table->unique(['user_id', 'game_id']);
             $table->dateTime('last_played_at')->nullable();
-            $table->time('time_played')->nullable();
-            $table->boolean('is_favorite')->default(false);
+            $table->unsignedInteger('time_played')->nullable();
+            $table->boolean('is_favorite');
             $table->timestamps();
         });
     }

@@ -14,6 +14,16 @@ class Library extends Model
       'time_played',
       'is_favorite',
     ];
+    protected $attributes = [
+        'is_favorite' => false,
+    ];
+    protected function casts(): array
+    {
+        return [
+          'is_favorite' => 'boolean'
+        ];
+    }
+
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);

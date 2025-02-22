@@ -2,16 +2,18 @@
 
 namespace App\Models;
 
+use App\Enums\UserVisibility;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Str;
 use Laravel\Sanctum\HasApiTokens;
 
 class User extends Authenticatable
 {
     use HasFactory, Notifiable, HasApiTokens;
-
     protected $fillable = [
         'email',
         'password',
@@ -19,6 +21,8 @@ class User extends Authenticatable
         'avatar',
         'login',
         'header',
+        'key',
+        'visibility'
     ];
 
     /**
@@ -29,8 +33,12 @@ class User extends Authenticatable
     protected $hidden = [
         'password',
         'remember_token',
+        'key'
     ];
-
+    // Установка по умолчанию
+    protected $attributes = [
+        'visibility' => UserVisibility::Private,
+    ];
     /**
      * Get the attributes that should be cast.
      *
@@ -41,21 +49,32 @@ class User extends Authenticatable
         return [
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
+            'key' => 'hashed'
         ];
     }
-    public function saves()
+    public function getImage($value): ?string
+    {
+        if ($value === null) {
+            return null;
+        }
+        if(!Str::startsWith($value, 'http')){
+            return asset(Storage::url($value));
+        }
+        return $value;
+    }
+    public function saves(): HasMany
     {
         return $this->hasMany(Save::class);
     }
-    public function userCloudService()
+    public function userCloudService(): HasMany
     {
         return $this->hasMany(UserCloudService::class);
     }
-    public function saveAccesses()
+    public function saveAccesses(): HasMany
     {
         return $this->hasMany(SaveAccess::class);
     }
-    public function libraries()
+    public function libraries(): HasMany
     {
         return $this->hasMany(Library::class);
     }

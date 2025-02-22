@@ -2,25 +2,61 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Enums\UserVisibility;
+use App\Exceptions\ForbiddenException;
 use App\Http\Controllers\Controller;
-use App\Http\Requests\Api\User\UpdateMeRequest;
+use App\Http\Requests\Api\User\UpdateProfileRequest;
+use App\Http\Resources\UserResource;
+use App\Models\User;
+use Illuminate\Http\JsonResponse;
 
 class UserController extends Controller
 {
-    public function getMe()
+    public function getProfile(): JsonResponse
     {
         $user = auth()->user();
-        return response()->json($user);
+        $user->load([
+           'libraries',
+        ])->loadCount([
+            'saves'
+        ]);
+        return response()->json(UserResource::make($user));
     }
-    public function updateMe(UpdateMeRequest $request)
+    public function updateProfile(UpdateProfileRequest $request): JsonResponse
     {
         $user = auth()->user();
-        if ($request->hasFile('avatar'))
-        {
-            $path = $request->file('avatar')->store("avatars/$user->nickname", 'public');
-            $user->update(['avatar' => $path]);
+        if (!$user instanceof User) {
+            throw new \RuntimeException('Authenticated user is not an instance of User model.');
         }
-        $user->update($request->except('avatar'));
-        return response()->json($user);
+        $data = $request->validated();
+        if ($request->hasFile('avatar_file')) {
+            $path = $request->file('avatar_file')->storeAs(
+                $user->login,
+                'avatar.' . $request->file('avatar_file')->getClientOriginalExtension(),
+                'public'
+            );
+            $data['avatar'] = $path;
+        }
+        if ($request->hasFile('header_file')) {
+            $path = $request->file('header_file')->storeAs(
+                $user->login,
+                'header.' . $request->file('header_file')->getClientOriginalExtension(),
+                'public'
+            );
+            $data['header'] = $path;
+        }
+        $user->update($data);
+        return response()->json(UserResource::make($user));
+    }
+    public function getOtherProfile(User $user): JsonResponse
+    {
+        if($user->visibility == UserVisibility::Private->value)
+            throw new ForbiddenException;
+        $user->load([
+            'libraries',
+        ])->loadCount([
+            'saves'
+        ]);
+        return response()->json(UserResource::make($user));
     }
 }

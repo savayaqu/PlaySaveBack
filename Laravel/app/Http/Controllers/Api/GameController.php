@@ -5,20 +5,29 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Api\Game\AddGameRequest;
 use App\Http\Requests\Api\Game\EditGameRequest;
+use App\Http\Resources\GameResource;
+use App\Http\Resources\LibraryResource;
 use App\Models\Game;
+use App\Models\Library;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 
 class GameController extends Controller
 {
-    public function getGames()
+    public function getGames(Request $request): JsonResponse
     {
-        $user = auth()->user();
-        $games = Game::query()->where('user_id', $user->id)->get();
-        return response()->json($games);
+        $games = Game::query()->paginate(30);
+        return GameResource::collection($games)->response();
     }
-    public function getGame(Game $game)
+    public function getGame(Game $game): JsonResponse
     {
         $user = auth()->user();
-        return response()->json($game);
+        $library = Library::query()->where('game_id', $game->id)->where('user_id', $user->id)->first();
+
+        return response()->json([
+            'game' => GameResource::make($game),
+            'library' => $library ? LibraryResource::make($library) : null,
+        ]);
     }
     public function addGame(AddGameRequest $request)
     {
