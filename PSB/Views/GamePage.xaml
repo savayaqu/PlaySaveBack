@@ -11,83 +11,58 @@
     <ScrollViewer VerticalScrollBarVisibility="Auto" 
               HorizontalScrollBarVisibility="Disabled">
         <StackPanel>
-            <Grid>
-                <Image Source="{x:Bind GameViewModel.GameHeader, Mode=OneWay}"/>
-                <Image Source="{x:Bind GameViewModel.GameLogo, Mode=OneWay}" MaxWidth="400" HorizontalAlignment="Left" VerticalAlignment="Bottom" Margin="16,0,0,100"/>
-                <StackPanel Grid.Row="0" Grid.Column="0"  VerticalAlignment="Bottom" Margin="16">
-                        <TextBlock Text="Сыграно 10 часов"/>
-                        <TextBlock Text="Последний запуск 5 дней назад"/>
-                    </StackPanel>
+            <StackPanel>
+                <!-- Верхняя часть с изображением и описанием -->
+                <Grid Height="300">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+
+                    <!-- Изображение игры -->
+                    <Image Source="{x:Bind GameViewModel.Game.Icon, Mode=OneWay}"
+                       Height="180"
+                           Width="130"
+                           Stretch="Fill"
+                       HorizontalAlignment="Left"
+                       VerticalAlignment="Bottom"
+                       Margin="16,0,0,100"
+                       Grid.Column="0" />
+
+                    <!-- Описание игры -->
+                    <TextBlock Text="{x:Bind GameViewModel.Game.Description, Mode=OneWay}"
+                           TextWrapping="Wrap"
+                           Grid.Column="1"
+                           Margin="16,0,16,0"
+                           VerticalAlignment="Top" />
+                </Grid>
+
+
+                <StackPanel VerticalAlignment="Bottom" Margin="16">
+                    <TextBlock Text="{x:Bind GameViewModel.PlayedHoursText, Mode=OneWay}" />
+                    <TextBlock Text="{x:Bind GameViewModel.LastPlayedText, Mode=OneWay}" />
+                </StackPanel>
                     <!-- Кнопки на одном уровне с текстом -->
                 <StackPanel Margin="16" Grid.Row="0" Grid.Column="0" HorizontalAlignment="Right" VerticalAlignment="Bottom" Orientation="Horizontal" Spacing="24">
-                        <Button Content="Облачное сохранение"/>
-                        <Button Content="Настройки" />
+                    <Button Content="Играть" Visibility="{x:Bind GameViewModel.InLibrary, Converter={StaticResource BoolToVisibility}, ConverterParameter=True}"/>
+                    <Button Content="Добавить в библиотеку" Command="{x:Bind GameViewModel.AddToLibraryCommand}" Visibility="{x:Bind GameViewModel.InLibrary, Converter={StaticResource BoolToVisibility}}"/>
+                    <Button Command="{x:Bind GameViewModel.ToggleFavoriteCommand, Mode=OneWay}">
+                        <FontIcon Glyph="{x:Bind GameViewModel.FavoriteIcon, Mode=OneWay}" />
+                    </Button>
+
+                    <Button Content="Настройки" />
                     </StackPanel>
-            </Grid>
-            
+            </StackPanel>
+
             <Grid ColumnDefinitions=" *, 300" RowDefinitions="Auto, Auto, Auto" RowSpacing="15" ColumnSpacing="15" Margin="16,0">
-                
-                
-                <StackPanel Orientation="Vertical" Grid.Column="0" Grid.Row="1">
-                    <ContentControl  Content="{x:Bind GameViewModel.GameDescriptionXaml, Mode=OneWay}"/>
-
-                    <ScrollViewer HorizontalScrollMode="Auto" 
-      HorizontalScrollBarVisibility="Auto"
-      VerticalScrollMode="Disabled"
-      VerticalScrollBarVisibility="Hidden">
-                        <StackPanel Orientation="Horizontal">
-                            <!-- Видео -->
-                            <ItemsControl ItemsSource="{x:Bind GameViewModel.SteamGame.Movies, Mode=OneWay}">
-                                <ItemsControl.ItemsPanel>
-                                    <ItemsPanelTemplate>
-                                        <StackPanel Orientation="Horizontal"/>
-                                    </ItemsPanelTemplate>
-                                </ItemsControl.ItemsPanel>
-                                <ItemsControl.ItemTemplate>
-                                    <DataTemplate x:DataType="models:Movie">
-                                        <StackPanel Margin="5">
-                                            <Image Source="{x:Bind Thumbnail}" 
-                       Width="200" Height="120" 
-                       Stretch="UniformToFill"/>
-                                            <MediaPlayerElement Width="200" Height="120"
-                                    AutoPlay="False"
-                                    AreTransportControlsEnabled="True"
-                                    Source="{x:Bind VideoSource, Mode=OneWay}"/>
-
-                                        </StackPanel>
-                                    </DataTemplate>
-                                </ItemsControl.ItemTemplate>
-                            </ItemsControl>
-
-                            <!-- Скриншоты -->
-                            <ItemsControl ItemsSource="{x:Bind GameViewModel.SteamGame.Screenshots, Mode=OneWay}">
-                                <ItemsControl.ItemsPanel>
-                                    <ItemsPanelTemplate>
-                                        <StackPanel Orientation="Horizontal"/>
-                                    </ItemsPanelTemplate>
-                                </ItemsControl.ItemsPanel>
-                                <ItemsControl.ItemTemplate>
-                                    <DataTemplate x:DataType="models:Screenshot">
-                                        <Image Source="{x:Bind PathThumbnail}" 
-                   Width="200" Height="120" 
-                   Margin="5" Stretch="UniformToFill"/>
-                                    </DataTemplate>
-                                </ItemsControl.ItemTemplate>
-                            </ItemsControl>
-                        </StackPanel>
-                    </ScrollViewer>
-
-
-                </StackPanel>
-
-
                 <!-- Второй StackPanel теперь внутри первого -->
                 <StackPanel Orientation="Vertical" Grid.Column="1">
                     <!-- Здесь можешь добавить другие элементы -->
-                    <TextBlock Text="Здесь достижения и пк"/>
+                    <TextBlock Text="Ваши сохранения"/>
+                    <Button Content="Сохранения пользователей"/>
                 </StackPanel>
-
             </Grid>
+            <TextBlock Text="Сохранения пользователей"/>
         </StackPanel>
     </ScrollViewer>
 

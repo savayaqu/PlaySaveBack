@@ -38,7 +38,7 @@ class TestSeeder extends Seeder
                 'key' => 666666,
             ]);
         }
-        for($i = 0; $i < 10; $i++) {
+        for($i = 0; $i < 40; $i++) {
             Library::query()->firstOrCreate([
                 'user_id' => $user->id,
                 'game_id' => Game::query()->inRandomOrder()->first()->id,

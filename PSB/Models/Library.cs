@@ -11,7 +11,7 @@ namespace PSB.Models
     public class Library
     {
         [JsonPropertyName("id")] public required ulong Id { get; set; }
-        [JsonPropertyName("game_id")] public required ulong GameId { get; set; }
+        [JsonPropertyName("game_id")] public ulong? GameId { get; set; }
 
         [JsonConverter(typeof(NullableDateTimeConverter))]
         [JsonPropertyName("last_played_at")] public DateTime? LastPlayedAt { get; set; }

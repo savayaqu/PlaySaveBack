@@ -27,7 +27,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::controller(LibraryController::class)->group(function () {
        Route::prefix('library')->group(function () {
           Route::get('', 'getLibrary'); //Получить свою библиотеку
-           Route::prefix('{game}')->group(function () {
+           Route::prefix('game/{game}')->group(function () {
                Route::post('', 'addToLibrary'); // Добавить игру в библиотеку
                Route::patch('', 'toggleFavorite'); // Добавить/убрать игру в Избранное
                Route::delete('', 'removeFromLibrary'); // Удалить игру из библиотеки

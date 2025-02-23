@@ -16,7 +16,7 @@ class LibraryResource extends JsonResource
     {
         return [
             'id' => $this->id,
-            'game_id' => $this->when(!$this->whenLoaded('game'), $this->game_id),
+            'game_id' => $this->when(!$this->relationLoaded('game'), $this->game_id),
             'last_played_at' => $this->last_played_at,
             'time_played' => $this->time_played,
             'is_favorite' => $this->is_favorite,

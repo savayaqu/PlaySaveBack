@@ -17,7 +17,8 @@ class GameResource extends JsonResource
         return [
           'id' => $this->id,
           'name' => $this->name,
-          'icon' => $this->icon,
+          //'icon' => $this->icon,
+          'icon' => "https://i.pinimg.com/736x/9c/b1/bd/9cb1bd438f42d0b8f29142812f668a81.jpg",
           'header' => $this->header,
           'description' => $this->description,
         ];
