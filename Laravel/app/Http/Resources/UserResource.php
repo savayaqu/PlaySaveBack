@@ -21,8 +21,8 @@ class UserResource extends JsonResource
         return [
             'id' => $this->id,
             'nickname' => $this->nickname,
-            'header' => $this->getImage($this->header),
-            'avatar' => $this->getImage($this->avatar),
+            'header' => $this->whenNotNull($this->getImage($this->header), fn() => asset('assets/images/default_header.svg')),
+            'avatar' => $this->whenNotNull($this->getImage($this->avatar), fn() => asset('assets/images/default_avatar.svg')),
             $this->mergeWhen($isThis, [
                 'login' => $this->login,
                 'email' => $this->email,

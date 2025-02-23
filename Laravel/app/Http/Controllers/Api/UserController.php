@@ -6,6 +6,7 @@ use App\Enums\UserVisibility;
 use App\Exceptions\ForbiddenException;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Api\User\UpdateProfileRequest;
+use App\Http\Resources\LibraryResource;
 use App\Http\Resources\UserResource;
 use App\Models\User;
 use Illuminate\Http\JsonResponse;
@@ -15,11 +16,6 @@ class UserController extends Controller
     public function getProfile(): JsonResponse
     {
         $user = auth()->user();
-        $user->load([
-           'libraries',
-        ])->loadCount([
-            'saves'
-        ]);
         return response()->json(UserResource::make($user));
     }
     public function updateProfile(UpdateProfileRequest $request): JsonResponse
@@ -52,11 +48,14 @@ class UserController extends Controller
     {
         if($user->visibility == UserVisibility::Private->value)
             throw new ForbiddenException;
-        $user->load([
-            'libraries',
-        ])->loadCount([
-            'saves'
+        $user->loadCount('saves');
+
+        // Загружаем библиотеки с пагинацией и связанной игрой
+        $libraries = $user->libraries()->with('game')->simplePaginate(10);
+
+        return response()->json([
+            'user' => UserResource::make($user),
+            'library' => LibraryResource::collection($libraries)->response()->getData(true),
         ]);
-        return response()->json(UserResource::make($user));
     }
 }
