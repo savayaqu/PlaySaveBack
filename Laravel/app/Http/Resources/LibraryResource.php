@@ -16,10 +16,10 @@ class LibraryResource extends JsonResource
     {
         return [
             'id' => $this->id,
-            'game_id' => $this->game_id,
+            'game_id' => $this->when(!$this->whenLoaded('game'), $this->game_id),
             'last_played_at' => $this->last_played_at,
             'time_played' => $this->time_played,
-            'is_favorite' => $this->is_favorite,  // Здесь создаем ключ is_favourite
+            'is_favorite' => $this->is_favorite,
             'game' => $this->whenLoaded('game', fn () => GameResource::make($this->game))
         ];
     }

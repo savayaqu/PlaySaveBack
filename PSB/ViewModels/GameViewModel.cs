@@ -43,8 +43,8 @@ namespace PSB.ViewModels
             //GameLogo = $"https://cdn.cloudflare.steamstatic.com/steam/apps/{SteamGame.SteamAppId}/logo.png";
             //GameHeader = LoadImage($"https://cdn.cloudflare.steamstatic.com/steam/apps/{SteamGame.SteamAppId}/library_hero.jpg")?.UriSource?.ToString();
             //GameLogo = LoadImage($"https://cdn.cloudflare.steamstatic.com/steam/apps/{SteamGame.SteamAppId}/logo.png")?.UriSource?.ToString();
-            GameLogo = new BitmapImage(new Uri($"https://cdn.cloudflare.steamstatic.com/steam/apps/{SteamGame.SteamAppId}/logo.png"));
-            GameHeader = new BitmapImage(new Uri($"https://cdn.cloudflare.steamstatic.com/steam/apps/{SteamGame.SteamAppId}/library_hero.jpg"));
+            //GameLogo = new BitmapImage(new Uri($"https://cdn.cloudflare.steamstatic.com/steam/apps/{SteamGame.SteamAppId}/logo.png"));
+            //GameHeader = new BitmapImage(new Uri($"https://cdn.cloudflare.steamstatic.com/steam/apps/{SteamGame.SteamAppId}/library_hero.jpg"));
             //var image = new Image
             //{
             //    Source = new BitmapImage(new Uri(imgSrc)),

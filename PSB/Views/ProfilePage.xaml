@@ -12,28 +12,20 @@
     Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
 
     <StackPanel>
-        <StackPanel Orientation="Horizontal" MinHeight="150" VerticalAlignment="Center" >
-            <Viewbox Height="150" Width="150">
-                <Image Source="{x:Bind ProfileViewModel.User.Avatar}" Stretch="Fill"/>
-            </Viewbox>
-            <Image Stretch="UniformToFill" Height="150" Width="150" Source="{x:Bind ProfileViewModel.User.Avatar}"/>
-            <TextBlock Text="{x:Bind ProfileViewModel.User.Nickname}" VerticalAlignment="Center"/>
+            <!-- Контент (аватарка и ник) -->
+        <StackPanel Orientation="Horizontal" Height="200" VerticalAlignment="Center" Spacing="12" Padding="36,0,0,0">
+            <StackPanel.Background>
+                <ImageBrush ImageSource="{x:Bind ProfileViewModel.User.Header, Mode=TwoWay}"/>
+            </StackPanel.Background>
+            <Image  Stretch="Fill" Height="95" Width="95" Source="{x:Bind ProfileViewModel.User.Avatar, Mode=TwoWay}"/>
+            <TextBlock Text="{x:Bind ProfileViewModel.User.Nickname}" FontWeight="SemiBold" FontSize="28" VerticalAlignment="Center"/>
         </StackPanel>
-        <StackPanel Orientation="Vertical">
-            <Button Command="{x:Bind ProfileViewModel.LogoutCommand, Mode=OneTime}" Content="Выйти" MaxHeight="50" MaxWidth="250"/>
-            <Button Command="{x:Bind ProfileViewModel.LoadCollectionsCommand, Mode=OneTime}" Content="коллекции" MaxHeight="50" MaxWidth="250"/>
+        <!-- Кнопки -->
+        <StackPanel Height="75" Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center" Padding="0,0,16,0" Spacing="8">
+            <Button Command="{x:Bind ProfileViewModel.LoadLibraryCommand, Mode=OneTime}" Content="Библиотека" Height="40" Width="110"/>
+            <Button Command="{x:Bind ProfileViewModel.LogoutCommand, Mode=OneTime}" Content="Выйти" Height="40" Background="DarkRed" Width="130"/>
         </StackPanel>
-        
-        <ItemsRepeater ItemsSource="{x:Bind ProfileViewModel.Collections}">
-            <ItemsRepeater.ItemTemplate>
-                <DataTemplate x:DataType="rescol:CollectionResponse">
-                    <StackPanel>
-                        <TextBlock Width="1000" Text="{x:Bind Game.Name}" VerticalAlignment="Center" />
-                        <!--<Image Source="{x:Bind Game.Image}" Width="50" Height="50"/>-->
-                    </StackPanel>
-                </DataTemplate>
-            </ItemsRepeater.ItemTemplate>
-        </ItemsRepeater>
+
     </StackPanel>
         
 </Page>

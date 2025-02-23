@@ -29,34 +29,24 @@ class AuthController extends Controller
             'nickname' => $request->input('login'),
         ]);
         $token = $user->createToken(Str::random(100))->plainTextToken;
-
         return response()->json(['user' => UserResource::make($user), 'token' => $token, 'key' => $key], 201);
     }
     public function signIn(SignInRequest $request): JsonResponse
     {
         $identifier = $request->input('identifier'); // Может быть email или login
         $password = $request->input('password');
-
         // Определяем, является ли идентификатор email'ом
         $field = filter_var($identifier, FILTER_VALIDATE_EMAIL) ? 'email' : 'login';
-
         // Попытка аутентификации
         if (!Auth::attempt([$field => $identifier, 'password' => $password])) {
             throw new ApiException('Invalid credentials', 401);
         }
-
         $user = Auth::user();
-
         if (!$user instanceof User) {
             throw new UnauthorizedException();
         }
-
         // Создаем токен
         $token = $user->createToken(Str::random(100))->plainTextToken;
-
-        // Загружаем связанные данные
-        $user->load('libraries');
-
         return response()->json([
             'user' => UserResource::make($user),
             'token' => $token,

@@ -45,7 +45,7 @@ namespace PSB
             }
 
             // Добавляем игры
-            foreach (var game in ProfileViewModel.Collections)
+            foreach (var game in ProfileViewModel.Library)
             {
                 if(game != null)
                 {
@@ -87,18 +87,19 @@ namespace PSB
         public async Task UpdateAuthNavAsync()
         {
             // Подписываемся на изменения коллекции
-            ProfileViewModel.Collections.CollectionChanged += (s, e) => UpdateLibraryMenu();
+            ProfileViewModel.Library.CollectionChanged += (s, e) => UpdateLibraryMenu();
 
             if (AuthData.User != null && AuthData.Token != null)
             {
-                await ProfileViewModel.LoadCollectionsAsync();
+                await ProfileViewModel.LoadLibraryAsync();
+
                 // Если пользователь авторизован, меняем элемент навигации на профиль
                 AuthNav.Tag = "ProfilePage";
-                AuthNav.Content = AuthData.User.Nickname;
+                //AuthNav.Content = AuthData.User.Nickname;
             }
             else
             {
-                ProfileViewModel.Collections.Clear();
+                ProfileViewModel.Library.Clear();
                     // Если пользователь не авторизован, возвращаемся к LoginPage
                 AuthNav.Tag = "LoginPage";
                 AuthNav.Content = "LoginPage";

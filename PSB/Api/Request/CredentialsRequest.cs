@@ -7,9 +7,9 @@ using System.Threading.Tasks;
 
 namespace PSB.Api.Request
 {
-    public class CredentialsRequest(string email, string password)
+    public class CredentialsRequest(string identifier, string password)
     {
-        [JsonPropertyName("email")] public string Email { get; set; } = email;
+        [JsonPropertyName("identifier")] public string Identifier { get; set; } = identifier;
         [JsonPropertyName("password")] public string Password { get; set; } = password;
     }
 }

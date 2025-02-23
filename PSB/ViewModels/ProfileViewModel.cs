@@ -7,45 +7,68 @@ using System.Threading.Tasks;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using PSB.Api.Response;
+using Microsoft.UI.Xaml.Media.Imaging;
 using PSB.Models;
 using PSB.Utils;
 using static PSB.Utils.Fetch;
+using System;
 
 
 namespace PSB.ViewModels
 {
     public partial class ProfileViewModel : ObservableObject
     {
-        [ObservableProperty] public partial ObservableCollection<CollectionResponse> Collections { get; set; } = new();
+        [ObservableProperty] public partial ObservableCollection<LibraryResponse> Library { get; set; } = new();
         [ObservableProperty] public partial User? User { get; set; } = AuthData.User;
+        public ProfileViewModel()
+        {
+            _ = LoadProfileAsync();
+        }
+        [RelayCommand]
+        public async Task LoadProfileAsync()
+        {
+            (var res, var body) = await FetchAsync<User>(
+                HttpMethod.Get, "profile",
+                setError: e => Debug.WriteLine($"Ошибка при получении профиля: {e}")
+            );
+
+            if (res.IsSuccessStatusCode && body != null)
+            {
+                User = body;
+                AuthData.User = User;
+            }
+        }
+
         [RelayCommand]
         private void Logout()
         {
             _ = AuthData.ExitAndNavigate();
         }
         [RelayCommand]
-        public async Task LoadCollectionsAsync()
+        public async Task LoadLibraryAsync()
         {
-            (var res, var body) = await FetchAsync<List<CollectionResponse>>(
-                HttpMethod.Get, "collections",
+            (var res, var body) = await FetchAsync<PaginatedResponse<LibraryResponse>>(
+                HttpMethod.Get, "library",
                 setError: e => Debug.WriteLine($"Error: {e}")
             );
-            if(!res.IsSuccessStatusCode)
+
+            if (!res.IsSuccessStatusCode || body == null)
                 return;
-            // Сериализуем объект body в строку JSON для вывода в консоль
+
+            // Логируем JSON-ответ
             string bodyJson = JsonSerializer.Serialize(body, new JsonSerializerOptions
             {
-                WriteIndented = true // Удобное форматирование
+                WriteIndented = true
             });
+            Debug.WriteLine(bodyJson);
+
             // Очистка коллекции и добавление новых элементов
-            Collections.Clear();
-            if (body != null)
+            Library.Clear();
+            foreach (var item in body.Data) // Теперь берем body.Data, а не body напрямую
             {
-                foreach (var item in body)
-                {
-                    Collections.Add(item);
-                }
+                Library.Add(item);
             }
         }
+
     }
 }
