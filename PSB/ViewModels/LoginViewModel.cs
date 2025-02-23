@@ -54,8 +54,8 @@ namespace PSB.ViewModels
                 if (body != null)
                 {
                     AuthData.SaveAndNavigate(body.Token, body.User);
-                    MainWindow.Instance.ProfileViewModel.User = body.User; // Инициализация User
-                    await MainWindow.Instance.UpdateAuthNavAsync();
+                    // Сброс ошибок при успешном логине
+                    Errors = new ErrorResponse();
                 }
             }
             catch (HttpRequestException ex)

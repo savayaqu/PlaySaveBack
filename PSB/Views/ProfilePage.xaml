@@ -15,10 +15,10 @@
             <!-- Контент (аватарка и ник) -->
         <StackPanel Orientation="Horizontal" Height="200" VerticalAlignment="Center" Spacing="12" Padding="36,0,0,0">
             <StackPanel.Background>
-                <ImageBrush ImageSource="{x:Bind ProfileViewModel.User.Header, Mode=OneWay}"/>
+                <ImageBrush ImageSource="{x:Bind ProfileViewModel.User.Header, Mode=TwoWay}"/>
             </StackPanel.Background>
-            <Image  Stretch="Fill" Height="95" Width="95" Source="{x:Bind ProfileViewModel.User.Avatar, Mode=OneWay}"/>
-            <TextBlock Text="{x:Bind ProfileViewModel.User.Nickname, Mode=OneWay}" FontWeight="SemiBold" FontSize="28" VerticalAlignment="Center"/>
+            <Image  Stretch="Fill" Height="95" Width="95" Source="{x:Bind ProfileViewModel.User.Avatar, Mode=TwoWay}"/>
+            <TextBlock Text="{x:Bind ProfileViewModel.User.Nickname}" FontWeight="SemiBold" FontSize="28" VerticalAlignment="Center"/>
         </StackPanel>
         <!-- Кнопки -->
         <StackPanel Height="75" Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center" Padding="0,0,16,0" Spacing="8">

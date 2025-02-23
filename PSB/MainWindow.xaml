@@ -39,14 +39,14 @@
             </NavigationView.Header>
 
         <NavigationView.MenuItems>
-            <NavigationViewItem x:Name="AuthNav" Height="100">
+            <NavigationViewItem Margin="0, 10, 0, 10" Height="100" x:Name="AuthNav">
                 <NavigationViewItem.Content>
-                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center" Spacing="12" Height="100">
+                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center" Spacing="12" Padding="36,0,0,0">
                         <StackPanel.Background>
-                            <ImageBrush ImageSource="{x:Bind ProfileViewModel.User.Header, Mode=OneWay}"/>
+                            <ImageBrush ImageSource="{x:Bind ProfileViewModel.User.Header, Mode=TwoWay}"/>
                         </StackPanel.Background>
-                        <Image Stretch="Fill" Height="35" Width="35" Source="{x:Bind ProfileViewModel.User.Avatar, Mode=OneWay}"/>
-                        <TextBlock Text="{x:Bind ProfileViewModel.User.Nickname, Mode=OneWay}" FontWeight="SemiBold" FontSize="28" VerticalAlignment="Center"/>
+                        <Image Stretch="Fill" Height="50" Width="50" Source="{x:Bind ProfileViewModel.User.Avatar, Mode=TwoWay}"/>
+                        <TextBlock Text="{x:Bind ProfileViewModel.User.Nickname}" FontWeight="SemiBold" FontSize="28" VerticalAlignment="Center"/>
                     </StackPanel>
                 </NavigationViewItem.Content>
             </NavigationViewItem>
