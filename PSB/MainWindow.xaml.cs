@@ -3,6 +3,7 @@ using System.Diagnostics;
 using System.Linq;
 using System.Reflection.Metadata;
 using System.Threading.Tasks;
+using Microsoft.UI.Text;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Media;
@@ -95,15 +96,69 @@ namespace PSB
 
                 // Если пользователь авторизован, меняем элемент навигации на профиль
                 AuthNav.Tag = "ProfilePage";
-                //AuthNav.Content = AuthData.User.Nickname;
+                AuthNav.Content = new StackPanel
+                {
+                    Orientation = Orientation.Horizontal,
+                    VerticalAlignment = VerticalAlignment.Center,
+                    Spacing = 12,
+                    Height = 70,
+                    Background = new ImageBrush // Задний фон для авторизованного пользователя
+                    {
+                        ImageSource = new BitmapImage(new Uri(ProfileViewModel.User.Header))
+                    },
+                    Children =
+            {
+                new Image
+                {
+                    Stretch = Stretch.Fill,
+                    Height = 35,
+                    Width = 35,
+                    Source = new BitmapImage(new Uri(ProfileViewModel.User.Avatar))
+                },
+                new TextBlock
+                {
+                    Text = ProfileViewModel.User?.Nickname ?? "Guest", // Если Nickname равен null, отображаем "Guest"
+                    FontWeight = FontWeights.SemiBold,
+                    FontSize = 28,
+                    VerticalAlignment = VerticalAlignment.Center
+                }
+            }
+                };
             }
             else
             {
                 ProfileViewModel.Library.Clear();
-                    // Если пользователь не авторизован, возвращаемся к LoginPage
+
+                // Если пользователь не авторизован, возвращаемся к LoginPage
                 AuthNav.Tag = "LoginPage";
-                AuthNav.Content = "LoginPage";
+                AuthNav.Content = new StackPanel
+                {
+                    Orientation = Orientation.Horizontal,
+                    VerticalAlignment = VerticalAlignment.Center,
+                    Spacing = 12,
+                    Height = 100,
+                    Padding = new Thickness(36, 0, 0, 0),
+                    Children =
+            {
+                // Иконка "Contact" вместо аватара
+                new FontIcon
+                {
+                    Glyph = "\uE77B", // Символьный код для иконки "Contact"
+                    FontSize = 28,
+                    VerticalAlignment = VerticalAlignment.Center
+                },
+                new TextBlock
+                {
+                    Text = "Login",
+                    FontWeight = FontWeights.SemiBold,
+                    FontSize = 28,
+                    VerticalAlignment = VerticalAlignment.Center
+                }
             }
+                };
+            }
+
+            UpdateLibraryMenu();
         }
         private void NavigationView_SelectionChanged(NavigationView sender, NavigationViewSelectionChangedEventArgs args)
         {
