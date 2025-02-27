@@ -7,9 +7,11 @@ using System.Text.Json;
 using System.Threading.Tasks;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Media.Imaging;
 using PSB.Api.Response;
+using PSB.ContentDialogs;
 using PSB.Converters;
 using PSB.Models;
 using PSB.Utils;
@@ -27,18 +29,54 @@ namespace PSB.ViewModels
         [ObservableProperty] public partial string PlayedHoursText { get; set; }
         [ObservableProperty] public partial Boolean IsFavorite { get; set; }
         [ObservableProperty] public partial Boolean InLibrary { get; set; } = false;
-        public string FavoriteIcon => IsFavorite ? "\uEB52" : "\uEB51";
+        //[ObservableProperty] public partial Boolean ExeExists { get; set; } = false;
+        [ObservableProperty] public partial string FilePath { get; set; }
 
+        [ObservableProperty]
+        [NotifyCanExecuteChangedFor(nameof(LaunchGameCommand))]
+        public partial Boolean ExeExists { get; set; } = false;
+
+        public string FavoriteIcon => IsFavorite ? "\uEB52" : "\uEB51";
         partial void OnIsFavoriteChanged(Boolean value)
         {
             OnPropertyChanged(nameof(FavoriteIcon));
         }
-
-        public GameViewModel(ulong gameId) 
+        public GameViewModel(ulong gameId)
         {
             GameId = gameId;
             _ = GetGameAsync();
         }
+        [RelayCommand(CanExecute = nameof(ExeExists))]
+        public async Task LaunchGame()
+        {
+            try
+            {
+                Process.Start(new ProcessStartInfo
+                {
+                    FileName = FilePath,
+                    UseShellExecute = true // Нужно для запуска GUI-приложений
+                });
+
+                Debug.WriteLine($"Игра запущена: {FilePath}");
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"Ошибка при запуске игры: {ex.Message}");
+            }
+        }
+        [RelayCommand]
+        public async Task OpenGameSettings()
+        {
+            if (App.DialogService.XamlRoot == null)
+            {
+                Debug.WriteLine("XamlRoot is not set. Call SetXamlRoot first.");
+                return;
+            }
+            var dialog = new GameSettingsContentDialog(Game);
+            await App.DialogService.ShowDialogAsync(dialog);
+        }
+        
+        
         [RelayCommand]
         public async Task ToggleFavorite()
         {
@@ -72,6 +110,10 @@ namespace PSB.ViewModels
                 return;
 
             Game = body!.Game;
+            FilePath = GameData.GetFilePath(Game);
+            if(!string.IsNullOrEmpty(FilePath))
+                ExeExists = true;
+
             if (body.Library != null)
             {
                 Library = body.Library;
@@ -90,7 +132,7 @@ namespace PSB.ViewModels
                 InLibrary = false;
             }
         }
-
+       
 
         private string GetDaysAgoText(DateTime lastPlayed)
         {

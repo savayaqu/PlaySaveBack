@@ -15,14 +15,14 @@ class TestSeeder extends Seeder
      */
     public function run(): void
     {
-        for ($i = 0; $i < 200; $i++) {
-            Game::query()->updateOrCreate([
-                'name' => fake()->unique()->name(),
-                'icon' => fake()->imageUrl(),
-                'header' => fake()->imageUrl(),
-                'description' => fake()->text(),
-            ]);
-        }
+        //for ($i = 0; $i < 200; $i++) {
+        //    Game::query()->updateOrCreate([
+        //        'name' => fake()->unique()->name(),
+        //        'icon' => fake()->imageUrl(),
+        //        'header' => fake()->imageUrl(),
+        //        'description' => fake()->text(),
+        //    ]);
+        //}
         $user = User::query()->firstOrCreate([
            'login' => 'admin',
            'nickname' => 'admin',

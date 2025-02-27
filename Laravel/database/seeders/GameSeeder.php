@@ -2,6 +2,7 @@
 
 namespace Database\Seeders;
 
+use App\Enums\GamePlatform;
 use App\Models\Game;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
@@ -95,7 +96,7 @@ class GameSeeder extends Seeder
                                 Game::create([
                                     'name' => $gameName,
                                     'game_code' => $gameSteamId,
-                                    'platform' => 1,
+                                    'platform' => GamePlatform::Steam,
                                 ]);
                             }
                         }

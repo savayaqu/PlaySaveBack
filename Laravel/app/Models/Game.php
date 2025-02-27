@@ -9,12 +9,8 @@ class Game extends Model
 {
     protected $fillable = [
         'name',
-        'path_to_exe',
-        'path_to_icon',
-        'hidden',
-        'last_played_at',
-        'total_time',
-        'user_id',
+        'platform',
+        'game_code'
     ];
 
     public function saves()

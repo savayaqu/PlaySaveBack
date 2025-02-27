@@ -1,5 +1,4 @@
-﻿using System.Collections.Generic;
-using System.Collections.ObjectModel;
+﻿using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.Net.Http;
 using System.Text.Json;
@@ -7,11 +6,9 @@ using System.Threading.Tasks;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using PSB.Api.Response;
-using Microsoft.UI.Xaml.Media.Imaging;
 using PSB.Models;
 using PSB.Utils;
 using static PSB.Utils.Fetch;
-using System;
 
 
 namespace PSB.ViewModels
@@ -60,7 +57,7 @@ namespace PSB.ViewModels
             {
                 WriteIndented = true
             });
-            Debug.WriteLine(bodyJson);
+            //Debug.WriteLine(bodyJson);
 
             // Очистка коллекции и добавление новых элементов
             Library.Clear();

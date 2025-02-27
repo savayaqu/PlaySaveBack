@@ -1,17 +1,13 @@
 using System;
 using System.Diagnostics;
 using System.Linq;
-using System.Reflection.Metadata;
 using System.Threading.Tasks;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
-using Microsoft.UI.Xaml.Media;
-using Microsoft.UI.Xaml.Media.Imaging;
 using Microsoft.UI.Xaml.Navigation;
 using PSB.Utils;
 using PSB.ViewModels;
 using PSB.Views;
-using Windows.Storage;
 
 namespace PSB
 {
@@ -25,84 +21,105 @@ namespace PSB
             Instance = this; // Сохраняем текущий экземпляр
 
             this.InitializeComponent();
+            App.DialogService.SetXamlRoot(this.Content.XamlRoot); // Устанавливаем XamlRoot для DialogService
+
             //ContentFrame.Navigate(typeof(Views.HomePage));
             ContentFrame.Navigated += ContentFrame_Navigated; // Подписываемся на событие Navigated
             ProfileViewModel = new ProfileViewModel();
             _ = UpdateAuthNavAsync();
-            
+
         }
         private void UpdateLibraryMenu()
         {
             // Удаляем старые элементы библиотеки
-            var existingLibraryItems = nvSample.MenuItems
+            var existingLibraryItems = NavView.MenuItems
                 .OfType<NavigationViewItem>()
                 .Where(item => item.Tag?.ToString()?.StartsWith("LibraryGame_") == true)
                 .ToList();
 
             foreach (var item in existingLibraryItems)
             {
-                nvSample.MenuItems.Remove(item);
+                NavView.MenuItems.Remove(item);
             }
 
             // Добавляем игры
             foreach (var game in ProfileViewModel.Library)
             {
-                if(game != null)
-                {
+                if (game?.Game == null) continue;
 
-                }
                 var gameItem = new NavigationViewItem
                 {
-                    Content = game?.Game?.Name,
-                    Tag = $"LibraryGame_{game?.Game?.Id}"
+                    Content = game.Game.Name,
+                    Tag = $"LibraryGame_{game.Game.Id}"
                 };
-                nvSample.MenuItems.Add(gameItem);
+                NavView.MenuItems.Add(gameItem);
             }
         }
         public void Nav(string pageTag)
         {
-            Type? pageType = Type.GetType($"PSB.Views.{pageTag}");
-            if (pageType != null)
+            if (string.IsNullOrEmpty(pageTag))
             {
-                ContentFrame.Navigate(pageType);
+                Debug.WriteLine("Page tag is null or empty.");
+                return;
             }
-            else if(pageTag.StartsWith("LibraryGame_"))
-            {
-                Debug.WriteLine("pageTag" + pageTag);
-                ulong gameId = Convert.ToUInt64( pageTag.Replace("LibraryGame_", ""));
-                Debug.WriteLine("gameId" + gameId);
-                var currentItem = nvSample.MenuItems
-                .OfType<NavigationViewItem>()
-                .FirstOrDefault(item => item.Tag == pageTag);
-                ContentFrame.Navigate(Type.GetType("PSB.Views.GamePage"), gameId);
-                HeaderText.Text = currentItem.Content.ToString();
 
-            }
-            else
+            try
             {
-                // Можно добавить сообщение об ошибке или обработку ситуации
-                ContentFrame.Content = new TextBlock { Text = "Page not found" };
+                if (pageTag.StartsWith("LibraryGame_"))
+                {
+                    ulong gameId = Convert.ToUInt64(pageTag.Replace("LibraryGame_", ""));
+                    var currentItem = NavView.MenuItems
+                        .OfType<NavigationViewItem>()
+                        .FirstOrDefault(item => item.Tag?.ToString() == pageTag);
+
+                    if (currentItem != null)
+                    {
+                        ContentFrame.Navigate(typeof(GamePage), gameId);
+                        HeaderText.Text = currentItem.Content.ToString();
+                    }
+                }
+                else
+                {
+                    Type pageType = Type.GetType($"PSB.Views.{pageTag}");
+                    if (pageType != null)
+                    {
+                        ContentFrame.Navigate(pageType);
+                    }
+                    else
+                    {
+                        Debug.WriteLine($"Page type not found for tag: {pageTag}");
+                        ContentFrame.Content = new TextBlock { Text = "Page not found" };
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"Navigation error: {ex.Message}");
+                ContentFrame.Content = new TextBlock { Text = "Navigation error" };
             }
         }
         public async Task UpdateAuthNavAsync()
         {
-            // Подписываемся на изменения коллекции
-            ProfileViewModel.Library.CollectionChanged += (s, e) => UpdateLibraryMenu();
-
-            if (AuthData.User != null && AuthData.Token != null)
+            try
             {
-                await ProfileViewModel.LoadLibraryAsync();
+                // Подписываемся на изменения коллекции
+                ProfileViewModel.Library.CollectionChanged += (s, e) => UpdateLibraryMenu();
 
-                // Если пользователь авторизован, меняем элемент навигации на профиль
-                AuthNav.Tag = "ProfilePage";
-                //AuthNav.Content = AuthData.User.Nickname;
+                if (AuthData.User != null && AuthData.Token != null)
+                {
+                    await ProfileViewModel.LoadLibraryAsync();
+                    AuthNav.Tag = "ProfilePage";
+                }
+                else
+                {
+                    ProfileViewModel.Library.Clear();
+                    AuthNav.Tag = "LoginPage";
+                    AuthNav.Content = "LoginPage";
+                }
             }
-            else
+            catch (Exception ex)
             {
-                ProfileViewModel.Library.Clear();
-                    // Если пользователь не авторизован, возвращаемся к LoginPage
-                AuthNav.Tag = "LoginPage";
-                AuthNav.Content = "LoginPage";
+                Debug.WriteLine($"Error updating auth navigation: {ex.Message}");
             }
         }
         private void NavigationView_SelectionChanged(NavigationView sender, NavigationViewSelectionChangedEventArgs args)
@@ -124,37 +141,46 @@ namespace PSB
         // Обработчик события Navigated для обновления заголовка и синхронизации NavigationView
         private void ContentFrame_Navigated(object sender, NavigationEventArgs e)
         {
-            // TODO: можно сделать что-то типа русификации
-
-            // Обновляем заголовок в зависимости от текущей страницы
             if (e.Content is Page page)
             {
-                //HeaderText.Text = page.GetType().Name.Replace("Page", ""); // Убираем "Page" из имени
+                page.Loaded += (s, _) =>
+                {
+                    if (page.Content.XamlRoot != null)
+                    {
+                        App.DialogService.SetXamlRoot(page.Content.XamlRoot);
+
+                        Debug.WriteLine("XamlRoot успешно обновлен после загрузки страницы.");
+                    }
+                    else
+                    {
+                        Debug.WriteLine("Ошибка: XamlRoot остался null после загрузки.");
+                    }
+                };
                 HeaderText.Text = page.GetType().Name;
+                // Управляем видимостью кнопки "Назад"
+                BackButton.Visibility = ContentFrame.CanGoBack ? Visibility.Visible : Visibility.Collapsed;
+                // Синхронизируем выбранный элемент в NavigationView
+                SyncNavigationViewSelection();
             }
-
-            // Управляем видимостью кнопки "Назад"
-            BackButton.Visibility = ContentFrame.CanGoBack ? Visibility.Visible : Visibility.Collapsed;
-
-            // Синхронизируем выбранный элемент в NavigationView
-            SyncNavigationViewSelection();
         }
 
+        
+
+        
         // Метод для синхронизации выбранного элемента в NavigationView
         private void SyncNavigationViewSelection()
         {
             if (ContentFrame.Content is Page page)
             {
-                string pageName = page.GetType().Name; // Получаем имя текущей страницы
+                string pageName = page.GetType().Name;
 
-                // Ищем соответствующий NavigationViewItem
-                foreach (var item in nvSample.MenuItems)
+                var selectedItem = NavView.MenuItems
+                    .OfType<NavigationViewItem>()
+                    .FirstOrDefault(item => item.Tag?.ToString() == pageName);
+
+                if (selectedItem != null)
                 {
-                    if (item is NavigationViewItem navItem && navItem.Tag?.ToString() == pageName)
-                    {
-                        nvSample.SelectedItem = navItem;
-                        break;
-                    }
+                    NavView.SelectedItem = selectedItem;
                 }
             }
         }

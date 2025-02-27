@@ -2,6 +2,7 @@
 
 namespace App\Http\Resources;
 
+use App\Enums\GamePlatform;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
@@ -17,10 +18,12 @@ class GameResource extends JsonResource
         return [
           'id' => $this->id,
           'name' => $this->name,
-          //'icon' => $this->icon,
-          'icon' => "https://i.pinimg.com/736x/9c/b1/bd/9cb1bd438f42d0b8f29142812f668a81.jpg",
-          'header' => $this->header,
-          'description' => $this->description,
+          'platform' =>  $this->platform,
+          'game_code' => $this->game_code,
+          $this->mergeWhen($this->platform == GamePlatform::Steam->value, [
+              'header' => "https://cdn.cloudflare.steamstatic.com/steam/apps/$this->game_code/library_hero.jpg",
+              'library_img' => "https://cdn.cloudflare.steamstatic.com/steam/apps/$this->game_code/library_600x900.jpg",
+          ]),
         ];
     }
 }
