@@ -1,99 +1,53 @@
 <?php
 
 use App\Http\Controllers\Api\AuthController;
-use App\Http\Controllers\Api\CloudServiceController;
-use App\Http\Controllers\Api\CustomGameController;
-use App\Http\Controllers\Api\CollectionController;
 use App\Http\Controllers\Api\GameController;
-use App\Http\Controllers\Api\PublisherController;
 use App\Http\Controllers\Api\SaveController;
 use App\Http\Controllers\Api\UserController;
+use App\Http\Controllers\Api\LibraryController;
 use Illuminate\Support\Facades\Route;
 
-
-//TODO: лучше сразу продумать логику и всю апиху, чтобы потом не отвлекаться
-//TODO: можно попробовать придерживаться тактики постранично
-//TODO: (сделал хорошо блок здесь - идешь winui3 делать)
-Route::controller(CollectionController::class)
-    ->middleware('auth:sanctum')->group(function () {
-   Route::get('/collections', 'index');
-});
-
-// AUTH
 Route::controller(AuthController::class)->group(function () {
     Route::post('register', 'signUp'); // Регистрация
-    Route::post('login',   'signIn'); // Авторизация
+    Route::post('login',   'signIn');  // Авторизация
     Route::middleware('auth:sanctum')->group(function () {
-        Route::get('logout',    'logout'); // Выход с одного устройства
+        Route::get('logout',    'logout');    // Выход с одного устройства
         Route::get('logoutAll', 'logoutAll'); // Выход со всех устройств
     });
 });
 Route::middleware('auth:sanctum')->group(function () {
-// Пользователь
-    Route::middleware('auth:sanctum')->group(function () {
-        Route::controller(UserController::class)->group(function () {
-            Route::post('user/update', 'updateProfile'); // Редактирование профиля
-            Route::get('user', 'getProfile'); // Просмотр профиля
-            Route::delete('user/cloud-storage/{id}', 'removeCloudStorage'); // Удаление привязанного облачного хранилища
+    Route::controller(UserController::class)->group(function () {
+        Route::prefix('profile')->group(function () {
+            Route::get('', 'getProfile');            //Просмотр своего профиля
+            Route::post('', 'updateProfile');        //Обновление профиля
+            Route::get('{user}', 'getOtherProfile'); // Просмотр чужого профиля
         });
     });
-
-// Сохранения
-    Route::middleware('auth:sanctum')->group(function () {
-        Route::controller(SaveController::class)->group(function () {
-            Route::get('saves', 'getUserSaves'); // Просмотр своих сохранений (сортировка по играм, фильтры)
-            Route::post('saves/update/{id}', 'updateSave'); // Обновление сохранения
-            Route::post('saves/upload', 'uploadSave'); // Загрузка сохранения на сервер (с указанием сервера)
-            Route::delete('saves/{id}', 'deleteSave'); // Удаление сохранения
-            Route::post('saves/{id}/description', 'addDescription'); // Добавить описание сохранению
-        });
+    Route::controller(LibraryController::class)->group(function () {
+       Route::prefix('library')->group(function () {
+          Route::get('', 'getLibrary');                     //Получить свою библиотеку
+           Route::prefix('game/{game}')->group(function () {
+               Route::post('', 'addToLibrary');             // Добавить игру в библиотеку
+               Route::patch('', 'toggleFavorite');          // Добавить/убрать игру в Избранное
+               Route::delete('', 'removeFromLibrary');      // Удалить игру из библиотеки
+           });
+       });
     });
-
-// Кастомные игры
-    Route::middleware('auth:sanctum')->group(function () {
-        Route::controller(CustomGameController::class)->group(function () {
-            Route::get('custom-games', 'getCustomGames'); // Просмотр своих кастомных игр
-            Route::post('custom-games', 'createCustomGame'); // Создание своей кастомной игры
-            Route::delete('custom-games/{id}', 'deleteCustomGame'); // Удаление своей кастомной игры
-        });
+    //TODO: сделать этот контроллер
+    Route::controller(SaveController::class)->group(function () {
+        //Просмотр всех сохранений
+        //Просмотр всех сохранений к игре
+        //Просмотр сохранений в виде поста
+        //Добавление сохранения
+        //Удаление сохранения
     });
-
-// Издатели
-    Route::middleware('auth:sanctum')->group(function () {
-        Route::controller(PublisherController::class)->group(function () {
-            Route::get('publishers', 'getPublishers'); // Просмотр издателей
-            Route::get('publishers/{id}/games', 'getPublisherGames'); // Просмотр игр издателя
-            Route::post('publishers', 'createPublisher'); // Создание издателя
-            Route::put('publishers/{id}', 'updatePublisher'); // Редактирование издателя
-            Route::delete('publishers/{id}', 'deletePublisher'); // Удаление издателя
-        });
-    });
-
-// Игры
-    Route::middleware('auth:sanctum')->group(function () {
-        Route::controller(GameController::class)->group(function () {
-            Route::get('games', 'index')->withoutMiddleware('auth:sanctum'); // просмотр игр
-            Route::post('games', 'createGame'); // Создание игры
-            Route::put('games/{id}', 'updateGame'); // Редактирование игры
-            Route::delete('games/{id}', 'deleteGame'); // Удаление игры
-            Route::get('games/{id}', 'showGame')->withoutMiddleware('auth:sanctum');; // Просмотр игры
-        });
-    });
-
-// Облачные хранилища
-    Route::middleware('auth:sanctum')->group(function () {
-        Route::controller(CloudServiceController::class)->group(function () {
-            Route::get('cloud-services', 'getCloudServices'); // Просмотр всех облачных хранилищ
-            Route::post('cloud-services', 'addCloudService'); // Добавление нового облачного хранилища
-            Route::delete('cloud-services/{id}', 'deleteCloudService'); // Удаление облачного хранилища
+    Route::controller(GameController::class)->group(function () {
+        Route::prefix('games')->group(function () {
+            Route::get('', 'getGames');      // Просмотр всех игр
+            Route::get('{game}', 'getGame'); // Просмотр игры
         });
     });
 });
 
-
-
-
-// Загрузка сейва на этот сервак
-Route::post('uploadToServer', [SaveController::class, 'upload'])->middleware('auth:sanctum');
 
 

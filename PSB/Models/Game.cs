@@ -10,10 +10,10 @@ namespace PSB.Models
     public class Game
     {
         [JsonPropertyName("id")] public required ulong Id { get; set; }
-        [JsonPropertyName("steam_id")] public ulong? SteamId { get; set; }
         [JsonPropertyName("name")] public required string Name { get; set; }
-        [JsonPropertyName("icon_hash")] public string? IconHash { get; set; }
-        [JsonPropertyName("publisher_id")] public ulong? PublisherId { get; set; }
-
+        [JsonPropertyName("platform")] public required int Platform { get; set; }
+        [JsonPropertyName("game_code")] public required string GameCode { get; set; }
+        [JsonPropertyName("header")] public string? Header { get; set; }        
+        [JsonPropertyName("library_img")] public string? LibraryImg{ get; set; }        
     }
 }

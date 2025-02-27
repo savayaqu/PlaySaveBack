@@ -127,6 +127,12 @@ return [
             'path' => storage_path('logs/laravel.log'),
         ],
 
+        'steam' => [
+          'driver' => 'single',
+          'path' => storage_path('logs/steam_fetch.log'),
+          'level' => 'info'
+        ],
+
     ],
 
 ];

@@ -13,10 +13,10 @@ return new class extends Migration
     {
         Schema::create('games', function (Blueprint $table) {
             $table->id();
-            $table->bigInteger('steam_id')->unsigned()->nullable()->unique();
             $table->string('name')->unique();
-            $table->string('icon_hash')->nullable();
-            $table->foreignId('publisher_id')->nullable()->constrained();
+            $table->string('game_code');
+            $table->tinyInteger('platform');
+            $table->unique(['game_code', 'platform']);
             $table->timestamps();
         });
     }

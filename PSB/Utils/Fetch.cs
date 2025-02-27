@@ -9,6 +9,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using PSB.Api;
 using PSB.Api.Response;
+using PSB.Converters;
 
 namespace PSB.Utils
 {
@@ -131,7 +132,8 @@ namespace PSB.Utils
 
                 var options = new JsonSerializerOptions
                 {
-                    PropertyNameCaseInsensitive = true // Игнорируем регистр имён свойств
+                    PropertyNameCaseInsensitive = true, // Игнорируем регистр имён свойств
+                    Converters = { new NullableDateTimeConverter() } // Добавляем конвертер
                 };
 
                 var responseBody = JsonSerializer.Deserialize<T>(responseJson, options);

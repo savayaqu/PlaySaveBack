@@ -9,9 +9,9 @@
     mc:Ignorable="d"
     Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
     <StackPanel Orientation="Vertical">
-        <TextBox PlaceholderText="Электронная почта" MaxHeight="50" Text="{x:Bind ViewModel.Email, Mode=TwoWay}"/>
+        <TextBox PlaceholderText="Электронная почта" MaxHeight="50" Text="{x:Bind ViewModel.Identifier, Mode=TwoWay}"/>
         <TextBox PlaceholderText="Пароль" MaxHeight="50" Text="{x:Bind ViewModel.Password, Mode=TwoWay}"/>
-        <!--<TextBlock Text="{x:Bind ViewModel.Error, Mode=TwoWay}" />-->
+        <TextBlock Text="{x:Bind ViewModel.Error, Mode=TwoWay}" />
         <Button Content="Войти" Command="{x:Bind ViewModel.LoginCommand, Mode=OneWay}"/>
         <Button Content="Создать аккаунт"/>
     </StackPanel>

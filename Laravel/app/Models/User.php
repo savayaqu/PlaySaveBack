@@ -2,22 +2,27 @@
 
 namespace App\Models;
 
+use App\Enums\UserVisibility;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Str;
 use Laravel\Sanctum\HasApiTokens;
 
 class User extends Authenticatable
 {
     use HasFactory, Notifiable, HasApiTokens;
-
     protected $fillable = [
         'email',
         'password',
-        'is_admin',
         'nickname',
         'avatar',
+        'login',
+        'header',
+        'key',
+        'visibility'
     ];
 
     /**
@@ -28,8 +33,12 @@ class User extends Authenticatable
     protected $hidden = [
         'password',
         'remember_token',
+        'key'
     ];
-
+    // Установка по умолчанию
+    protected $attributes = [
+        'visibility' => UserVisibility::Private,
+    ];
     /**
      * Get the attributes that should be cast.
      *
@@ -40,30 +49,33 @@ class User extends Authenticatable
         return [
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
+            'key' => 'hashed'
         ];
     }
-    public function customGames()
+    public function getImage($value): ?string
     {
-        return $this->hasMany(CustomGame::class);
+        if ($value === null) {
+            return null;
+        }
+        if(!Str::startsWith($value, 'http')){
+            return asset(Storage::url($value));
+        }
+        return $value;
     }
-    public function saves()
+    public function saves(): HasMany
     {
         return $this->hasMany(Save::class);
     }
-    public function userCloudService()
+    public function userCloudService(): HasMany
     {
         return $this->hasMany(UserCloudService::class);
     }
-    public function collections()
+    public function saveAccesses(): HasMany
     {
-        return $this->hasMany(Collection::class);
+        return $this->hasMany(SaveAccess::class);
     }
-    public function profileImage()
+    public function libraries(): HasMany
     {
-        if(!$this->avatar)
-        {
-            return asset('assets/images/profile-icon.svg');
-        }
-        return url(Storage::url($this->avatar));
+        return $this->hasMany(Library::class);
     }
 }

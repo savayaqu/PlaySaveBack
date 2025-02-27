@@ -10,7 +10,7 @@ namespace PSB.Api.Response
 {
     public class GameResponse
     {
-        [JsonPropertyName("game")] public Game? Game  { get; set; }
-        [JsonPropertyName("steamGame")] public SteamGame? SteamGame  { get; set; }
+        [JsonPropertyName("game")] public required Game Game  { get; set; }
+        [JsonPropertyName("library")] public Library? Library { get; set; }
     }
 }
