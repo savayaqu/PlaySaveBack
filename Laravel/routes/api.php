@@ -30,6 +30,7 @@ Route::middleware('auth:sanctum')->group(function () {
                Route::post('', 'addToLibrary');             // Добавить игру в библиотеку
                Route::patch('', 'toggleFavorite');          // Добавить/убрать игру в Избранное
                Route::delete('', 'removeFromLibrary');      // Удалить игру из библиотеки
+               Route::patch('update', 'updateLibraryGame'); // Изменить данные игры в библиотеки
            });
        });
     });

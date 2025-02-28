@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Api\Library\EditLibraryGameRequest;
 use App\Http\Resources\LibraryResource;
 use App\Http\Resources\UserResource;
 use App\Models\Game;
@@ -34,6 +35,14 @@ class LibraryController extends Controller
 
         if ($library)
             $library->update(['is_favorite' => !$library->is_favorite]);
+        return response()->json(null, 204);
+    }
+    public function updateLibraryGame(Game $game, EditLibraryGameRequest $request): JsonResponse
+    {
+        $user = auth()->user();
+        $library = $user->libraries()->where('game_id', $game->id)->first();
+        if($library)
+            $library->update($request->validated());
         return response()->json(null, 204);
     }
 }
