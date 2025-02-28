@@ -1,21 +1,14 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.Net.Http;
-using System.Text.Json;
 using System.Threading.Tasks;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using Microsoft.UI.Xaml;
-using Microsoft.UI.Xaml.Controls;
-using Microsoft.UI.Xaml.Media.Imaging;
+using PSB.Api.Request;
 using PSB.Api.Response;
 using PSB.ContentDialogs;
-using PSB.Converters;
 using PSB.Models;
 using PSB.Utils;
-
 using static PSB.Utils.Fetch;
 
 namespace PSB.ViewModels
@@ -51,13 +44,44 @@ namespace PSB.ViewModels
         {
             try
             {
-                Process.Start(new ProcessStartInfo
+                Process gameProcess = new Process
                 {
-                    FileName = FilePath,
-                    UseShellExecute = true // Нужно для запуска GUI-приложений
-                });
-
+                    StartInfo = new ProcessStartInfo
+                    {
+                        FileName = FilePath,
+                        UseShellExecute = true
+                    }
+                };
+                gameProcess.Start();
                 Debug.WriteLine($"Игра запущена: {FilePath}");
+
+                DateTime startTime = DateTime.Now;
+
+                // Ожидание завершения процесса
+                await Task.Run(() => gameProcess.WaitForExit());
+
+                DateTime endTime = DateTime.Now;
+                DateTime trimmedEndTime = new DateTime(endTime.Year, endTime.Month, endTime.Day, endTime.Hour, endTime.Minute, endTime.Second);
+                // Запись времени игры
+                TimeSpan playTime = endTime - startTime;
+
+                uint secondsPlayed = (uint)playTime.TotalSeconds;
+                Library.TimePlayed = (Library.TimePlayed ?? 0) + secondsPlayed;
+                Library.LastPlayedAt = endTime;
+                try
+                {
+                    var res = await FetchAsync(
+                        HttpMethod.Patch, $"library/game/{GameId}/update",
+                         isFetch => Debug.WriteLine("isFetch " + isFetch),
+                         error => Debug.WriteLine("error " + error),
+                         new UpdateLibraryGameRequest(Library.TimePlayed, endTime.ToString("yyyy-MM-dd HH:mm:ss")),
+                         serialize: true
+                    );
+                }
+                catch (HttpRequestException ex)
+                {
+                    Debug.WriteLine( "Ошибка соединения: " + ex.Message);
+                }
             }
             catch (Exception ex)
             {
