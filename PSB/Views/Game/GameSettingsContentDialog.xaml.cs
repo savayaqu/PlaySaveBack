@@ -13,6 +13,7 @@ namespace PSB.ContentDialogs
     public sealed partial class GameSettingsContentDialog : ContentDialog
     {
         GameSettingsContentViewModel GameSettingsContentViewModel { get; set; }
+        GameViewModel GameViewModel { get; set; }
         public GameSettingsContentDialog(Game game)
         {
             this.InitializeComponent();

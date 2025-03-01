@@ -16,6 +16,7 @@ namespace PSB
         public static MainWindow? Instance { get; private set; }
         public ProfileViewModel ProfileViewModel { get; set; }
 
+
         public MainWindow()
         {
             Instance = this; // Сохраняем текущий экземпляр
@@ -43,7 +44,7 @@ namespace PSB
             }
 
             // Добавляем игры
-            foreach (var game in ProfileViewModel.Library)
+            foreach (var game in ProfileViewModel.Libraries)
             {
                 if (game?.Game == null) continue;
 
@@ -62,7 +63,6 @@ namespace PSB
                 Debug.WriteLine("Page tag is null or empty.");
                 return;
             }
-
             try
             {
                 if (pageTag.StartsWith("LibraryGame_"))
@@ -72,12 +72,21 @@ namespace PSB
                         .OfType<NavigationViewItem>()
                         .FirstOrDefault(item => item.Tag?.ToString() == pageTag);
 
-                    if (currentItem != null)
-                    {
-                        ContentFrame.Navigate(typeof(GamePage), gameId);
-                        HeaderText.Text = currentItem.Content.ToString();
-                    }
+                    ContentFrame.Navigate(typeof(GamePage), gameId);
+                    HeaderText.Text = currentItem?.Content?.ToString() ?? $"Игра {gameId}";
+                    return;
                 }
+
+                if (pageTag.StartsWith("Game_"))
+                {
+                    var parts = pageTag.Split('|');
+                    ulong gameId = Convert.ToUInt64(parts[0].Replace("Game_", ""));
+                    string gameName = parts.Length > 1 ? parts[1] : "Unknown Game";
+                    ContentFrame.Navigate(typeof(GamePage), gameId);
+                    HeaderText.Text = gameName; // Используем переданное имя
+                    return;
+                }
+
                 else
                 {
                     Type pageType = Type.GetType($"PSB.Views.{pageTag}");
@@ -103,7 +112,7 @@ namespace PSB
             try
             {
                 // Подписываемся на изменения коллекции
-                ProfileViewModel.Library.CollectionChanged += (s, e) => UpdateLibraryMenu();
+                ProfileViewModel.Libraries.CollectionChanged += (s, e) => UpdateLibraryMenu();
 
                 if (AuthData.User != null && AuthData.Token != null)
                 {
@@ -112,7 +121,7 @@ namespace PSB
                 }
                 else
                 {
-                    ProfileViewModel.Library.Clear();
+                    ProfileViewModel.Libraries.Clear();
                     AuthNav.Tag = "LoginPage";
                     AuthNav.Content = "LoginPage";
                 }

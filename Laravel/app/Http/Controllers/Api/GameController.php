@@ -7,6 +7,7 @@ use App\Http\Requests\Api\Game\AddGameRequest;
 use App\Http\Requests\Api\Game\EditGameRequest;
 use App\Http\Resources\GameResource;
 use App\Http\Resources\LibraryResource;
+use App\Http\Resources\SaveResource;
 use App\Models\Game;
 use App\Models\Library;
 use Illuminate\Http\JsonResponse;
@@ -23,25 +24,12 @@ class GameController extends Controller
     {
         $user = auth()->user();
         $library = Library::query()->where('game_id', $game->id)->where('user_id', $user->id)->first();
-
+        $saves = $user->saves()->where('game_id',$game->id)->get();
+        //dd($saves);
         return response()->json([
             'game' => GameResource::make($game),
             'library' => $library ? LibraryResource::make($library) : null,
+            'saves' => $saves->isEmpty() ? null : SaveResource::collection($saves),
         ]);
-    }
-    public function addGame(AddGameRequest $request)
-    {
-        $user = auth()->user();
-        $validated = $request->validated();
-        $game = Game::query()->create([
-            ...$validated,
-            'user_id' => $user->id,
-        ]);
-        return response()->json($game, 201);
-    }
-    public function editGame(Game $game, EditGameRequest $request)
-    {
-        $game->update($request->all());
-        return response()->json($game);
     }
 }

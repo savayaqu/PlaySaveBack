@@ -20,13 +20,17 @@
                 </StackPanel>
                     <!-- Кнопки на одном уровне с текстом -->
                 <StackPanel Margin="16" Grid.Row="0" Grid.Column="0" HorizontalAlignment="Right" VerticalAlignment="Bottom" Orientation="Horizontal" Spacing="24">
-                    <Button Command="{x:Bind GameViewModel.LaunchGameCommand, Mode=OneTime}" Content="Играть" Visibility="{x:Bind GameViewModel.ExeExists, Converter={StaticResource BoolToVisibility}, ConverterParameter=True}"/>
-                    <Button Content="Добавить в библиотеку" Command="{x:Bind GameViewModel.AddToLibraryCommand}" Visibility="{x:Bind GameViewModel.InLibrary, Converter={StaticResource BoolToVisibility}}"/>
-                    <Button Command="{x:Bind GameViewModel.ToggleFavoriteCommand, Mode=OneWay}">
+                    <Button Content="Добавить в библиотеку" Command="{x:Bind GameViewModel.AddToLibraryCommand}" Visibility="{x:Bind GameViewModel.InLibrary, Mode=OneWay, Converter={StaticResource BoolToVisibility}, ConverterParameter=True}"/>
+
+
+                    <Button Content="Играть" Command="{x:Bind GameViewModel.LaunchGameCommand, Mode=OneTime}"  Visibility="{x:Bind GameViewModel.ExeExists, Mode=OneWay, Converter={StaticResource BoolToVisibility}, ConverterParameter=True}"/>
+
+                    <Button Command="{x:Bind GameViewModel.ToggleFavoriteCommand, Mode=OneWay}" Visibility="{x:Bind GameViewModel.InLibrary, Mode=OneWay, Converter={StaticResource BoolToVisibility}, ConverterParameter=False}">
                         <FontIcon Glyph="{x:Bind GameViewModel.FavoriteIcon, Mode=OneWay}" />
                     </Button>
 
-                    <Button Content="Настройки" Command="{x:Bind GameViewModel.OpenGameSettingsCommand, Mode=OneTime}" Visibility="{x:Bind GameViewModel.InLibrary, Converter={StaticResource BoolToVisibility}, ConverterParameter=True}"/>
+                    <Button Content="Настройки" Command="{x:Bind GameViewModel.OpenGameSettingsCommand, Mode=OneTime}" Visibility="{x:Bind GameViewModel.InLibrary, Mode=OneWay, Converter={StaticResource BoolToVisibility}, ConverterParameter=False}"/>
+
                 </StackPanel>
             </StackPanel>
 

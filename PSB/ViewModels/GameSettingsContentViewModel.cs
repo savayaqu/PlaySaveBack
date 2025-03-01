@@ -1,23 +1,27 @@
 ﻿using System;
+using System.Diagnostics;
+using System.Drawing;
+using System.IO;
+using System.Linq;
+using System.Net.Http;
 using System.Threading.Tasks;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using System.Drawing;
-using PSB.Models;
-using PSB.Utils;
-using Windows.Storage.AccessCache;
-using Windows.Storage;
-using Windows.Storage.Pickers;
-using System.IO;
-using System.Diagnostics;
-using System.Linq;
 using Microsoft.UI.Xaml.Media.Imaging;
 using PSB.Helpers;
+using PSB.Models;
+using PSB.Utils;
+using Windows.Storage;
+using Windows.Storage.AccessCache;
+using Windows.Storage.Pickers;
+using static PSB.Utils.Fetch;
 
 namespace PSB.ViewModels
 {
     public partial class GameSettingsContentViewModel : ObservableObject
     {
+        public ProfileViewModel ProfileViewModel { get; set; } = MainWindow.Instance?.ProfileViewModel!;
+        public GameViewModel GameViewModel { get; set; } = GameViewModel.Instance!;
         [ObservableProperty] public partial string? SelectedFile { get; set; }
         [ObservableProperty] public partial string? SelectedSavesFolder { get; set; }
         [ObservableProperty] public partial string? GameName { get; set; }
@@ -191,8 +195,26 @@ namespace PSB.ViewModels
         [RelayCommand]
         private async Task RemoveFromLibrary()
         {
-            // Логика удаления из библиотеки
+            var res = await FetchAsync(
+                HttpMethod.Delete, $"library/game/{Game.Id}",
+                setError: e => Debug.WriteLine($"Error: {e}")
+            );
+
+            if (res.IsSuccessStatusCode)
+            {
+                GameData.RemoveGameData(Game);
+
+                // Удаляем игру из библиотеки
+                var libraryItem = ProfileViewModel.Libraries.FirstOrDefault(l => l.Game.Id == Game.Id);
+                if (libraryItem != null)
+                    ProfileViewModel.Libraries.Remove(libraryItem);
+
+                Debug.WriteLine("Попытка закрыть диалог...");
+                App.DialogService.HideDialog();
+            }
         }
+
+
 
         [RelayCommand]
         private async Task RemoveAllSaves()

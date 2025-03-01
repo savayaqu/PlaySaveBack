@@ -15,7 +15,7 @@ namespace PSB.ViewModels
 {
     public partial class ProfileViewModel : ObservableObject
     {
-        [ObservableProperty] public partial ObservableCollection<LibraryResponse> Library { get; set; } = new();
+        [ObservableProperty] public partial ObservableCollection<Library> Libraries { get; set; } = new();
         [ObservableProperty] public partial User? User { get; set; } = AuthData.User;
         public ProfileViewModel()
         {
@@ -44,7 +44,7 @@ namespace PSB.ViewModels
         [RelayCommand]
         public async Task LoadLibraryAsync()
         {
-            (var res, var body) = await FetchAsync<PaginatedResponse<LibraryResponse>>(
+            (var res, var body) = await FetchAsync<PaginatedResponse<Library>>(
                 HttpMethod.Get, "library",
                 setError: e => Debug.WriteLine($"Error: {e}")
             );
@@ -60,10 +60,10 @@ namespace PSB.ViewModels
             //Debug.WriteLine(bodyJson);
 
             // Очистка коллекции и добавление новых элементов
-            Library.Clear();
+            Libraries.Clear();
             foreach (var item in body.Data) // Теперь берем body.Data, а не body напрямую
             {
-                Library.Add(item);
+                Libraries.Add(item);
             }
         }
 

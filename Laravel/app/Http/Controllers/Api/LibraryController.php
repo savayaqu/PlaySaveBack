@@ -26,23 +26,28 @@ class LibraryController extends Controller
            'user_id' => $user->id,
            'game_id' => $game->id,
         ]);
+        $library->load('game');
         return response()->json(LibraryResource::make($library), 201);
     }
     public function toggleFavorite(Game $game): JsonResponse
     {
         $user = auth()->user();
-        $library = $user->libraries()->where('game_id', $game->id)->first();
-
-        if ($library)
-            $library->update(['is_favorite' => !$library->is_favorite]);
+        $library = $user->libraries()->where('game_id', $game->id)->firstOrFail();
+        $library->update(['is_favorite' => !$library->is_favorite]);
         return response()->json(null, 204);
     }
     public function updateLibraryGame(Game $game, EditLibraryGameRequest $request): JsonResponse
     {
         $user = auth()->user();
-        $library = $user->libraries()->where('game_id', $game->id)->first();
-        if($library)
-            $library->update($request->validated());
+        $library = $user->libraries()->where('game_id', $game->id)->firstOrFail();
+        $library->update($request->validated());
+        return response()->json(null, 204);
+    }
+    public function removeFromLibrary(Game $game): JsonResponse
+    {
+        $user = auth()->user();
+        $library = $user->libraries()->where('game_id', $game->id)->firstOrFail();
+        $library->delete();
         return response()->json(null, 204);
     }
 }

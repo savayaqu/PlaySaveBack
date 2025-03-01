@@ -12,5 +12,6 @@ namespace PSB.Api.Response
     {
         [JsonPropertyName("game")] public required Game Game  { get; set; }
         [JsonPropertyName("library")] public Library? Library { get; set; }
+        [JsonPropertyName("saves")] public Save? Save { get; set; }
     }
 }

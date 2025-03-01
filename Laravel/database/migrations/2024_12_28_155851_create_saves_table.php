@@ -13,16 +13,13 @@ return new class extends Migration
     {
         Schema::create('saves', function (Blueprint $table) {
             $table->id();
+            $table->string('path');
             $table->string('file_name');
-            $table->text('file_path');
             $table->unsignedBigInteger('size');
             $table->text('description')->nullable();
             $table->foreignId('user_id')->constrained();
             $table->foreignId('game_id')->constrained();
             $table->foreignId('user_cloud_service_id')->constrained('user_cloud_service', 'id');
-            $table->integer('download')->default(0);
-            $table->integer('rating')->default(0);
-            $table->text('screenshot')->nullable();
             $table->timestamps();
         });
     }

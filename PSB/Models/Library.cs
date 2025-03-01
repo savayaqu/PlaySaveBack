@@ -17,5 +17,7 @@ namespace PSB.Models
         [JsonPropertyName("last_played_at")] public DateTime? LastPlayedAt { get; set; }
         [JsonPropertyName("time_played")] public uint? TimePlayed { get; set; }
         [JsonPropertyName("is_favorite")] public required Boolean IsFavorite { get; set; }
+        [JsonPropertyName("game")] public Game? Game { get; set; }
+
     }
 }

@@ -15,6 +15,9 @@ namespace PSB.ViewModels
 {
     public partial class GameViewModel : ObservableObject
     {
+        public ProfileViewModel ProfileViewModel { get; set; } = MainWindow.Instance?.ProfileViewModel!;
+        public static GameViewModel? Instance { get; private set; }
+
         [ObservableProperty] public partial ulong GameId {  get; set; }
         [ObservableProperty] public partial Game Game { get; set; }
         [ObservableProperty] public partial Library Library { get; set; }
@@ -36,6 +39,7 @@ namespace PSB.ViewModels
         }
         public GameViewModel(ulong gameId)
         {
+            Instance = this;
             GameId = gameId;
             _ = GetGameAsync();
         }
@@ -114,7 +118,7 @@ namespace PSB.ViewModels
         public async Task AddToLibrary()
         {
             (var res, var body) = await FetchAsync<Library>(
-                HttpMethod.Get, $"games/{GameId}",
+                HttpMethod.Post, $"library/game/{GameId}",
                 setError: e => Debug.WriteLine($"Error: {e}")
             );
             if (!res.IsSuccessStatusCode)
@@ -122,6 +126,7 @@ namespace PSB.ViewModels
             if ( body != null )
                 Library = body;
             InLibrary = true;
+            ProfileViewModel.Libraries.Add(Library);
         }
         public async Task GetGameAsync()
         {
@@ -155,8 +160,10 @@ namespace PSB.ViewModels
                 PlayedHoursText = "Сыграно 0 часов";
                 InLibrary = false;
             }
+            Debug.WriteLine($"InLibrary: {InLibrary}, ExeExists: {ExeExists}");
+
         }
-       
+
 
         private string GetDaysAgoText(DateTime lastPlayed)
         {

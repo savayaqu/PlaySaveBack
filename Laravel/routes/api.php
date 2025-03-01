@@ -48,6 +48,13 @@ Route::middleware('auth:sanctum')->group(function () {
             Route::get('{game}', 'getGame'); // Просмотр игры
         });
     });
+    Route::controller(\App\Http\Controllers\GoogleDriveController::class)->group(function () {
+        Route::prefix('google-drive')->group(function () {
+            Route::get('auth-url', 'getAuthUrl');
+            Route::get('callback', 'callback')->withoutMiddleware('auth:sanctum');
+            Route::post('upload', 'uploadFile');
+        });
+    });
 });
 
 

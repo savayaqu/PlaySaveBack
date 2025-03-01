@@ -8,7 +8,7 @@ class Save extends Model
 {
     protected $fillable = [
       'file_name',
-      'file_path',
+      'file',
       'size',
       'description',
       'user_id',

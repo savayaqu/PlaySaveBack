@@ -8,11 +8,14 @@ use Google\Client;
 use Google\Service\Drive;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Log;
 
 class GoogleDriveController extends Controller
 {
     public function getAuthUrl(Request $request)
     {
+        $user = $request->user();
         $client = new Client();
         $client->setClientId(env('GOOGLE_DRIVE_CLIENT_ID'));
         $client->setClientSecret(env('GOOGLE_DRIVE_CLIENT_SECRET'));
@@ -20,19 +23,27 @@ class GoogleDriveController extends Controller
         $client->addScope("https://www.googleapis.com/auth/drive");
         $client->setAccessType('offline'); // Запрашивает refresh_token
         $client->setPrompt('consent'); // Гарантирует показ экрана авторизации
-        return redirect($client->createAuthUrl());
+
+        // Генерируем уникальный state (можно просто user_id)
+        $state = bin2hex(random_bytes(16)) . '_' . $user->id;
+
+        // Сохраняем state в Redis (или другую систему хранения)
+        Cache::put("oauth_state:{$state}", $user->id, now()->addMinutes(10));
+        $client->setState($state);
+        //return redirect($client->createAuthUrl());
+        return response()->json($client->createAuthUrl());
     }
 
     public function callback(Request $request)
     {
+        $state = $request->state;
+        $userId = Cache::pull("oauth_state:{$state}");
         $client = new Client();
         $client->setClientId(env('GOOGLE_DRIVE_CLIENT_ID'));
         $client->setClientSecret(env('GOOGLE_DRIVE_CLIENT_SECRET'));
         $client->setRedirectUri(env('GOOGLE_DRIVE_REDIRECT_URI'));
-
         $cloudService = CloudService::query()->where('name', 'Google Drive')->first();
         $token = $client->fetchAccessTokenWithAuthCode($request->get('code'));
-        $userId = Auth::id();
         // Попытка найти запись
         $userCloudService = UserCloudService::query()->where([
             'user_id' => $userId,
@@ -57,7 +68,7 @@ class GoogleDriveController extends Controller
             ]);
         }
 
-        return redirect(route('profile'));
+        return response(null, 204);
     }
 
     public function uploadFile(Request $request)
