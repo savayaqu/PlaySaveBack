@@ -211,6 +211,7 @@ namespace PSB.ViewModels
 
                 Debug.WriteLine("Попытка закрыть диалог...");
                 App.DialogService.HideDialog();
+                GameViewModel.InLibrary = false;
             }
         }
 
