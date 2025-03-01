@@ -23,21 +23,29 @@ class TestSeeder extends Seeder
         //        'description' => fake()->text(),
         //    ]);
         //}
-        $user = User::query()->firstOrCreate([
-           'login' => 'admin',
-           'nickname' => 'admin',
-           'password' => 'Admin123!',
-           'key' => 666666
-        ]);
-        for($i = 0; $i < 5; $i++) {
-            $log =  fake()->unique()->word();
+        if(User::query()->count() <= 2) {
+             $user = User::query()->firstOrCreate([
+                'login' => 'admin',
+                'nickname' => 'admin',
+                'password' => 'Admin123!',
+                'key' => 666666
+            ]);
             User::query()->firstOrCreate([
-                'login' => $log,
-                'nickname' => $log,
+                'login' => 'test',
+                'nickname' => 'test',
                 'password' => 'Test123!',
-                'key' => 666666,
+                'key' => 666666
             ]);
         }
+        //for($i = 0; $i < 5; $i++) {
+        //    $log =  fake()->unique()->word();
+        //    User::query()->firstOrCreate([
+        //        'login' => $log,
+        //        'nickname' => $log,
+        //        'password' => 'Test123!',
+        //        'key' => 666666,
+        //    ]);
+        //}
         for($i = 0; $i < 40; $i++) {
             Library::query()->firstOrCreate([
                 'user_id' => $user->id,
