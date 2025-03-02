@@ -36,9 +36,9 @@ namespace PSB
             ProfileViewModel = new ProfileViewModel();
 
             // Инициализируем сервисы
-            _libraryService = new LibraryService(NavView, ProfileViewModel);
             _authService = new AuthService(ProfileViewModel, AuthNav);
             _navigationService = new NavigationService(ContentFrame, NavView, HeaderText);
+            _libraryService = new LibraryService(NavView, ProfileViewModel, _navigationService);
 
             // Обновляем авторизацию при старте
             _ = _authService.UpdateAuthNavAsync();

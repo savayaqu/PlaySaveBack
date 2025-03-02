@@ -36,10 +36,14 @@ namespace PSB
             MainWindow = new MainWindow();
             MainWindow.ExtendsContentIntoTitleBar = true;
 
-            // Инициализируем сервисы перед их использованием
-            LibraryService = new LibraryService(MainWindow.NavigationViewControl, MainWindow.ProfileViewModel);
-            AuthService = new AuthService(MainWindow.ProfileViewModel, MainWindow.AuthNavControl);
+            // Инициализируем NavigationService первым
             NavigationService = new NavigationService(MainWindow.ContentFrameControl, MainWindow.NavigationViewControl, MainWindow.HeaderTextBlock);
+
+            // Теперь передаем NavigationService в LibraryService
+            LibraryService = new LibraryService(MainWindow.NavigationViewControl, MainWindow.ProfileViewModel, NavigationService);
+
+            // Инициализируем AuthService
+            AuthService = new AuthService(MainWindow.ProfileViewModel, MainWindow.AuthNavControl);
 
             MainWindow.Activate();
         }
