@@ -58,7 +58,7 @@ namespace PSB.ViewModels
             {
                 WriteIndented = true
             });
-            Debug.WriteLine(bodyJson);
+            //Debug.WriteLine(bodyJson);
 
             // Очистка коллекции и добавление новых элементов
             Libraries.Clear();

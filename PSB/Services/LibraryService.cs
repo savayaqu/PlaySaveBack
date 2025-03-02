@@ -1,0 +1,82 @@
+﻿using Microsoft.UI.Xaml.Controls;
+using PSB.Models;
+using PSB.Services;
+using PSB.Utils;
+using PSB.ViewModels;
+using System.Collections.Generic;
+using System.Linq;
+
+public class LibraryService
+{
+    private readonly NavigationView _navView;
+    private readonly ProfileViewModel _profileViewModel;
+    private readonly NavigationService _navigationService;
+
+    public LibraryService(NavigationView navView, ProfileViewModel profileViewModel, NavigationService navigationService)
+    {
+        _navView = navView;
+        _profileViewModel = profileViewModel;
+        _navigationService = navigationService;
+
+        // Подписка на обновления библиотеки
+        _profileViewModel.Libraries.CollectionChanged += (s, e) => UpdateLibraryMenu();
+    }
+
+    public void UpdateLibraryMenu()
+    {
+        // Удаляем старые элементы библиотеки (игры и заголовки)
+        var existingItems = _navView.MenuItems
+            .OfType<NavigationViewItem>()
+            .Where(item => item.Tag?.ToString()?.StartsWith("Game_") == true)
+            .ToList();
+
+        var existingHeaders = _navView.MenuItems
+            .OfType<NavigationViewItemHeader>()
+            .Where(header => header.Content?.ToString() is "УСТАНОВЛЕНЫ" or "ИЗБРАННОЕ" or "БЕЗ КАТЕГОРИИ")
+            .ToList();
+
+        foreach (var item in existingItems) _navView.MenuItems.Remove(item);
+        foreach (var header in existingHeaders) _navView.MenuItems.Remove(header);
+
+        // Разделяем игры по категориям
+        var installedGames = _profileViewModel.Libraries
+            .Where(game => game?.Game != null && GameData.GetFilePath(game.Game) != null)
+            .ToList();
+
+        var favoriteGames = _profileViewModel.Libraries
+            .Where(game => game?.Game != null && game.IsFavorite && GameData.GetFilePath(game.Game) == null)
+            .ToList();
+
+        var uncategorizedGames = _profileViewModel.Libraries
+            .Where(game => game?.Game != null && GameData.GetFilePath(game.Game) == null && !game.IsFavorite)
+            .ToList();
+
+        // Функция для добавления заголовка и игр
+        void AddCategory(string headerText, List<Library> games)
+        {
+            if (games.Count == 0) return;
+
+            var header = new NavigationViewItemHeader { Content = headerText };
+            _navView.MenuItems.Add(header);
+
+            foreach (var game in games)
+            {
+                var gameItem = new NavigationViewItem
+                {
+                    Content = game.Game?.Name,
+                    Tag = $"Game_{game.Game?.Id}|{game.Game?.Name}",
+                    Icon = new FontIcon { Glyph = "\uE7FC" }
+                };
+                _navView.MenuItems.Add(gameItem);
+            }
+        }
+
+        // Добавляем категории, если в них есть игры
+        AddCategory("УСТАНОВЛЕНЫ", installedGames);
+        AddCategory("ИЗБРАННОЕ", favoriteGames);
+        AddCategory("БЕЗ КАТЕГОРИИ", uncategorizedGames);
+
+        // Синхронизируем выделение после обновления меню
+        _navigationService.SyncNavigationViewSelection(_navigationService.GetCurrentPage());
+    }
+}

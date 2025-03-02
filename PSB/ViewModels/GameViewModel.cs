@@ -27,6 +27,7 @@ namespace PSB.ViewModels
         [ObservableProperty] public partial Boolean IsFavorite { get; set; }
         [ObservableProperty] public partial Boolean InLibrary { get; set; } = false;
         [ObservableProperty] public partial string FilePath { get; set; }
+        public event Action? GameLoaded;
 
         [ObservableProperty]
         [NotifyCanExecuteChangedFor(nameof(LaunchGameCommand))]
@@ -39,9 +40,15 @@ namespace PSB.ViewModels
         }
         public GameViewModel(ulong gameId)
         {
+
             Instance = this;
             GameId = gameId;
-            _ = GetGameAsync();
+
+            _ = GetGameAsync().ContinueWith(_ =>
+            {
+                GameLoaded?.Invoke();
+            }, TaskScheduler.FromCurrentSynchronizationContext());
+
         }
         [RelayCommand(CanExecute = nameof(ExeExists))]
         public async Task LaunchGame()
@@ -127,7 +134,10 @@ namespace PSB.ViewModels
             {
                 libraryItem.IsFavorite = IsFavorite;
             }
-            MainWindow.Instance?.UpdateLibraryMenu();
+            if (App.LibraryService != null)
+            {
+                App.LibraryService.UpdateLibraryMenu();
+            }
         }
 
 

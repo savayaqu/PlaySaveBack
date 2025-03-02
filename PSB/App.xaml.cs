@@ -16,7 +16,10 @@ namespace PSB
         /// executed, and as such is the logical equivalent of main() or WinMain().
         /// </summary>
         public static DialogService DialogService { get; private set; }
-        public static Window MainWindow { get; private set; }
+        public static MainWindow MainWindow { get; private set; }
+        public static NavigationService NavigationService { get; private set; }
+        public static LibraryService LibraryService { get; private set; }
+        public static AuthService AuthService { get; private set; }
 
         public App()
         {
@@ -32,7 +35,19 @@ namespace PSB
         {
             MainWindow = new MainWindow();
             MainWindow.ExtendsContentIntoTitleBar = true;
+
+            // Инициализируем NavigationService первым
+            NavigationService = new NavigationService(MainWindow.ContentFrameControl, MainWindow.NavigationViewControl, MainWindow.HeaderTextBlock);
+
+            // Теперь передаем NavigationService в LibraryService
+            LibraryService = new LibraryService(MainWindow.NavigationViewControl, MainWindow.ProfileViewModel, NavigationService);
+
+            // Инициализируем AuthService
+            AuthService = new AuthService(MainWindow.ProfileViewModel, MainWindow.AuthNavControl);
+
             MainWindow.Activate();
         }
+
+
     }
 }

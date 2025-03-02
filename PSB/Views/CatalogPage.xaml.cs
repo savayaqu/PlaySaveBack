@@ -38,7 +38,7 @@ namespace PSB.Views
             if (sender is FrameworkElement element && element.DataContext is Game game)
             {
                 string gameTag = $"Game_{game.Id}|{game.Name}";
-                MainWindow.Instance?.Nav(gameTag);
+                App.NavigationService.Navigate(gameTag);
             }
         }
     }

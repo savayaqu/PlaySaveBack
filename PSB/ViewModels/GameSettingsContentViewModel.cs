@@ -127,7 +127,7 @@ namespace PSB.ViewModels
                 GameViewModel.FilePath = SelectedFile;
 
                 // Вызываем обновление меню
-                MainWindow.Instance?.UpdateLibraryMenu();
+                App.LibraryService.UpdateLibraryMenu();
             }
         }
 

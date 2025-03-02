@@ -1,6 +1,7 @@
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Navigation;
 using PSB.ViewModels;
+using Windows.Gaming.Input;
 
 
 namespace PSB.Views
@@ -11,22 +12,31 @@ namespace PSB.Views
     public sealed partial class GamePage : Page
     {
         public GameViewModel? GameViewModel { get; set; }
-        public ulong GameId { get; private set; }
-
         public GamePage()
         {
             this.InitializeComponent();
+            Loaded += (s, e) =>
+            {
+                if (DataContext is GameViewModel viewModel)
+                {
+                    viewModel.GameLoaded += () => App.NavigationService.SyncNavigationViewSelection(this);
+                }
+            };
         }
         protected override void OnNavigatedTo(NavigationEventArgs e)
         {
             base.OnNavigatedTo(e);
+
             if (e.Parameter is ulong gameId)
             {
-                GameViewModel = new GameViewModel(gameId);
-                GameId = gameId;
-
-                DataContext = GameViewModel;
+                // ≈сли GameViewModel уже существует, пропускаем создание нового
+                if (GameViewModel == null || GameViewModel.GameId != gameId)
+                {
+                    GameViewModel = new GameViewModel(gameId);
+                    DataContext = GameViewModel;
+                }
             }
         }
+
     }
 }
