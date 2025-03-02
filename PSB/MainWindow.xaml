@@ -23,13 +23,12 @@
             SelectionChanged="NavigationView_SelectionChanged">
 
         <!-- Заголовок с кнопкой "Назад" -->
-        <NavigationView.Header>
-            <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+        <NavigationView.Header >
+            <StackPanel Orientation="Horizontal" VerticalAlignment="Center" Spacing="15" Margin="-35,-46,0,0">
                 <Button x:Name="BackButton" 
                             Content="&#xE72B;" 
                             FontFamily="Segoe MDL2 Assets" 
                             FontSize="16"
-                            Margin="0,0,10,0"
                             Click="BackButton_Click"/>
                 <TextBlock x:Name="HeaderText" 
                    Text="HomePage" 

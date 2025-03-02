@@ -16,6 +16,7 @@ class Library extends Model
     ];
     protected $attributes = [
         'is_favorite' => false,
+        'time_played' => 0,
     ];
     protected function casts(): array
     {

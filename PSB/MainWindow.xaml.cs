@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
@@ -8,6 +9,7 @@ using Microsoft.UI.Xaml.Navigation;
 using PSB.Utils;
 using PSB.ViewModels;
 using PSB.Views;
+using PSB.Models;
 
 namespace PSB
 {
@@ -27,35 +29,68 @@ namespace PSB
             //ContentFrame.Navigate(typeof(Views.HomePage));
             ContentFrame.Navigated += ContentFrame_Navigated; // Подписываемся на событие Navigated
             ProfileViewModel = new ProfileViewModel();
+            // Подписываемся на изменения коллекции
+            ProfileViewModel.Libraries.CollectionChanged += (s, e) => UpdateLibraryMenu();
             _ = UpdateAuthNavAsync();
-
         }
-        private void UpdateLibraryMenu()
+        public void UpdateLibraryMenu()
         {
-            // Удаляем старые элементы библиотеки
-            var existingLibraryItems = NavView.MenuItems
+            // Удаляем старые элементы библиотеки (игры и заголовки)
+            var existingItems = NavView.MenuItems
                 .OfType<NavigationViewItem>()
                 .Where(item => item.Tag?.ToString()?.StartsWith("LibraryGame_") == true)
                 .ToList();
 
-            foreach (var item in existingLibraryItems)
-            {
-                NavView.MenuItems.Remove(item);
-            }
+            var existingHeaders = NavView.MenuItems
+                .OfType<NavigationViewItemHeader>()
+                .Where(header => header.Content?.ToString() is "УСТАНОВЛЕНЫ" or "ИЗБРАННОЕ" or "БЕЗ КАТЕГОРИИ")
+                .ToList();
 
-            // Добавляем игры
-            foreach (var game in ProfileViewModel.Libraries)
-            {
-                if (game?.Game == null) continue;
+            foreach (var item in existingItems) NavView.MenuItems.Remove(item);
+            foreach (var header in existingHeaders) NavView.MenuItems.Remove(header);
 
-                var gameItem = new NavigationViewItem
+            // Разделяем игры по категориям
+            var installedGames = ProfileViewModel.Libraries
+                .Where(game => game?.Game != null && GameData.GetFilePath(game.Game) != null)
+                .ToList();
+
+            var favoriteGames = ProfileViewModel.Libraries
+                .Where(game => game?.Game != null && game.IsFavorite && GameData.GetFilePath(game.Game) == null) // Исключаем установленные игры
+                .ToList();
+
+            var uncategorizedGames = ProfileViewModel.Libraries
+                .Where(game => game?.Game != null && GameData.GetFilePath(game.Game) == null && !game.IsFavorite) // Исключаем установленные и избранные игры
+                .ToList();
+
+            // Функция для добавления заголовка и игр
+            void AddCategory(string headerText, List<Library> games)
+            {
+                if (games.Count == 0) return;
+
+                var header = new NavigationViewItemHeader { Content = headerText };
+                NavView.MenuItems.Add(header);
+
+                foreach (var game in games)
                 {
-                    Content = game.Game.Name,
-                    Tag = $"LibraryGame_{game.Game.Id}"
-                };
-                NavView.MenuItems.Add(gameItem);
+                    var gameItem = new NavigationViewItem
+                    {
+                        Content = game.Game?.Name,
+                        Tag = $"LibraryGame_{game.Game?.Id}",
+                        Icon = new FontIcon { Glyph = "\uE7FC" }
+                    };
+                    NavView.MenuItems.Add(gameItem);
+                }
             }
+
+            // Добавляем категории, если в них есть игры
+            AddCategory("УСТАНОВЛЕНЫ", installedGames);
+            AddCategory("ИЗБРАННОЕ", favoriteGames);
+            AddCategory("БЕЗ КАТЕГОРИИ", uncategorizedGames);
+
+            // Синхронизируем выбранный элемент
+            SyncNavigationViewSelection();
         }
+
         public void Nav(string pageTag)
         {
             if (string.IsNullOrEmpty(pageTag))
@@ -111,8 +146,6 @@ namespace PSB
         {
             try
             {
-                // Подписываемся на изменения коллекции
-                ProfileViewModel.Libraries.CollectionChanged += (s, e) => UpdateLibraryMenu();
 
                 if (AuthData.User != null && AuthData.Token != null)
                 {
@@ -144,6 +177,21 @@ namespace PSB
             if (ContentFrame.CanGoBack)
             {
                 ContentFrame.GoBack();
+                // Обновляем заголовок после возврата
+                if (ContentFrame.Content is Page page)
+                {
+                    if (page is GamePage gamePage)
+                    {
+                        HeaderText.Text = gamePage.Name;
+                        Debug.WriteLine("HeaderText" + HeaderText.Text);
+                    }
+                    else
+                    {
+                        HeaderText.Text = page.GetType().Name;
+                        Debug.WriteLine("HeaderText" + HeaderText.Text);
+
+                    }
+                }
             }
         }
 
@@ -157,7 +205,6 @@ namespace PSB
                     if (page.Content.XamlRoot != null)
                     {
                         App.DialogService.SetXamlRoot(page.Content.XamlRoot);
-
                         Debug.WriteLine("XamlRoot успешно обновлен после загрузки страницы.");
                     }
                     else
@@ -165,32 +212,58 @@ namespace PSB
                         Debug.WriteLine("Ошибка: XamlRoot остался null после загрузки.");
                     }
                 };
-                HeaderText.Text = page.GetType().Name;
                 // Управляем видимостью кнопки "Назад"
                 BackButton.Visibility = ContentFrame.CanGoBack ? Visibility.Visible : Visibility.Collapsed;
+
                 // Синхронизируем выбранный элемент в NavigationView
                 SyncNavigationViewSelection();
             }
         }
 
-        
-
-        
         // Метод для синхронизации выбранного элемента в NavigationView
         private void SyncNavigationViewSelection()
         {
+            // Проверяем, что содержимое ContentFrame является страницей
             if (ContentFrame.Content is Page page)
             {
                 string pageName = page.GetType().Name;
+                Debug.WriteLine("pageName: " + pageName);
 
-                var selectedItem = NavView.MenuItems
-                    .OfType<NavigationViewItem>()
-                    .FirstOrDefault(item => item.Tag?.ToString() == pageName);
+                NavigationViewItem selectedItem = null;
+
+                if (page is GamePage gamePage)
+                {
+                    // Если это GamePage, получаем GameId из параметров навигации
+                    if (gamePage.GameId != 0)
+                    {
+                        string gameTag = $"LibraryGame_{gamePage.GameId}";
+                        selectedItem = NavView.MenuItems
+                            .OfType<NavigationViewItem>()
+                            .FirstOrDefault(item => item.Tag?.ToString() == gameTag);
+                    }
+                }
+                else
+                {
+                    // Для других страниц ищем по имени типа страницы
+                    selectedItem = NavView.MenuItems
+                        .OfType<NavigationViewItem>()
+                        .FirstOrDefault(item => item.Tag?.ToString() == pageName);
+                }
 
                 if (selectedItem != null)
                 {
                     NavView.SelectedItem = selectedItem;
                 }
+                else
+                {
+                    // Если элемент не найден, сбрасываем выделение
+                    NavView.SelectedItem = null;
+                }
+            }
+            else
+            {
+                // Если содержимое не является страницей, сбрасываем выделение
+                NavView.SelectedItem = null;
             }
         }
     }

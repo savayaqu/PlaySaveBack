@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices.WindowsRuntime;
@@ -10,6 +11,7 @@ using Microsoft.UI.Xaml.Data;
 using Microsoft.UI.Xaml.Input;
 using Microsoft.UI.Xaml.Media;
 using Microsoft.UI.Xaml.Navigation;
+using PSB.Models;
 using PSB.ViewModels;
 using Windows.Foundation;
 using Windows.Foundation.Collections;
@@ -29,6 +31,20 @@ namespace PSB.Views
         {
             this.InitializeComponent();
             ProfileViewModel = new ProfileViewModel();
+        }
+        private void OnGameTapped(object sender, TappedRoutedEventArgs e)
+        {
+            if (sender is FrameworkElement element && element.DataContext is Library library)
+            {
+                if (library.Game != null)
+                {
+                    string gameTag = $"Game_{library.Game.Id}|{library.Game.Name}";
+                    MainWindow.Instance?.Nav(gameTag);
+                }
+                else
+                    throw new ArgumentNullException();
+                
+            }
         }
     }
 }

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Diagnostics;
+using System.Linq;
 using System.Net.Http;
 using System.Threading.Tasks;
 using CommunityToolkit.Mvvm.ComponentModel;
@@ -25,7 +26,6 @@ namespace PSB.ViewModels
         [ObservableProperty] public partial string PlayedHoursText { get; set; }
         [ObservableProperty] public partial Boolean IsFavorite { get; set; }
         [ObservableProperty] public partial Boolean InLibrary { get; set; } = false;
-        //[ObservableProperty] public partial Boolean ExeExists { get; set; } = false;
         [ObservableProperty] public partial string FilePath { get; set; }
 
         [ObservableProperty]
@@ -66,25 +66,29 @@ namespace PSB.ViewModels
 
                 DateTime endTime = DateTime.Now;
                 DateTime trimmedEndTime = new DateTime(endTime.Year, endTime.Month, endTime.Day, endTime.Hour, endTime.Minute, endTime.Second);
+
                 // Запись времени игры
                 TimeSpan playTime = endTime - startTime;
-
                 uint secondsPlayed = (uint)playTime.TotalSeconds;
+
+                // Обновляем локальные данные
                 Library.TimePlayed = (Library.TimePlayed ?? 0) + secondsPlayed;
                 Library.LastPlayedAt = endTime;
+
                 try
                 {
+                    // Отправляем данные на сервер
                     var res = await FetchAsync(
                         HttpMethod.Patch, $"library/game/{GameId}/update",
-                         isFetch => Debug.WriteLine("isFetch " + isFetch),
-                         error => Debug.WriteLine("error " + error),
-                         new UpdateLibraryGameRequest(Library.TimePlayed, endTime.ToString("yyyy-MM-dd HH:mm:ss")),
-                         serialize: true
+                        isFetch => Debug.WriteLine("isFetch " + isFetch),
+                        error => Debug.WriteLine("error " + error),
+                        new UpdateLibraryGameRequest(Library.TimePlayed, endTime.ToString("yyyy-MM-dd HH:mm:ss")),
+                        serialize: true
                     );
                 }
                 catch (HttpRequestException ex)
                 {
-                    Debug.WriteLine( "Ошибка соединения: " + ex.Message);
+                    Debug.WriteLine("Ошибка соединения: " + ex.Message);
                 }
             }
             catch (Exception ex)
@@ -103,8 +107,8 @@ namespace PSB.ViewModels
             var dialog = new GameSettingsContentDialog(Game);
             await App.DialogService.ShowDialogAsync(dialog);
         }
-        
-        
+
+
         [RelayCommand]
         public async Task ToggleFavorite()
         {
@@ -112,8 +116,22 @@ namespace PSB.ViewModels
                 HttpMethod.Patch, $"library/game/{GameId}",
                 setError: e => Debug.WriteLine($"Error: {e}")
             );
+
+            if (!res.IsSuccessStatusCode)
+                return;
+
             IsFavorite = !IsFavorite;
+            // Обновляем библиотеку
+            var libraryItem = ProfileViewModel.Libraries.FirstOrDefault(l => l.Game?.Id == GameId);
+            if (libraryItem != null)
+            {
+                libraryItem.IsFavorite = IsFavorite;
+            }
+            MainWindow.Instance?.UpdateLibraryMenu();
         }
+
+
+
         [RelayCommand]
         public async Task AddToLibrary()
         {

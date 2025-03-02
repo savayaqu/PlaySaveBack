@@ -25,7 +25,31 @@
             <Button Command="{x:Bind ProfileViewModel.LoadLibraryCommand, Mode=OneTime}" Content="Библиотека" Height="40" Width="110"/>
             <Button Command="{x:Bind ProfileViewModel.LogoutCommand, Mode=OneTime}" Content="Выйти" Height="40" Background="DarkRed" Width="130"/>
         </StackPanel>
+        <GridView ItemsSource="{x:Bind ProfileViewModel.Libraries, Mode=OneWay}"
+          HorizontalAlignment="Stretch"
+          VerticalAlignment="Stretch"
+          ScrollViewer.HorizontalScrollMode="Disabled"
+          ScrollViewer.VerticalScrollMode="Enabled"
+          ScrollViewer.VerticalScrollBarVisibility="Auto">
 
+            <GridView.ItemsPanel>
+                <ItemsPanelTemplate>
+                    <ItemsWrapGrid Orientation="Horizontal" MaximumRowsOrColumns="5"/>
+                </ItemsPanelTemplate>
+            </GridView.ItemsPanel>
+
+            <GridView.ItemTemplate>
+                <DataTemplate>
+                    <StackPanel Width="200" Margin="10"
+                        HorizontalAlignment="Center"
+                        Tapped="OnGameTapped">
+                        <TextBlock Text="{Binding Game.Name}" FontSize="16" TextAlignment="Center" Margin="0,5,0,0"/>
+                        <Image Source="{Binding Game.LibraryImg}" MinHeight="200" MaxHeight="300" MinWidth="100" MaxWidth="200" Stretch="UniformToFill"/>
+                        <TextBlock Text="{Binding TimePlayed}"/>
+                    </StackPanel>
+                </DataTemplate>
+            </GridView.ItemTemplate>
+        </GridView>
     </StackPanel>
         
 </Page>

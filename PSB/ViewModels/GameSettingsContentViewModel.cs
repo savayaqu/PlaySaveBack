@@ -11,6 +11,7 @@ using Microsoft.UI.Xaml.Media.Imaging;
 using PSB.Helpers;
 using PSB.Models;
 using PSB.Utils;
+using Windows.Gaming.Input;
 using Windows.Storage;
 using Windows.Storage.AccessCache;
 using Windows.Storage.Pickers;
@@ -99,7 +100,6 @@ namespace PSB.ViewModels
                     var icon = IconFromExe.GetExeIcon(file.Path);
                     if (icon != null)
                     {
-                        // Преобразуем иконку в BitmapImage для отображения
                         var bitmapImage = await IconToBitmapImage.IconToBitmapImageAsync(icon);
                         ExeImage = bitmapImage;
                     }
@@ -122,9 +122,16 @@ namespace PSB.ViewModels
                 {
                     Debug.WriteLine("Папка Saves не найдена.");
                 }
+
+                GameViewModel.ExeExists = true;
+                GameViewModel.FilePath = SelectedFile;
+
+                // Вызываем обновление меню
+                MainWindow.Instance?.UpdateLibraryMenu();
             }
         }
-       
+
+
 
         /// <summary>
         /// Ищет папку Saves в указанной директории, на уровень выше и в подпапках.

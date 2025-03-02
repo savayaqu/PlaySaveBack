@@ -11,6 +11,8 @@ namespace PSB.Views
     public sealed partial class GamePage : Page
     {
         public GameViewModel? GameViewModel { get; set; }
+        public ulong GameId { get; private set; }
+
         public GamePage()
         {
             this.InitializeComponent();
@@ -21,6 +23,8 @@ namespace PSB.Views
             if (e.Parameter is ulong gameId)
             {
                 GameViewModel = new GameViewModel(gameId);
+                GameId = gameId;
+
                 DataContext = GameViewModel;
             }
         }

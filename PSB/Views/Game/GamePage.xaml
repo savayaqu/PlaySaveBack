@@ -7,32 +7,67 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" xmlns:models="using:PSB.Models" xmlns:core="using:Windows.Media.Core"
     mc:Ignorable="d"
-    Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
+    Background="{ThemeResource ApplicationPageBackgroundThemeBrush}"
+    Name="{x:Bind GameViewModel.Game.Name, Mode=OneWay}">
     <ScrollViewer VerticalScrollBarVisibility="Auto" 
               HorizontalScrollBarVisibility="Disabled">
         <StackPanel>
             <StackPanel>
-
                 <Image Source="{x:Bind GameViewModel.Game.Header, Mode=OneWay}"/>
-                <StackPanel VerticalAlignment="Bottom" Margin="16">
-                    <TextBlock Text="{x:Bind GameViewModel.PlayedHoursText, Mode=OneWay}" />
-                    <TextBlock Text="{x:Bind GameViewModel.LastPlayedText, Mode=OneWay}" />
-                </StackPanel>
-                    <!-- Кнопки на одном уровне с текстом -->
-                <StackPanel Margin="16" Grid.Row="0" Grid.Column="0" HorizontalAlignment="Right" VerticalAlignment="Bottom" Orientation="Horizontal" Spacing="24">
-                    <Button Content="Добавить в библиотеку" Command="{x:Bind GameViewModel.AddToLibraryCommand}" Visibility="{x:Bind GameViewModel.InLibrary, Mode=OneWay, Converter={StaticResource BoolToVisibility}, ConverterParameter=True}"/>
 
+                <!-- Выровненные элементы в одном уровне -->
+                <Grid Margin="16">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
 
-                    <Button Content="Играть" Command="{x:Bind GameViewModel.LaunchGameCommand, Mode=OneTime}"  Visibility="{x:Bind GameViewModel.ExeExists, Mode=OneWay, Converter={StaticResource BoolToVisibility}, ConverterParameter=True}"/>
+                    
 
-                    <Button Command="{x:Bind GameViewModel.ToggleFavoriteCommand, Mode=OneWay}" Visibility="{x:Bind GameViewModel.InLibrary, Mode=OneWay, Converter={StaticResource BoolToVisibility}, ConverterParameter=False}">
-                        <FontIcon Glyph="{x:Bind GameViewModel.FavoriteIcon, Mode=OneWay}" />
-                    </Button>
+                    <!-- Блок с последним запуском и временем игры -->
+                    <StackPanel Grid.Column="0" Orientation="Horizontal" Spacing="16">
+                        <StackPanel>
+                            <!-- Кнопка "Играть" -->
+                            <Button Grid.Column="0" Padding="16,8" Background="Green" Foreground="White" Command="{x:Bind GameViewModel.LaunchGameCommand, Mode=OneTime}" Visibility="{x:Bind GameViewModel.InLibrary, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}, ConverterParameter=False}">
+                                <StackPanel Orientation="Horizontal" Spacing="8">
+                                    <FontIcon Glyph="&#xE768;" FontSize="16"/>
+                                    <!-- Иконка Play -->
+                                    <TextBlock Text="ИГРАТЬ" FontWeight="Bold"/>
+                                </StackPanel>
+                            </Button>
+                        </StackPanel>
+                        <StackPanel Orientation="Vertical" Visibility="{x:Bind GameViewModel.InLibrary, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}, ConverterParameter=False}">
+                            <TextBlock Text="СОХРАНЕНИЯ" FontSize="12" Foreground="Gray"/>
+                            <TextBlock Text="Синхронизированы| или нет" FontSize="14"/>
+                        </StackPanel>
+                        <StackPanel Orientation="Vertical" Visibility="{x:Bind GameViewModel.InLibrary, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}, ConverterParameter=False}">
+                            <TextBlock Text="ПОСЛЕДНИЙ ЗАПУСК" FontSize="12" Foreground="Gray"/>
+                            <TextBlock Text="{x:Bind GameViewModel.LastPlayedText, Mode=OneWay}" FontSize="14"/>
+                        </StackPanel>
 
-                    <Button Content="Настройки" Command="{x:Bind GameViewModel.OpenGameSettingsCommand, Mode=OneTime}" Visibility="{x:Bind GameViewModel.InLibrary, Mode=OneWay, Converter={StaticResource BoolToVisibility}, ConverterParameter=False}"/>
+                        <StackPanel Orientation="Vertical" Visibility="{x:Bind GameViewModel.InLibrary, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}, ConverterParameter=False}">
+                            <TextBlock Text="ВЫ ИГРАЛИ" FontSize="12" Foreground="Gray"/>
+                            <TextBlock Text="{x:Bind GameViewModel.Library.TimePlayed, Mode=OneWay, Converter={StaticResource TimePlayedConverter}}" FontSize="14"/>
+                        </StackPanel>
+                    </StackPanel>
 
-                </StackPanel>
+                    <!-- Иконки справа -->
+                    <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="16">
+                        <!-- Добавить в библиотеку -->
+                        <Button Content="Добавить в библиотеку" Command="{x:Bind GameViewModel.AddToLibraryCommand}" Visibility="{x:Bind GameViewModel.InLibrary, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}, ConverterParameter=True}"/>
+                        <!-- Настройки -->
+                        <Button Command="{x:Bind GameViewModel.OpenGameSettingsCommand, Mode=OneTime}" Visibility="{x:Bind GameViewModel.InLibrary, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}, ConverterParameter=False}">
+                            <FontIcon Glyph="&#xE713;" FontSize="16"/>
+                        </Button>
+                        <!-- Избранное -->
+                        <Button Command="{x:Bind GameViewModel.ToggleFavoriteCommand, Mode=OneWay}" Visibility="{x:Bind GameViewModel.InLibrary, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}, ConverterParameter=False}">
+                            <FontIcon Glyph="{x:Bind GameViewModel.FavoriteIcon, Mode=OneWay}" FontSize="16"/>
+                        </Button>
+                    </StackPanel>
+                </Grid>
+
             </StackPanel>
+
 
             <Grid ColumnDefinitions=" *, 300" RowDefinitions="Auto, Auto, Auto" RowSpacing="15" ColumnSpacing="15" Margin="16,0">
                 <!-- Второй StackPanel теперь внутри первого -->

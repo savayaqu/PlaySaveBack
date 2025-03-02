@@ -12,7 +12,8 @@
                 <!-- Other merged dictionaries here -->
             </ResourceDictionary.MergedDictionaries>
             <!-- Other app resources here -->
-            <converters:BoolToVisibilityConverter x:Key="BoolToVisibility"/>
+            <converters:BoolToVisibilityConverter x:Key="BoolToVisibilityConverter"/>
+            <converters:TimePlayedConverter x:Key="TimePlayedConverter"/>
         </ResourceDictionary>
     </Application.Resources>
 </Application>

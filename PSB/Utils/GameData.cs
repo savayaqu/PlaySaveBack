@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Diagnostics;
+using System.Linq;
 using PSB.Models;
+using PSB.ViewModels;
 using Windows.Storage;
 
 namespace PSB.Utils

@@ -20,6 +20,7 @@ namespace PSB.ViewModels
         public ProfileViewModel()
         {
             _ = LoadProfileAsync();
+            _ = LoadLibraryAsync();
         }
         [RelayCommand]
         public async Task LoadProfileAsync()
@@ -57,7 +58,7 @@ namespace PSB.ViewModels
             {
                 WriteIndented = true
             });
-            //Debug.WriteLine(bodyJson);
+            Debug.WriteLine(bodyJson);
 
             // Очистка коллекции и добавление новых элементов
             Libraries.Clear();
