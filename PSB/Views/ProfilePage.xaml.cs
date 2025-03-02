@@ -39,11 +39,9 @@ namespace PSB.Views
                 if (library.Game != null)
                 {
                     string gameTag = $"Game_{library.Game.Id}|{library.Game.Name}";
-                    MainWindow.Instance?.Nav(gameTag);
+                    App.NavigationService.Navigate(gameTag);
                 }
-                else
-                    throw new ArgumentNullException();
-                
+               
             }
         }
     }

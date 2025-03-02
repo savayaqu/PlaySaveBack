@@ -17,25 +17,19 @@ namespace PSB.Utils
     {
         private static readonly ApplicationDataContainer LocalSettings = ApplicationData.Current.LocalSettings;
 
-        public static void Save(string? token, User? user)
+        public static async Task SaveAndNavigate(string? token, User? user)
         {
             Token = token;
             User = user;
-        }
-        public static void SaveAndNavigate(string? token, User? user)
-        {
-            Token = token;
-            User = user;
-            MainWindow.Instance?.UpdateAuthNavAsync(); // Обновляем состояние навигации
-            MainWindow.Instance?.Nav("ProfilePage");
+            await App.AuthService.UpdateAuthNavAsync();
         }
         public static async Task ExitAndNavigate(Action<bool>? setIsFetch = null)
         {
             await FetchAsync(HttpMethod.Get, "logout", setIsFetch);
             Token = null;
             User = null;
-            MainWindow.Instance?.UpdateAuthNavAsync(); // Обновляем состояние навигации
-            MainWindow.Instance?.Nav("LoginPage");
+            await App.AuthService.UpdateAuthNavAsync();
+
         }
         private static string? _token = null;
         public static string? Token

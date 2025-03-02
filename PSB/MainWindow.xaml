@@ -19,8 +19,7 @@
             SelectionFollowsFocus="Disabled"
             IsTabStop="False"
             IsBackButtonVisible="Collapsed"
-            IsSettingsVisible="False"
-            SelectionChanged="NavigationView_SelectionChanged">
+            IsSettingsVisible="False">
 
         <!-- Заголовок с кнопкой "Назад" -->
         <NavigationView.Header >
@@ -62,7 +61,6 @@
             <AutoSuggestBox QueryIcon="Find"/>
 
         </NavigationView.MenuItems>
-
         <Frame x:Name="ContentFrame" />
     </NavigationView>
 </Window>
