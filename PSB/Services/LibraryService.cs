@@ -1,4 +1,6 @@
 ﻿using Microsoft.UI.Xaml.Controls;
+using Microsoft.UI.Xaml.Media.Imaging;
+using PSB.Helpers;
 using PSB.Models;
 using PSB.Services;
 using PSB.Utils;
@@ -72,8 +74,19 @@ public class LibraryService
                     {
                         Content = game.Game?.Name,
                         Tag = $"Game_{game.Game?.Id}|{game.Game?.Name}",
-                        Icon = new FontIcon { Glyph = "\uE7FC" }
+                        //Icon = new FontIcon { Glyph = "\uE7FC" }
                     };
+                    if (GameData.GetFilePath(game.Game) != null)
+                    {
+                        var exeIcon = IconFromExe.GetIconElement(GameData.GetFilePath(game.Game));
+                        if (exeIcon != null)
+                            gameItem.Icon = exeIcon;
+                    }
+                    else
+                    {
+                        // Если путь к исполняемому файлу отсутствует, используем стандартную иконку
+                        gameItem.Icon = new FontIcon { Glyph = "\uE7FC" };
+                    }
                     _navView.MenuItems.Add(gameItem);
                 }
             }

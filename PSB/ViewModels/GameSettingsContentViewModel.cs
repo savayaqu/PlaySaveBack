@@ -26,8 +26,6 @@ namespace PSB.ViewModels
         [ObservableProperty] public partial string? SelectedFile { get; set; }
         [ObservableProperty] public partial string? SelectedSavesFolder { get; set; }
         [ObservableProperty] public partial string? GameName { get; set; }
-        [ObservableProperty] public partial BitmapImage ExeImage { get; set; } 
-        [ObservableProperty] public partial Icon ExeIcon { get; set; } 
         [ObservableProperty] public partial Game Game { get; set; }
         //TODO: Придумать что-нибудь с иконкой и картиной .exe
         public GameSettingsContentViewModel(Game game) 
@@ -36,8 +34,6 @@ namespace PSB.ViewModels
             GameName = Game.Name;
             SelectedFile = GameData.GetFilePath(Game);
             SelectedSavesFolder = GameData.GetSavesFolderPath(Game);
-            //ExeIcon = IconToBitmapImage.IconToBitmapImageAsync(IconFromExe.GetExeIcon(SelectedFile));
-            ExeIcon = IconFromExe.GetExeIcon(SelectedFile);
         }
         [RelayCommand]
         private async Task ChooseFolderSaves()
@@ -93,21 +89,6 @@ namespace PSB.ViewModels
                 SelectedFile = file.Path;
                 Debug.WriteLine("Game name " + file.Name);
                 Debug.WriteLine("Game DisplayName " + file.DisplayName);
-
-                // Получаем иконку .exe-файла
-                try
-                {
-                    var icon = IconFromExe.GetExeIcon(file.Path);
-                    if (icon != null)
-                    {
-                        var bitmapImage = await IconToBitmapImage.IconToBitmapImageAsync(icon);
-                        ExeImage = bitmapImage;
-                    }
-                }
-                catch (Exception ex)
-                {
-                    Debug.WriteLine($"Ошибка при получении иконки: {ex.Message}");
-                }
 
                 string? gameDirectory = Path.GetDirectoryName(file.Path);
                 string? savesFolder = FindSavesFolder(gameDirectory);
