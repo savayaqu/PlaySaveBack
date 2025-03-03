@@ -22,61 +22,73 @@ public class LibraryService
         _profileViewModel.Libraries.CollectionChanged += (s, e) => UpdateLibraryMenu();
     }
 
+    private bool _isUpdatingLibrary = false;
+
     public void UpdateLibraryMenu()
     {
-        // Удаляем старые элементы библиотеки (игры и заголовки)
-        var existingItems = _navView.MenuItems
-            .OfType<NavigationViewItem>()
-            .Where(item => item.Tag?.ToString()?.StartsWith("Game_") == true)
-            .ToList();
+        if (_isUpdatingLibrary) return;
+        _isUpdatingLibrary = true;
 
-        var existingHeaders = _navView.MenuItems
-            .OfType<NavigationViewItemHeader>()
-            .Where(header => header.Content?.ToString() is "УСТАНОВЛЕНЫ" or "ИЗБРАННОЕ" or "БЕЗ КАТЕГОРИИ")
-            .ToList();
-
-        foreach (var item in existingItems) _navView.MenuItems.Remove(item);
-        foreach (var header in existingHeaders) _navView.MenuItems.Remove(header);
-
-        // Разделяем игры по категориям
-        var installedGames = _profileViewModel.Libraries
-            .Where(game => game?.Game != null && GameData.GetFilePath(game.Game) != null)
-            .ToList();
-
-        var favoriteGames = _profileViewModel.Libraries
-            .Where(game => game?.Game != null && game.IsFavorite && GameData.GetFilePath(game.Game) == null)
-            .ToList();
-
-        var uncategorizedGames = _profileViewModel.Libraries
-            .Where(game => game?.Game != null && GameData.GetFilePath(game.Game) == null && !game.IsFavorite)
-            .ToList();
-
-        // Функция для добавления заголовка и игр
-        void AddCategory(string headerText, List<Library> games)
+        try
         {
-            if (games.Count == 0) return;
+            // Удаляем старые элементы библиотеки (игры и заголовки)
+            var existingItems = _navView.MenuItems
+                .OfType<NavigationViewItem>()
+                .Where(item => item.Tag?.ToString()?.StartsWith("Game_") == true)
+                .ToList();
 
-            var header = new NavigationViewItemHeader { Content = headerText };
-            _navView.MenuItems.Add(header);
+            var existingHeaders = _navView.MenuItems
+                .OfType<NavigationViewItemHeader>()
+                .Where(header => header.Content?.ToString() is "УСТАНОВЛЕНЫ" or "ИЗБРАННОЕ" or "БЕЗ КАТЕГОРИИ")
+                .ToList();
 
-            foreach (var game in games)
+            foreach (var item in existingItems) _navView.MenuItems.Remove(item);
+            foreach (var header in existingHeaders) _navView.MenuItems.Remove(header);
+
+            // Разделяем игры по категориям
+            var installedGames = _profileViewModel.Libraries
+                .Where(game => game?.Game != null && GameData.GetFilePath(game.Game) != null)
+                .ToList();
+
+            var favoriteGames = _profileViewModel.Libraries
+                .Where(game => game?.Game != null && game.IsFavorite && GameData.GetFilePath(game.Game) == null)
+                .ToList();
+
+            var uncategorizedGames = _profileViewModel.Libraries
+                .Where(game => game?.Game != null && GameData.GetFilePath(game.Game) == null && !game.IsFavorite)
+                .ToList();
+
+            // Функция для добавления заголовка и игр
+            void AddCategory(string headerText, List<Library> games)
             {
-                var gameItem = new NavigationViewItem
+                if (games.Count == 0) return;
+
+                var header = new NavigationViewItemHeader { Content = headerText };
+                _navView.MenuItems.Add(header);
+
+                foreach (var game in games)
                 {
-                    Content = game.Game?.Name,
-                    Tag = $"Game_{game.Game?.Id}|{game.Game?.Name}",
-                    Icon = new FontIcon { Glyph = "\uE7FC" }
-                };
-                _navView.MenuItems.Add(gameItem);
+                    var gameItem = new NavigationViewItem
+                    {
+                        Content = game.Game?.Name,
+                        Tag = $"Game_{game.Game?.Id}|{game.Game?.Name}",
+                        Icon = new FontIcon { Glyph = "\uE7FC" }
+                    };
+                    _navView.MenuItems.Add(gameItem);
+                }
             }
+
+            // Добавляем категории, если в них есть игры
+            AddCategory("УСТАНОВЛЕНЫ", installedGames);
+            AddCategory("ИЗБРАННОЕ", favoriteGames);
+            AddCategory("БЕЗ КАТЕГОРИИ", uncategorizedGames);
+
+            // Синхронизируем выделение после обновления меню
+            _navigationService.SyncNavigationViewSelection(_navigationService.GetCurrentPage());
         }
-
-        // Добавляем категории, если в них есть игры
-        AddCategory("УСТАНОВЛЕНЫ", installedGames);
-        AddCategory("ИЗБРАННОЕ", favoriteGames);
-        AddCategory("БЕЗ КАТЕГОРИИ", uncategorizedGames);
-
-        // Синхронизируем выделение после обновления меню
-        _navigationService.SyncNavigationViewSelection(_navigationService.GetCurrentPage());
+        finally
+        {
+            _isUpdatingLibrary = false;
+        }
     }
 }

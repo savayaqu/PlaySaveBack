@@ -19,7 +19,8 @@
             SelectionFollowsFocus="Disabled"
             IsTabStop="False"
             IsBackButtonVisible="Collapsed"
-            IsSettingsVisible="False">
+            IsSettingsVisible="False"
+            IsTitleBarAutoPaddingEnabled="False">
 
         <!-- Заголовок с кнопкой "Назад" -->
         <NavigationView.Header >

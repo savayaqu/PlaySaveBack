@@ -6,6 +6,7 @@ using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Navigation;
 using PSB.Views;
 using System.Linq;
+using Microsoft.UI.Xaml.Media.Animation;
 
 namespace PSB.Services
 {
@@ -55,7 +56,6 @@ namespace PSB.Services
                     {
                         Debug.WriteLine("GamePage уже загружена для этой игры. Обновляем выделение в меню.");
                         _headerText.Text = gameName;
-                        SyncNavigationViewSelection(currentGamePage);
                         return;
                     }
 
@@ -91,10 +91,12 @@ namespace PSB.Services
             {
                 string pageTag = selectedItem.Tag.ToString();
 
+                // Проверяем, что текущая страница уже не соответствует выбранному элементу
                 if (_frame.Content?.GetType().Name == _pages.GetValueOrDefault(pageTag)?.Name)
                 {
                     return;
                 }
+
                 Navigate(pageTag);
             }
         }
@@ -103,7 +105,6 @@ namespace PSB.Services
 
         private void OnNavigated(object sender, NavigationEventArgs e)
         {
-            // Обновляем заголовок и выделяем текущую страницу в меню
             if (e.Content is Page page)
             {
                 page.Loaded += (s, _) =>
@@ -111,20 +112,24 @@ namespace PSB.Services
                     if (page.Content.XamlRoot != null)
                     {
                         App.DialogService.SetXamlRoot(page.Content.XamlRoot);
-                        Debug.WriteLine("XamlRoot успешно обновлен после загрузки страницы.");
                     }
-                    else
-                    {
-                        Debug.WriteLine("Ошибка: XamlRoot остался null после загрузки.");
-                    }
+                    
                 };
+
                 _headerText.Text = page.GetType().Name;
-                SyncNavigationViewSelection(page);
+
+                if (_navView.SelectedItem != null && _navView.SelectedItem is NavigationViewItem selectedItem && selectedItem.Tag?.ToString() != page.GetType().Name)
+                {
+                    SyncNavigationViewSelection(page);
+                }
             }
         }
 
         public void SyncNavigationViewSelection(Page page)
         {
+            // Временно отключаем обработчик SelectionChanged
+            _navView.SelectionChanged -= OnNavigationViewSelectionChanged;
+
             NavigationViewItem selectedItem = null;
 
             if (page is GamePage gamePage && gamePage.GameViewModel?.Game != null)
@@ -135,9 +140,12 @@ namespace PSB.Services
                     .OfType<NavigationViewItem>()
                     .FirstOrDefault(item => item.Tag?.ToString() == gameTag);
 
-                _navView.UpdateLayout();
-
                 Debug.WriteLine($"Выделена игра: {gamePage.GameViewModel.Game.Name}");
+                // Обновляем SelectedItem, только если он изменился
+                if (_navView.SelectedItem != selectedItem)
+                {
+                    _navView.SelectedItem = selectedItem;
+                }
             }
             else
             {
@@ -146,12 +154,10 @@ namespace PSB.Services
                     .FirstOrDefault(item => item.Tag?.ToString() == page.GetType().Name);
             }
 
-            if (_navView.SelectedItem != selectedItem)
-            {
-                _navView.SelectedItem = null; // Сброс перед выбором (решает проблему с несрабатыванием)
-                _navView.SelectedItem = selectedItem;
-            }
+            
 
+            // Включаем обработчик SelectionChanged обратно
+            _navView.SelectionChanged += OnNavigationViewSelectionChanged;
         }
 
         private ulong ExtractGameId(string pageTag)
