@@ -9,15 +9,17 @@
     mc:Ignorable="d"
     Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
 
-    <StackPanel Orientation="Vertical">
-        <StackPanel Spacing="35">
-            <SelectorBar SelectionChanged="SelectorBar_SelectionChanged" TabIndex="10">
-                <SelectorBarItem Text="Главная" Tag="General" IsSelected="True"/>
-                <SelectorBarItem Text="Общие" Tag="Behavior"/>
-                <SelectorBarItem Text="Аккаунт" Tag="Account"/>
-            </SelectorBar>
+    <StackPanel Orientation="Vertical" >
+        <StackPanel Margin="24" CornerRadius="10" BorderThickness="4" BorderBrush="Red">
+            <StackPanel HorizontalAlignment="Center">
+                <SelectorBar SelectionChanged="SelectorBar_SelectionChanged" Padding="10">
+                    <SelectorBarItem Text="Главная" Tag="General" IsSelected="True"/>
+                    <SelectorBarItem Text="Общие" Tag="Behavior"/>
+                    <SelectorBarItem Text="Аккаунт" Tag="Account"/>
+                </SelectorBar>
+            </StackPanel>
+            <Frame x:Name="ContentFrame" VerticalAlignment="Center"/>
         </StackPanel>
         
-        <Frame x:Name="ContentFrame" VerticalAlignment="Center"/>
     </StackPanel>
 </Page>
