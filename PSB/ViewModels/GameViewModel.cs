@@ -189,7 +189,8 @@ namespace PSB.ViewModels
                 InLibrary = false;
             }
             Debug.WriteLine($"InLibrary: {InLibrary}, ExeExists: {ExeExists}");
-
+           // await Task.Delay(1000);
+            GameLoaded?.Invoke();
         }
 
 

@@ -113,10 +113,13 @@ namespace PSB.Services
                     {
                         App.DialogService.SetXamlRoot(page.Content.XamlRoot);
                     }
-                    
                 };
 
-                _headerText.Text = page.GetType().Name;
+                // Не обновляем заголовок для GamePage, он обновится после загрузки данных
+                if (page is not GamePage)
+                {
+                    _headerText.Text = page.GetType().Name;
+                }
 
                 if (_navView.SelectedItem != null && _navView.SelectedItem is NavigationViewItem selectedItem && selectedItem.Tag?.ToString() != page.GetType().Name)
                 {

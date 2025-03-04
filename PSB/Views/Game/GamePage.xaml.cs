@@ -1,6 +1,7 @@
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Navigation;
 using PSB.ViewModels;
+using Windows.ApplicationModel.Contacts;
 using Windows.Gaming.Input;
 
 
@@ -12,17 +13,12 @@ namespace PSB.Views
     public sealed partial class GamePage : Page
     {
         public GameViewModel? GameViewModel { get; set; }
+
         public GamePage()
         {
             this.InitializeComponent();
-            Loaded += (s, e) =>
-            {
-                if (DataContext is GameViewModel viewModel)
-                {
-                    viewModel.GameLoaded += () => App.NavigationService.SyncNavigationViewSelection(this);
-                }
-            };
         }
+
         protected override void OnNavigatedTo(NavigationEventArgs e)
         {
             base.OnNavigatedTo(e);
@@ -34,9 +30,20 @@ namespace PSB.Views
                 {
                     GameViewModel = new GameViewModel(gameId);
                     DataContext = GameViewModel;
+
+                    // Подписываемся на событие загрузки данных
+                    GameViewModel.GameLoaded += OnGameLoaded;
                 }
             }
         }
 
+        private void OnGameLoaded()
+        {
+            // Обновляем заголовок после загрузки данных
+            if (GameViewModel?.Game != null)
+            {
+                App.MainWindow.HeaderTextBlock.Text = GameViewModel.Game.Name;
+            }
+        }
     }
 }
