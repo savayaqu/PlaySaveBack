@@ -42,6 +42,8 @@ namespace PSB
 
             // Обновляем авторизацию при старте
             _ = _authService.UpdateAuthNavAsync();
+            ContentFrame.Navigated += ContentFrame_Navigated;
+
         }
         private void BackButton_Click(object sender, RoutedEventArgs e)
         {
@@ -49,6 +51,10 @@ namespace PSB
             {
                 ContentFrame.GoBack();
             }
+        }
+        private void ContentFrame_Navigated(object sender, NavigationEventArgs e)
+        {
+            BackButton.Visibility = ContentFrame.CanGoBack ? Visibility.Visible : Visibility.Collapsed;
         }
     }
 }

@@ -132,32 +132,33 @@ namespace PSB.Services
 
             NavigationViewItem selectedItem = null;
 
+            // Обработка специальных страниц, таких как GamePage
             if (page is GamePage gamePage && gamePage.GameViewModel?.Game != null)
             {
                 string gameTag = $"Game_{gamePage.GameViewModel.GameId}|{gamePage.GameViewModel.Game.Name}";
-
-                selectedItem = _navView.MenuItems
-                    .OfType<NavigationViewItem>()
-                    .FirstOrDefault(item => item.Tag?.ToString() == gameTag);
-
-                Debug.WriteLine($"Выделена игра: {gamePage.GameViewModel.Game.Name}");
-                // Обновляем SelectedItem, только если он изменился
-                if (_navView.SelectedItem != selectedItem)
-                {
-                    _navView.SelectedItem = selectedItem;
-                }
+                selectedItem = FindNavigationViewItemByTag(gameTag);
             }
             else
             {
-                selectedItem = _navView.MenuItems
-                    .OfType<NavigationViewItem>()
-                    .FirstOrDefault(item => item.Tag?.ToString() == page.GetType().Name);
+                // Обработка обычных страниц
+                selectedItem = FindNavigationViewItemByTag(page.GetType().Name);
             }
 
-            
+            // Устанавливаем выбранный элемент, если он найден
+            if (selectedItem != null)
+            {
+                _navView.SelectedItem = selectedItem;
+            }
 
             // Включаем обработчик SelectionChanged обратно
             _navView.SelectionChanged += OnNavigationViewSelectionChanged;
+        }
+
+        private NavigationViewItem FindNavigationViewItemByTag(string tag)
+        {
+            return _navView.MenuItems
+                .OfType<NavigationViewItem>()
+                .FirstOrDefault(item => item.Tag?.ToString() == tag);
         }
 
         private ulong ExtractGameId(string pageTag)
