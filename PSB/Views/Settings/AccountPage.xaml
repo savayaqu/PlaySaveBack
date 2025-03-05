@@ -9,7 +9,37 @@
     mc:Ignorable="d"
     Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
 
-    <Grid>
-        <TextBlock Text="ЭТО СТРАНИЦА АККАУНТА"/>
-    </Grid>
+    <StackPanel>
+        <TextBlock Text="Аккаунт" FontWeight="ExtraBold"/>
+        <TextBlock Text="Видимость профиля"/>
+        <ComboBox></ComboBox>
+        <TextBlock Text="Выберите, кто может видеть ваш профиль и библиотеку"/>
+        
+        
+        <TextBlock Text="Текущий email"/>
+        <TextBlock Text="{x:Bind AccountViewModel.User.Email, Mode=OneWay}"/>
+        <StackPanel Orientation="Horizontal" Spacing="12">
+            <Button>
+                <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                    <FontIcon Glyph="&#xE715;" />
+                    <TextBlock Text="Обновить электронную почту" Margin="8,0,0,0" />
+                </StackPanel>
+            </Button>
+            <Button>
+                <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                    <FontIcon Glyph="&#xE8D7;" />
+                    <TextBlock Text="Обновить пароль" Margin="8,0,0,0" />
+                </StackPanel>
+            </Button>
+        </StackPanel>
+        <TextBlock Text="Облачные сервисы"/>
+        <StackPanel Orientation="Horizontal" Spacing="12">
+            <Button Command="{x:Bind AccountViewModel.ConnectionGoogleDriveCommand, Mode=OneTime}">
+                <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                    <FontIcon Glyph="&#xE753;" />
+                    <TextBlock Text="Подключить Google Drive" Margin="8,0,0,0" />
+                </StackPanel>
+            </Button>
+        </StackPanel>
+    </StackPanel>
 </Page>
