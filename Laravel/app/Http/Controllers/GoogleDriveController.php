@@ -9,6 +9,7 @@ use App\Models\Save;
 use App\Models\UserCloudService;
 use Google\Client;
 use Google\Service\Drive;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cache;
@@ -17,7 +18,7 @@ use Illuminate\Support\Facades\Log;
 
 class GoogleDriveController extends Controller
 {
-    public function getAuthUrl(Request $request)
+    public function getAuthUrl(Request $request): JsonResponse
     {
         $user = $request->user();
         $client = new Client();
@@ -34,8 +35,10 @@ class GoogleDriveController extends Controller
         // Сохраняем state в Redis (или другую систему хранения)
         Cache::put("oauth_state:{$state}", $user->id, now()->addMinutes(10));
         $client->setState($state);
-        //return redirect($client->createAuthUrl());
-        return response()->json($client->createAuthUrl());
+        return response()->json([
+            'success' => true,
+            'url' => $client->createAuthUrl()
+        ]);
     }
 
     public function callback(Request $request)
