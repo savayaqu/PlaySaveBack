@@ -32,8 +32,4 @@ class Save extends Model
     {
         return $this->hasMany(SaveAccess::class);
     }
-    public function saveVersions()
-    {
-        return $this->hasMany(SaveVersion::class);
-    }
 }
