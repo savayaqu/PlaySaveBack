@@ -34,6 +34,7 @@ namespace PSB.ViewModels
         [ObservableProperty] public partial Boolean InLibrary { get; set; } = false;
         [ObservableProperty] public partial string FilePath { get; set; }
         [ObservableProperty] public partial InfoBar SuccessInfoBar { get; set; }
+        [ObservableProperty] public partial Boolean IsUploading { get; set; }
         public event Action? GameLoaded;
 
         [ObservableProperty]
@@ -175,7 +176,8 @@ namespace PSB.ViewModels
                     Debug.WriteLine("Файл не найден.");
                     return false;
                 }
-
+                // Начинаем загрузку
+                IsUploading = true;
                 // Читаем файл в массив байтов
                 var fileBytes = await File.ReadAllBytesAsync(filePath);
 
@@ -214,9 +216,10 @@ namespace PSB.ViewModels
                 Debug.WriteLine($"Ошибка: {ex.Message}");
                 return false;
             }
-        }
+            finally { IsUploading = false; } 
+            }
 
-        [RelayCommand]
+            [RelayCommand]
         public async Task UploadSave()
         {
             string zipFilePath = string.Empty;
