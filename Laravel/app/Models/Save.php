@@ -7,8 +7,9 @@ use Illuminate\Database\Eloquent\Model;
 class Save extends Model
 {
     protected $fillable = [
+      'file_id',
       'file_name',
-      'file',
+      'version',
       'size',
       'description',
       'user_id',

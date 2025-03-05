@@ -13,8 +13,9 @@ return new class extends Migration
     {
         Schema::create('saves', function (Blueprint $table) {
             $table->id();
-            $table->string('path');
+            $table->string('file_id');
             $table->string('file_name');
+            $table->string('version');
             $table->unsignedBigInteger('size');
             $table->text('description')->nullable();
             $table->foreignId('user_id')->constrained();

@@ -13,8 +13,8 @@ return new class extends Migration
     {
         Schema::create('user_cloud_service', function (Blueprint $table) {
             $table->id();
-            $table->string('access_token')->unique();
-            $table->string('refresh_token')->nullable()->unique();
+            $table->text('access_token');
+            $table->text('refresh_token')->nullable();
             $table->timestamp('expires_at')->nullable();
             $table->foreignId('cloud_service_id')->constrained('cloud_services', 'id');
             $table->foreignId('user_id')->constrained();
