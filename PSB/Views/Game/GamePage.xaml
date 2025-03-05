@@ -63,6 +63,11 @@
                 </StackPanel>
             </Grid>
             <!-- Остальной контент -->
+            <InfoBar Title="{x:Bind GameViewModel.SuccessInfoBar.Title,         Mode=OneWay}"
+         Message="{x:Bind GameViewModel.SuccessInfoBar.Message,     Mode=OneWay}"
+         Severity="{x:Bind GameViewModel.SuccessInfoBar.Severity,   Mode=OneWay}"
+         IsOpen="{x:Bind GameViewModel.SuccessInfoBar.IsOpen,       Mode=OneWay}"
+         TabIndex="10"/>
             <Grid ColumnDefinitions="*, 300" RowDefinitions="Auto, Auto, Auto" RowSpacing="15" ColumnSpacing="15" Margin="16,0">
                 <!-- Контент слева -->
                 <StackPanel Grid.Column="0">
@@ -72,6 +77,12 @@
                 <StackPanel Orientation="Vertical" Grid.Column="1" Spacing="12">
                     <TextBlock Style="{StaticResource SubtitleTextBlockStyle}" Text="Ваши сохранения" HorizontalTextAlignment="Center"/>
                     <StackPanel Orientation="Vertical" Spacing="16">
+                        <Button Command="{x:Bind GameViewModel.UploadSaveCommand}">
+                            <StackPanel Orientation="Horizontal" Spacing="12">
+                                <FontIcon Glyph="&#xE710;" />
+                                <TextBlock Text="Создать"/>
+                            </StackPanel>
+                        </Button>
                         <TextBlock Style="{StaticResource BodyTextBlockStyle}" Text="Текущее сохранение"/>
                         <TextBlock Style="{StaticResource BodyTextBlockStyle}" Text="Статус: крутой"/>
                         <Line X1="0" X2="300" VerticalAlignment="Center" StrokeThickness="2" Stroke="White"/>

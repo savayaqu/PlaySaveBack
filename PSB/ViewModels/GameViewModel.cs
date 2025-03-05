@@ -10,7 +10,13 @@ using PSB.Api.Response;
 using PSB.ContentDialogs;
 using PSB.Models;
 using PSB.Utils;
+using System.IO;
+using System.IO.Compression;
 using static PSB.Utils.Fetch;
+using System.Net.Http.Headers;
+using Microsoft.UI.Xaml.Controls;
+using System.Text.Json;
+using System.Text;
 
 namespace PSB.ViewModels
 {
@@ -27,6 +33,7 @@ namespace PSB.ViewModels
         [ObservableProperty] public partial Boolean IsFavorite { get; set; }
         [ObservableProperty] public partial Boolean InLibrary { get; set; } = false;
         [ObservableProperty] public partial string FilePath { get; set; }
+        [ObservableProperty] public partial InfoBar SuccessInfoBar { get; set; }
         public event Action? GameLoaded;
 
         [ObservableProperty]
@@ -34,6 +41,7 @@ namespace PSB.ViewModels
         public partial Boolean ExeExists { get; set; } = false;
 
         public string FavoriteIcon => IsFavorite ? "\uEB52" : "\uEB51";
+
         partial void OnIsFavoriteChanged(Boolean value)
         {
             OnPropertyChanged(nameof(FavoriteIcon));
@@ -43,6 +51,14 @@ namespace PSB.ViewModels
 
             Instance = this;
             GameId = gameId;
+
+            SuccessInfoBar = new InfoBar
+            {
+                Title = "",
+                Message = "",
+                Severity = InfoBarSeverity.Informational,
+                IsOpen = false
+            };
 
             _ = GetGameAsync().ContinueWith(_ =>
             {
@@ -139,8 +155,117 @@ namespace PSB.ViewModels
                 App.LibraryService.UpdateLibraryMenu();
             }
         }
+        public async Task<string> ZipFolder(string folderPath, string zipFilePath)
+        {
+            if (File.Exists(zipFilePath))
+            {
+                File.Delete(zipFilePath); // Удаляем существующий ZIP-файл, если он есть
+            }
 
+            ZipFile.CreateFromDirectory(folderPath, zipFilePath); // Создаём ZIP-архив
+            return zipFilePath;
+        }
+        public async Task<bool> UploadFile(string filePath)
+        {
+            try
+            {
+                // Проверяем, существует ли файл
+                if (!File.Exists(filePath))
+                {
+                    Debug.WriteLine("Файл не найден.");
+                    return false;
+                }
 
+                // Читаем файл в массив байтов
+                var fileBytes = await File.ReadAllBytesAsync(filePath);
+
+                // Создаем MultipartFormDataContent
+                var content = new MultipartFormDataContent();
+
+                // Добавляем файл
+                var fileContent = new ByteArrayContent(fileBytes);
+                fileContent.Headers.ContentType = MediaTypeHeaderValue.Parse("application/zip");
+                content.Add(fileContent, "file", Path.GetFileName(filePath));
+
+                // Добавляем текстовые поля
+                content.Add(new StringContent("v1"), "version"); // Версия
+                content.Add(new StringContent(Convert.ToString(GameId)), "game_id"); // ID игры
+
+                // Отправляем запрос
+                var res = await FetchAsync(
+                    HttpMethod.Post,
+                    "google-drive/upload",
+                    body: content
+                );
+
+                if (res.IsSuccessStatusCode)
+                {
+                    Debug.WriteLine("Файл успешно загружен на сервер.");
+                    return true;
+                }
+                else
+                {
+                    Debug.WriteLine($"Ошибка при загрузке файла: {res.StatusCode}");
+                    return false;
+                }
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"Ошибка: {ex.Message}");
+                return false;
+            }
+        }
+
+        [RelayCommand]
+        public async Task UploadSave()
+        {
+            string zipFilePath = string.Empty;
+            try
+            {
+                // Шаг 1: Сжимаем папку в ZIP
+                zipFilePath = Path.Combine(Path.GetTempPath(), "saves.zip");
+                Debug.WriteLine($"Временный файл: {zipFilePath}");
+                await ZipFolder(GameData.GetSavesFolderPath(Game)!, zipFilePath);
+
+                // Шаг 2: Отправляем ZIP-файл на сервер
+                bool uploadSuccess = await UploadFile(zipFilePath);
+
+                if (uploadSuccess)
+                {
+                    // Показываем уведомление об успехе
+                    SuccessInfoBar.Title = "Успешно";
+                    SuccessInfoBar.Message = "Сохранения успешно загружены на сервер.";
+                    SuccessInfoBar.Severity = InfoBarSeverity.Success;
+                    SuccessInfoBar.IsOpen = true;
+                }
+                else
+                {
+                    // Показываем уведомление об ошибке
+                    SuccessInfoBar.Title = "Ошибка";
+                    SuccessInfoBar.Message = "Не удалось загрузить сохранения на сервер.";
+                    SuccessInfoBar.Severity = InfoBarSeverity.Error;
+                    SuccessInfoBar.IsOpen = true;
+                }
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"Ошибка: {ex.Message}");
+
+                // Показываем уведомление об ошибке
+                SuccessInfoBar.Title = "Ошибка";
+                SuccessInfoBar.Message = $"Произошла ошибка: {ex.Message}";
+                SuccessInfoBar.Severity = InfoBarSeverity.Error;
+                SuccessInfoBar.IsOpen = true;
+            }
+            finally
+            {
+                // Удаляем временный ZIP-файл
+                if (!string.IsNullOrEmpty(zipFilePath) && File.Exists(zipFilePath))
+                {
+                    File.Delete(zipFilePath);
+                }
+            }
+        }
 
         [RelayCommand]
         public async Task AddToLibrary()
