@@ -158,6 +158,39 @@ namespace PSB.ViewModels
         }
         public async Task GetGameAsync()
         {
+            // Проверяем, есть ли данные в кэше
+            var cachedGameResponse = GameData.LoadGameData(GameId);
+            if (cachedGameResponse != null)
+            {
+                Game = cachedGameResponse.Game;
+                FilePath = GameData.GetFilePath(Game);
+                if (!string.IsNullOrEmpty(FilePath))
+                    ExeExists = true;
+
+                if (cachedGameResponse.Library != null)
+                {
+                    Library = cachedGameResponse.Library;
+                    LastPlayedText = Library.LastPlayedAt.HasValue
+                        ? $"Последний запуск {GetDaysAgoText(Library.LastPlayedAt.Value)}"
+                        : "Последний запуск: Никогда";
+
+                    PlayedHoursText = $"Сыграно {(Library.TimePlayed ?? 0) / 3600} часов";
+                    IsFavorite = Library.IsFavorite;
+                    InLibrary = true;
+                }
+                else
+                {
+                    LastPlayedText = "Последний запуск: Никогда";
+                    PlayedHoursText = "Сыграно 0 часов";
+                    InLibrary = false;
+                }
+
+                Debug.WriteLine($"Данные для игры '{GameId}' загружены из кэша.");
+                GameLoaded?.Invoke();
+                return;
+            }
+
+            // Если данных в кэше нет, запрашиваем их с сервера
             (var res, var body) = await FetchAsync<GameResponse>(
                 HttpMethod.Get, $"games/{GameId}",
                 setError: e => Debug.WriteLine($"Error: {e}")
@@ -168,7 +201,7 @@ namespace PSB.ViewModels
 
             Game = body!.Game;
             FilePath = GameData.GetFilePath(Game);
-            if(!string.IsNullOrEmpty(FilePath))
+            if (!string.IsNullOrEmpty(FilePath))
                 ExeExists = true;
 
             if (body.Library != null)
@@ -188,8 +221,11 @@ namespace PSB.ViewModels
                 PlayedHoursText = "Сыграно 0 часов";
                 InLibrary = false;
             }
-            Debug.WriteLine($"InLibrary: {InLibrary}, ExeExists: {ExeExists}");
-           // await Task.Delay(1000);
+
+            // Сохраняем данные в кэше
+            GameData.SaveGameData(body);
+            Debug.WriteLine($"Данные для игры '{GameId}' сохранены в кэше.");
+
             GameLoaded?.Invoke();
         }
 

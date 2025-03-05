@@ -1,8 +1,8 @@
 ﻿using System;
 using System.Diagnostics;
-using System.Linq;
+using PSB.Api.Response;
+using System.Text.Json;
 using PSB.Models;
-using PSB.ViewModels;
 using Windows.Storage;
 
 namespace PSB.Utils
@@ -11,13 +11,19 @@ namespace PSB.Utils
     {
         private static readonly ApplicationDataContainer LocalSettings = ApplicationData.Current.LocalSettings;
 
-        // Записать данные для игры
-        public static void SaveGameData(Game game, string executablePath, string savesFolderPath)
+        // Сохранить всю информацию об игре
+        public static void SaveGameData(GameResponse gameResponse)
         {
             try
             {
-                LocalSettings.Values[$"{game.Id}_FilePath"] = executablePath;
-                LocalSettings.Values[$"{game.Id}_SavesFolderPath"] = savesFolderPath;
+                var game = gameResponse.Game;
+                var library = gameResponse.Library;
+
+                LocalSettings.Values[$"{game.Id}_Game"] = JsonSerializer.Serialize(game);
+                if (library != null)
+                {
+                    LocalSettings.Values[$"{game.Id}_Library"] = JsonSerializer.Serialize(library);
+                }
                 Debug.WriteLine($"Данные для игры '{game.Id}' успешно сохранены.");
             }
             catch (Exception ex)
@@ -26,13 +32,35 @@ namespace PSB.Utils
             }
         }
 
+        // Загрузить всю информацию об игре
+        public static GameResponse? LoadGameData(ulong gameId)
+        {
+            try
+            {
+                if (LocalSettings.Values.TryGetValue($"{gameId}_Game", out var gameJson) &&
+                    LocalSettings.Values.TryGetValue($"{gameId}_Library", out var libraryJson))
+                {
+                    var game = JsonSerializer.Deserialize<Game>(gameJson.ToString());
+                    var library = JsonSerializer.Deserialize<Library>(libraryJson.ToString());
+
+                    return new GameResponse { Game = game, Library = library };
+                }
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"Ошибка при загрузке данных игры: {ex.Message}");
+            }
+
+            return null;
+        }
+
         // Удалить данные игры
         public static void RemoveGameData(Game game)
         {
             try
             {
-                LocalSettings.Values.Remove($"{game.Id}_FilePath");
-                LocalSettings.Values.Remove($"{game.Id}_SavesFolderPath");
+                LocalSettings.Values.Remove($"{game.Id}_Game");
+                LocalSettings.Values.Remove($"{game.Id}_Library");
                 Debug.WriteLine($"Данные для игры '{game.Id}' удалены.");
             }
             catch (Exception ex)
