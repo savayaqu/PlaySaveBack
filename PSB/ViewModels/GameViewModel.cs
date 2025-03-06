@@ -17,6 +17,9 @@ using System.Net.Http.Headers;
 using Microsoft.UI.Xaml.Controls;
 using System.Text.Json;
 using System.Text;
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.Net.Http.Json;
 
 namespace PSB.ViewModels
 {
@@ -35,6 +38,7 @@ namespace PSB.ViewModels
         [ObservableProperty] public partial string FilePath { get; set; }
         [ObservableProperty] public partial InfoBar SuccessInfoBar { get; set; }
         [ObservableProperty] public partial Boolean IsUploading { get; set; }
+        [ObservableProperty] public partial ObservableCollection<Save>? Saves { get; set; } = new ObservableCollection<Save>();
         public event Action? GameLoaded;
 
         [ObservableProperty]
@@ -60,8 +64,9 @@ namespace PSB.ViewModels
                 Severity = InfoBarSeverity.Informational,
                 IsOpen = false
             };
+            //TODO: динамически не меняется сохранение, время, запуск.
 
-            _ = GetGameAsync().ContinueWith(_ =>
+            _ = GetGameAsync(false).ContinueWith(_ =>
             {
                 GameLoaded?.Invoke();
             }, TaskScheduler.FromCurrentSynchronizationContext());
@@ -109,6 +114,13 @@ namespace PSB.ViewModels
                         new UpdateLibraryGameRequest(Library.TimePlayed, endTime.ToString("yyyy-MM-dd HH:mm:ss")),
                         serialize: true
                     );
+                    GameData.SaveGameData(new GameResponse
+                    {
+                        Game = Game,
+                        Library = Library,
+                        Saves = Saves?.ToList()
+                    });
+                    GameLoaded?.Invoke();
                 }
                 catch (HttpRequestException ex)
                 {
@@ -189,6 +201,8 @@ namespace PSB.ViewModels
                 fileContent.Headers.ContentType = MediaTypeHeaderValue.Parse("application/zip");
                 content.Add(fileContent, "file", Path.GetFileName(filePath));
 
+                //TODO: предлагать на выбор
+
                 // Добавляем текстовые поля
                 content.Add(new StringContent("v1"), "version"); // Версия
                 content.Add(new StringContent(Convert.ToString(GameId)), "game_id"); // ID игры
@@ -199,7 +213,7 @@ namespace PSB.ViewModels
                     "google-drive/upload",
                     body: content
                 );
-
+                
                 if (res.IsSuccessStatusCode)
                 {
                     Debug.WriteLine("Файл успешно загружен на сервер.");
@@ -217,9 +231,9 @@ namespace PSB.ViewModels
                 return false;
             }
             finally { IsUploading = false; } 
-            }
+        }
 
-            [RelayCommand]
+        [RelayCommand]
         public async Task UploadSave()
         {
             string zipFilePath = string.Empty;
@@ -235,6 +249,9 @@ namespace PSB.ViewModels
 
                 if (uploadSuccess)
                 {
+                    _ = GetGameAsync(true);
+                    OnPropertyChanged(nameof(Saves)); // Дополнительно уведомляем об изменении
+
                     // Показываем уведомление об успехе
                     SuccessInfoBar.Title = "Успешно";
                     SuccessInfoBar.Message = "Сохранения успешно загружены на сервер.";
@@ -279,68 +296,87 @@ namespace PSB.ViewModels
             );
             if (!res.IsSuccessStatusCode)
                 return;
-            if ( body != null )
-                Library = body;
-            InLibrary = true;
-            ProfileViewModel.Libraries.Add(Library);
-        }
-        public async Task GetGameAsync()
-        {
-            // Проверяем, есть ли данные в кэше
-            var cachedGameResponse = GameData.LoadGameData(GameId);
-            if (cachedGameResponse != null)
+
+            if (body != null)
             {
-                Game = cachedGameResponse.Game;
-                FilePath = GameData.GetFilePath(Game);
-                if (!string.IsNullOrEmpty(FilePath))
-                    ExeExists = true;
+                Library = body;
+                InLibrary = true;
+                ProfileViewModel.Libraries.Add(Library);
 
-                if (cachedGameResponse.Library != null)
+                // Обновляем кэш
+                GameData.SaveGameData(new GameResponse
                 {
-                    Library = cachedGameResponse.Library;
-                    LastPlayedText = Library.LastPlayedAt.HasValue
-                        ? $"Последний запуск {GetDaysAgoText(Library.LastPlayedAt.Value)}"
-                        : "Последний запуск: Никогда";
+                    Game = Game,
+                    Library = Library,
+                    Saves = Saves?.ToList()
+                });
 
-                    PlayedHoursText = $"Сыграно {(Library.TimePlayed ?? 0) / 3600} часов";
-                    IsFavorite = Library.IsFavorite;
-                    InLibrary = true;
-                }
-                else
-                {
-                    LastPlayedText = "Последний запуск: Никогда";
-                    PlayedHoursText = "Сыграно 0 часов";
-                    InLibrary = false;
-                }
-
-                Debug.WriteLine($"Данные для игры '{GameId}' загружены из кэша.");
+                // Вызываем обновление интерфейса
                 GameLoaded?.Invoke();
-                return;
+            }
+        }
+
+        public async Task GetGameAsync(bool ignoreCache)
+        {
+            if (!ignoreCache)
+            {
+                // Проверяем, есть ли данные в кэше
+                var cachedGameResponse = GameData.LoadGameData(GameId);
+                if (cachedGameResponse != null)
+                {
+                    // Данные загружены из кэша
+                    Game = cachedGameResponse.Game;
+                    if(cachedGameResponse.Saves != null)
+                    {
+                        Saves = new ObservableCollection<Save>(cachedGameResponse.Saves);
+                    }
+                    FilePath = GameData.GetFilePath(Game)!;
+                    ExeExists = !string.IsNullOrEmpty(FilePath);
+
+                    // Обновляем библиотеку, если она есть в кэше
+                    Library = cachedGameResponse.Library;
+                    UpdateLibraryDetails(Library);
+                    GameLoaded?.Invoke();
+                    return;
+                }
             }
 
-            // Если данных в кэше нет, запрашиваем их с сервера
+            // Загружаем с сервера, если нет данных в кэше или нужно обновить
             (var res, var body) = await FetchAsync<GameResponse>(
                 HttpMethod.Get, $"games/{GameId}",
                 setError: e => Debug.WriteLine($"Error: {e}")
             );
 
-            if (!res.IsSuccessStatusCode)
-                return;
-
-            Game = body!.Game;
-            FilePath = GameData.GetFilePath(Game);
-            if (!string.IsNullOrEmpty(FilePath))
-                ExeExists = true;
-
-            if (body.Library != null)
+            if (res.IsSuccessStatusCode)
             {
-                Library = body.Library;
-                LastPlayedText = Library.LastPlayedAt.HasValue
-                    ? $"Последний запуск {GetDaysAgoText(Library.LastPlayedAt.Value)}"
-                    : "Последний запуск: Никогда";
+                Game = body!.Game;
+                FilePath = GameData.GetFilePath(Game)!;
+                ExeExists = !string.IsNullOrEmpty(FilePath);
 
-                PlayedHoursText = $"Сыграно {(Library.TimePlayed ?? 0) / 3600} часов";
-                IsFavorite = Library.IsFavorite;
+                Library = body.Library;
+                UpdateLibraryDetails(Library);
+
+                if(body.Saves != null)
+                {
+                    Saves = new ObservableCollection<Save>(body.Saves);
+                }
+                // Сохраняем новые данные в кэш
+                GameData.SaveGameData(body);
+                Debug.WriteLine($"Данные для игры '{GameId}' сохранены в кэше.");
+            }
+
+            GameLoaded?.Invoke();
+        }
+
+        private void UpdateLibraryDetails(Library? library)
+        {
+            if (library != null)
+            {
+                LastPlayedText = library.LastPlayedAt.HasValue
+                    ? $"Последний запуск {GetDaysAgoText(library.LastPlayedAt.Value)}"
+                    : "Последний запуск: Никогда";
+                PlayedHoursText = $"Сыграно {(library.TimePlayed ?? 0) / 3600} часов";
+                IsFavorite = library.IsFavorite;
                 InLibrary = true;
             }
             else
@@ -349,13 +385,12 @@ namespace PSB.ViewModels
                 PlayedHoursText = "Сыграно 0 часов";
                 InLibrary = false;
             }
-
-            // Сохраняем данные в кэше
-            GameData.SaveGameData(body);
-            Debug.WriteLine($"Данные для игры '{GameId}' сохранены в кэше.");
-
-            GameLoaded?.Invoke();
+            OnPropertyChanged(nameof(LastPlayedText));
+            OnPropertyChanged(nameof(PlayedHoursText));
+            OnPropertyChanged(nameof(IsFavorite));
+            OnPropertyChanged(nameof(InLibrary));
         }
+
 
 
         private string GetDaysAgoText(DateTime lastPlayed)

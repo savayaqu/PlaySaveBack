@@ -16,13 +16,15 @@ class SaveResource extends JsonResource
     {
         return [
            'id' => $this->id,
-           'file' => $this->id,
+           'file_id' => $this->file_id,
            'file_name' => $this->file_name,
+           'version' => $this->version,
            'size' => $this->size,
            'description' => $this->description,
-           'user_id' => $this->user_id,
-           'game_id' => $this->game_id,
+           //'user_id' => $this->user_id,
+           //'game_id' => $this->game_id,
            'user_cloud_service_id' => $this->user_cloud_service_id,
+           'created_at' => $this->created_at->format('Y-m-d H:i:s'),
         ];
     }
 }

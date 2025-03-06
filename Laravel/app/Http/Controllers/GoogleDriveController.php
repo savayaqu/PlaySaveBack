@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\Api\Save\UploadSaveRequest;
+use App\Http\Resources\SaveResource;
 use App\Models\CloudService;
 use App\Models\Game;
 use App\Models\Save;
@@ -188,7 +189,7 @@ class GoogleDriveController extends Controller
                 'uploadType' => 'multipart',
                 'fields' => 'id',
             ]);
-            Save::query()->create([
+            $save = Save::query()->create([
                'file_id' => $file->id,
                'file_name' => $gameFolderName,
                'game_id' => $request->game_id,
@@ -201,7 +202,7 @@ class GoogleDriveController extends Controller
             return response()->json(['error' => 'Failed to upload file to Google Drive: ' . $e->getMessage()], 500);
         }
 
-        return response()->json(['fileId' => $file->id], 200);
+        return response()->json(SaveResource::make($save), 201);
     }
 
 }

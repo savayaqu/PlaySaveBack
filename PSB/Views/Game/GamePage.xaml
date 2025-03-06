@@ -76,6 +76,22 @@
                 <!-- Контент справа -->
                 <StackPanel Orientation="Vertical" Grid.Column="1" Spacing="12">
                     <TextBlock Style="{StaticResource SubtitleTextBlockStyle}" Text="Ваши сохранения" HorizontalTextAlignment="Center"/>
+                    <ListView ItemsSource="{x:Bind GameViewModel.Saves, Mode=TwoWay}">
+                        <ListView.ItemTemplate>
+                            <DataTemplate x:DataType="models:Save">
+                                <StackPanel Orientation="Horizontal" Spacing="4">
+                                    <Line StrokeThickness="1" Stroke="White" Y1="0" Y2="20"/>
+                                    <FontIcon Glyph="&#xE8B7;" />
+                                    <TextBlock Text="{x:Bind FileName}"/>
+                                    <Line StrokeThickness="1" Stroke="White" Y1="0" Y2="20" />
+                                    <TextBlock Text="{x:Bind Version}"/>
+                                    <Line StrokeThickness="1" Stroke="White" Y1="0" Y2="20"/>
+                                    <TextBlock Text="{x:Bind Size}"/>
+                                    <Line StrokeThickness="1" Stroke="White" Y1="0" Y2="20"/>
+                                </StackPanel>
+                            </DataTemplate>
+                        </ListView.ItemTemplate>
+                    </ListView>
                     <StackPanel Orientation="Vertical" Spacing="16">
                         <ProgressBar Visibility="{x:Bind GameViewModel.IsUploading, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}" IsIndeterminate="{x:Bind GameViewModel.IsUploading, Mode=OneWay}" Height="20" Margin="10" />
                         <Button Command="{x:Bind GameViewModel.UploadSaveCommand}">

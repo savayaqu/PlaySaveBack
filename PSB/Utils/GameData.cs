@@ -4,6 +4,7 @@ using PSB.Api.Response;
 using System.Text.Json;
 using PSB.Models;
 using Windows.Storage;
+using System.Collections.Generic;
 
 namespace PSB.Utils
 {
@@ -18,11 +19,15 @@ namespace PSB.Utils
             {
                 var game = gameResponse.Game;
                 var library = gameResponse.Library;
-
+                var saves = gameResponse.Saves;
                 LocalSettings.Values[$"{game.Id}_Game"] = JsonSerializer.Serialize(game);
                 if (library != null)
                 {
                     LocalSettings.Values[$"{game.Id}_Library"] = JsonSerializer.Serialize(library);
+                }
+                if (saves != null)
+                {
+                    LocalSettings.Values[$"{game.Id}_Saves"] = JsonSerializer.Serialize(saves);
                 }
                 Debug.WriteLine($"Данные для игры '{game.Id}' успешно сохранены.");
             }
@@ -37,13 +42,32 @@ namespace PSB.Utils
         {
             try
             {
-                if (LocalSettings.Values.TryGetValue($"{gameId}_Game", out var gameJson) &&
-                    LocalSettings.Values.TryGetValue($"{gameId}_Library", out var libraryJson))
+                // Загружаем данные игры
+                if (LocalSettings.Values.TryGetValue($"{gameId}_Game", out var gameJson))
                 {
-                    var game = JsonSerializer.Deserialize<Game>(gameJson.ToString());
-                    var library = JsonSerializer.Deserialize<Library>(libraryJson.ToString());
+                    var game = JsonSerializer.Deserialize<Game>(gameJson.ToString()!);
 
-                    return new GameResponse { Game = game, Library = library };
+                    // Загружаем данные библиотеки (если есть)
+                    Library? library = null;
+                    if (LocalSettings.Values.TryGetValue($"{gameId}_Library", out var libraryJson))
+                    {
+                        library = JsonSerializer.Deserialize<Library>(libraryJson.ToString()!);
+                    }
+
+                    // Загружаем данные сохранений (если есть)
+                    List<Save>? saves = null;
+                    if (LocalSettings.Values.TryGetValue($"{gameId}_Saves", out var savesJson))
+                    {
+                        saves = JsonSerializer.Deserialize<List<Save>>(savesJson.ToString()!);
+                    }
+
+                    // Возвращаем объект GameResponse
+                    return new GameResponse
+                    {
+                        Game = game!,
+                        Library = library,
+                        Saves = saves
+                    };
                 }
             }
             catch (Exception ex)
@@ -61,6 +85,7 @@ namespace PSB.Utils
             {
                 LocalSettings.Values.Remove($"{game.Id}_Game");
                 LocalSettings.Values.Remove($"{game.Id}_Library");
+                LocalSettings.Values.Remove($"{game.Id}_Saves");
                 Debug.WriteLine($"Данные для игры '{game.Id}' удалены.");
             }
             catch (Exception ex)

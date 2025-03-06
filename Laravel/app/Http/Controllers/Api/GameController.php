@@ -25,7 +25,6 @@ class GameController extends Controller
         $user = auth()->user();
         $library = Library::query()->where('game_id', $game->id)->where('user_id', $user->id)->first();
         $saves = $user->saves()->where('game_id',$game->id)->get();
-        //dd($saves);
         return response()->json([
             'game' => GameResource::make($game),
             'library' => $library ? LibraryResource::make($library) : null,
