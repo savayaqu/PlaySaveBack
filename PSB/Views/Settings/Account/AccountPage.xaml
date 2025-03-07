@@ -17,15 +17,15 @@
         
         
         <TextBlock Text="Текущий email"/>
-        <TextBlock Text="{x:Bind AccountViewModel.User.Email, Mode=OneWay}"/>
+        <TextBlock Text="{x:Bind AccountViewModel.User.Email, Mode=TwoWay}"/>
         <StackPanel Orientation="Horizontal" Spacing="12">
-            <Button>
+            <Button Command="{x:Bind AccountViewModel.UpdateEmailCommand}">
                 <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
                     <FontIcon Glyph="&#xE715;" />
                     <TextBlock Text="Обновить электронную почту" Margin="8,0,0,0" />
                 </StackPanel>
             </Button>
-            <Button>
+            <Button Command="{x:Bind AccountViewModel.UpdatePasswordCommand}">
                 <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
                     <FontIcon Glyph="&#xE8D7;" />
                     <TextBlock Text="Обновить пароль" Margin="8,0,0,0" />

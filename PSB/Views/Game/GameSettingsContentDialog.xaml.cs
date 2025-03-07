@@ -19,5 +19,15 @@ namespace PSB.ContentDialogs
             this.InitializeComponent();
             GameSettingsContentViewModel = new GameSettingsContentViewModel(game);
         }
+
+        private void ContentDialog_Closing(ContentDialog sender, ContentDialogClosingEventArgs args)
+        {
+
+        }
+
+        private void Button_Click(object sender, Microsoft.UI.Xaml.RoutedEventArgs e)
+        {
+
+        }
     }
 }

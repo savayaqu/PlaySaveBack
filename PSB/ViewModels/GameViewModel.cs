@@ -320,25 +320,29 @@ namespace PSB.ViewModels
         {
             if (!ignoreCache)
             {
-                // Проверяем, есть ли данные в кэше
-                var cachedGameResponse = GameData.LoadGameData(GameId);
-                if (cachedGameResponse != null)
+                if(!InLibrary)
                 {
-                    // Данные загружены из кэша
-                    Game = cachedGameResponse.Game;
-                    if(cachedGameResponse.Saves != null)
+                    // Проверяем, есть ли данные в кэше
+                    var cachedGameResponse = GameData.LoadGameData(GameId);
+                    if (cachedGameResponse != null)
                     {
-                        Saves = new ObservableCollection<Save>(cachedGameResponse.Saves);
-                    }
-                    FilePath = GameData.GetFilePath(Game)!;
-                    ExeExists = !string.IsNullOrEmpty(FilePath);
+                        // Данные загружены из кэша
+                        Game = cachedGameResponse.Game;
+                        if (cachedGameResponse.Saves != null)
+                        {
+                            Saves = new ObservableCollection<Save>(cachedGameResponse.Saves);
+                        }
+                        FilePath = GameData.GetFilePath(Game)!;
+                        ExeExists = !string.IsNullOrEmpty(FilePath);
 
-                    // Обновляем библиотеку, если она есть в кэше
-                    Library = cachedGameResponse.Library;
-                    UpdateLibraryDetails(Library);
-                    GameLoaded?.Invoke();
-                    return;
+                        // Обновляем библиотеку, если она есть в кэше
+                        Library = cachedGameResponse.Library;
+                        UpdateLibraryDetails(Library);
+                        GameLoaded?.Invoke();
+                        return;
+                    }
                 }
+                
             }
 
             // Загружаем с сервера, если нет данных в кэше или нужно обновить
