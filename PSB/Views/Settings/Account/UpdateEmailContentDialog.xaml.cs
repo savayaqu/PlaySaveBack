@@ -24,10 +24,12 @@ namespace PSB.Views.Settings.Account
     /// </summary>
     public sealed partial class UpdateEmailContentDialog : ContentDialog
     {
-        public UpdateEmailViewModel UpdateEmailViewModel {  get; set; } = new UpdateEmailViewModel();
+        public UpdateEmailViewModel UpdateEmailViewModel {  get; set; }
         public UpdateEmailContentDialog()
         {
             this.InitializeComponent();
+            UpdateEmailViewModel = new UpdateEmailViewModel(this); // Передаем ссылку на текущий диалог
+
             DataContext = UpdateEmailViewModel;
             nav.Click += Nav_Click; // Обработчик клика на гиперссылку
         }
@@ -42,7 +44,7 @@ namespace PSB.Views.Settings.Account
             _ = App.DialogService.ShowDialogAsync(updatePasswordDialog);
         }
 
-        private void Button_Click(object sender, RoutedEventArgs e)
+        public void Button_Click(object sender, RoutedEventArgs e)
         {
             this.Hide();
         }

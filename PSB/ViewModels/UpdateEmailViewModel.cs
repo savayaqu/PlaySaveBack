@@ -7,6 +7,7 @@ using System.Text;
 using System.Threading.Tasks;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using Microsoft.UI.Xaml.Controls;
 using PSB.Api.Request;
 using PSB.Models;
 using PSB.Utils;
@@ -19,11 +20,18 @@ namespace PSB.ViewModels
     {
         //TODO: валидацию отображать
         //TODO: после обновления на AccountPage не меняется почта
+        
         [ObservableProperty] public partial User? User { get; set; } = AuthData.User;
+        [ObservableProperty] public partial ContentDialog? ContentDialog { get; set; }
+
         [ObservableProperty]
         [NotifyCanExecuteChangedFor(nameof(UpdateEmailCommand))]
         public partial string? Email { get; set; } = "";
         private bool CanUpdate() => !string.IsNullOrEmpty(Email);
+        public UpdateEmailViewModel(ContentDialog contentDialog)
+        {
+            ContentDialog = contentDialog;
+        }
 
         [RelayCommand(CanExecute = nameof(CanUpdate))]
         public async Task UpdateEmail()
@@ -35,6 +43,7 @@ namespace PSB.ViewModels
             if (res.IsSuccessStatusCode)
             {
                 AuthData.User = body;
+                ContentDialog.Hide();
             }
         }
     }
