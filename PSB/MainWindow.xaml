@@ -36,7 +36,6 @@
                    FontSize="16"/>
             </StackPanel>
         </NavigationView.Header>
-
         <NavigationView.MenuItems>
             <NavigationViewItem Margin="0, 10, 0, 10" Height="100" x:Name="AuthNav">
                 <NavigationViewItem.Content>
@@ -59,8 +58,6 @@
             </NavigationViewItem>
             <NavigationViewItem Content="Settings" Tag="SettingsPage" Icon="Setting"/>
             <NavigationViewItemHeader Content="БИБЛИОТЕКА" />
-            <AutoSuggestBox QueryIcon="Find"/>
-
         </NavigationView.MenuItems>
         <Frame x:Name="ContentFrame" />
     </NavigationView>

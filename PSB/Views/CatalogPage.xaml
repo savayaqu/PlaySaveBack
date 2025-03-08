@@ -8,8 +8,12 @@
     mc:Ignorable="d"
     Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
 
-    <Grid Padding="20">
-        <GridView ItemsSource="{x:Bind CatalogViewModel.Games, Mode=OneWay}"
+    <Grid Padding="20" HorizontalAlignment="Center" VerticalAlignment="Center" >
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+        <GridView Grid.Column="0" ItemsSource="{x:Bind CatalogViewModel.Games, Mode=OneWay}"
                   HorizontalAlignment="Stretch"
                   VerticalAlignment="Stretch"
                   ScrollViewer.HorizontalScrollMode="Disabled"
@@ -33,5 +37,24 @@
                 </DataTemplate>
             </GridView.ItemTemplate>
         </GridView>
+        <!-- Пагинация -->
+        <StackPanel Grid.Column="1" Orientation="Vertical" HorizontalAlignment="Center" VerticalAlignment="Bottom" Grid.Row="1" Margin="0,20,0,0">
+            <StackPanel Orientation="Horizontal">
+                <Button Command="{x:Bind CatalogViewModel.PreviousPageCommand}" Margin="0,0,10,0">
+                    <FontIcon Glyph="&#xE892;" />
+                </Button>
+                <TextBlock Text="{x:Bind CatalogViewModel.CurrentPage, Mode=OneWay}" VerticalAlignment="Center" Margin="10,0"/>
+                <TextBlock Text="/" VerticalAlignment="Center" Margin="10,0"/>
+                <TextBlock Text="{x:Bind CatalogViewModel.TotalPages, Mode=OneWay}" VerticalAlignment="Center" Margin="10,0"/>
+                <Button Command="{x:Bind CatalogViewModel.NextPageCommand}" Margin="10,0,0,0">
+                    <FontIcon Glyph="&#xE893;" />
+                </Button>
+            </StackPanel>
+            <StackPanel Orientation="Horizontal" Spacing="6">
+                <TextBlock Text="Jump to " VerticalAlignment="Center" />
+                <TextBox Text="{x:Bind CatalogViewModel.PageInput, Mode=TwoWay}" Width="50"/>
+                <Button Content="GO" Command="{x:Bind CatalogViewModel.JumpToPageCommand}"/>
+            </StackPanel>
+        </StackPanel>
     </Grid>
 </Page>
