@@ -46,5 +46,48 @@ namespace PSB.Views.Settings.Account
         {
             this.Hide();
         }
+        private void ToggleButton_Checked(object sender, RoutedEventArgs e)
+        {
+            if (sender is ToggleButton toggleButton && toggleButton.Tag is string tag)
+            {
+                // Находим PasswordBox по Tag
+                var passwordBox = FindChild<PasswordBox>(toggleButton.Parent as StackPanel, tag);
+                if (passwordBox != null)
+                {
+                    passwordBox.PasswordRevealMode = PasswordRevealMode.Visible; // Показываем пароль
+                }
+            }
+        }
+
+        private void ToggleButton_Unchecked(object sender, RoutedEventArgs e)
+        {
+            if (sender is ToggleButton toggleButton && toggleButton.Tag is string tag)
+            {
+                // Находим PasswordBox по Tag
+                var passwordBox = FindChild<PasswordBox>(toggleButton.Parent as StackPanel, tag);
+                if (passwordBox != null)
+                {
+                    passwordBox.PasswordRevealMode = PasswordRevealMode.Hidden; // Скрываем пароль
+                }
+            }
+        }
+
+        // Вспомогательный метод для поиска дочернего элемента по Tag
+        private T FindChild<T>(DependencyObject parent, string tag) where T : FrameworkElement
+        {
+            if (parent == null) return null;
+
+            for (int i = 0; i < VisualTreeHelper.GetChildrenCount(parent); i++)
+            {
+                var child = VisualTreeHelper.GetChild(parent, i) as FrameworkElement;
+                if (child != null && child.Tag as string == tag && child is T result)
+                {
+                    return result;
+                }
+                var foundChild = FindChild<T>(child, tag);
+                if (foundChild != null) return foundChild;
+            }
+            return null;
+        }
     }
 }
