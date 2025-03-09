@@ -11,6 +11,7 @@ using PSB.ViewModels;
 using PSB.Views;
 using PSB.Models;
 using PSB.Services;
+using Windows.Storage;
 
 namespace PSB
 {
@@ -34,7 +35,6 @@ namespace PSB
             this.InitializeComponent();
 
             ProfileViewModel = new ProfileViewModel();
-
             // Инициализируем сервисы
             _authService = new AuthService(ProfileViewModel, AuthNav);
             _navigationService = new NavigationService(ContentFrame, NavView, HeaderText);

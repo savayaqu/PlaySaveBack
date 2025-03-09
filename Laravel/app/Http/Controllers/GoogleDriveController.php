@@ -191,9 +191,10 @@ class GoogleDriveController extends Controller
             ]);
             $save = Save::query()->create([
                'file_id' => $file->id,
-               'file_name' => $gameFolderName,
+               'file_name' => $fileName,
                'game_id' => $request->game_id,
                'version' => $saveVersionFolderName,
+                'description' => $request->description ?? null,
                 'size' => $fileSize,
                 'user_id' => $user->id,
                 'user_cloud_service_id' => $user->userCloudService()->where('cloud_service_id', $cloudService->id)->first()->id,

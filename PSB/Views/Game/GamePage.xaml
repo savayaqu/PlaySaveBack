@@ -75,7 +75,23 @@
                 </StackPanel>
                 <!-- Контент справа -->
                 <StackPanel Orientation="Vertical" Grid.Column="1" Spacing="12">
-                    <TextBlock Style="{StaticResource SubtitleTextBlockStyle}" Text="Ваши сохранения" HorizontalTextAlignment="Center"/>
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock Style="{StaticResource SubtitleTextBlockStyle}" Text="Ваши сохранения" HorizontalTextAlignment="Center"/>
+                    <Button>
+                        <FontIcon Glyph="&#xE946;" />
+                        <Button.Flyout>
+                            <Flyout>
+                                <StackPanel>
+                                    <TextBlock Text="Если сохранение не отображается, то нажмите кнопку "/>
+                                        <Button Command="{x:Bind GameViewModel.GetMySavesCommand}">
+                                            <FontIcon Glyph="&#xE777;" />
+                                        </Button>
+                                    </StackPanel>
+                            </Flyout>
+                        </Button.Flyout>
+                    </Button>
+                    </StackPanel>
+                    
                     <ListView ItemsSource="{x:Bind GameViewModel.Saves, Mode=TwoWay}">
                         <ListView.ItemTemplate>
                             <DataTemplate x:DataType="models:Save">
@@ -94,11 +110,20 @@
                     </ListView>
                     <StackPanel Orientation="Vertical" Spacing="16">
                         <ProgressBar Visibility="{x:Bind GameViewModel.IsUploading, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}" IsIndeterminate="{x:Bind GameViewModel.IsUploading, Mode=OneWay}" Height="20" Margin="10" />
-                        <Button Command="{x:Bind GameViewModel.UploadSaveCommand}">
+                        <Button>
                             <StackPanel Orientation="Horizontal" Spacing="12">
                                 <FontIcon Glyph="&#xE710;" />
                                 <TextBlock Text="Создать"/>
                             </StackPanel>
+                            <Button.Flyout>
+                                <Flyout>
+                                    <StackPanel Spacing="6">
+                                        <TextBox PlaceholderText="Описание сохранения" Text="{x:Bind GameViewModel.SaveDescription, Mode=TwoWay}"/>
+                                        <TextBox PlaceholderText="Версия сохранения" Text="{x:Bind GameViewModel.SaveVersion, Mode=TwoWay}"/>
+                                        <Button HorizontalAlignment="Center" Command="{x:Bind GameViewModel.UploadSaveCommand}" Content="Создать"></Button>
+                                    </StackPanel>
+                                </Flyout>
+                            </Button.Flyout>
                         </Button>
                         <TextBlock Style="{StaticResource BodyTextBlockStyle}" Text="Текущее сохранение"/>
                         <TextBlock Style="{StaticResource BodyTextBlockStyle}" Text="Статус: крутой"/>
@@ -115,6 +140,12 @@
                             <StackPanel Orientation="Horizontal" Spacing="12">
                                 <FontIcon Glyph="&#xE74D;" />
                                 <TextBlock Text="Удалить"/>
+                            </StackPanel>
+                        </Button>
+                        <Button>
+                            <StackPanel Orientation="Horizontal" Spacing="12">
+                                <FontIcon Glyph="&#xE74D;" />
+                                <TextBlock Text="Перезаписать"/>
                             </StackPanel>
                         </Button>
                     </StackPanel>

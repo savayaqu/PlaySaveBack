@@ -18,9 +18,12 @@ Route::controller(AuthController::class)->group(function () {
 Route::middleware('auth:sanctum')->group(function () {
     Route::controller(UserController::class)->group(function () {
         Route::prefix('profile')->group(function () {
-            Route::get('', 'getProfile');            //Просмотр своего профиля
-            Route::post('', 'updateProfile');        //Обновление профиля
+            Route::get('', 'getProfile');            // Просмотр своего профиля
+            Route::get('services', 'getCloudServices'); //Просмотр своих подключенных облачных сервисов
+
+            Route::post('', 'updateProfile');        // Обновление профиля
             Route::get('{user}', 'getOtherProfile'); // Просмотр чужого профиля
+
         });
     });
     Route::controller(LibraryController::class)->group(function () {
@@ -41,6 +44,9 @@ Route::middleware('auth:sanctum')->group(function () {
         //Просмотр сохранений в виде поста
         //Добавление сохранения
         //Удаление сохранения
+        Route::prefix('saves')->group(function () {
+           Route::get('{game}/my', 'getMySavesGame'); // Просмотр моих сохранений к игре
+        });
     });
     Route::controller(GameController::class)->group(function () {
         Route::prefix('games')->group(function () {
@@ -50,9 +56,9 @@ Route::middleware('auth:sanctum')->group(function () {
     });
     Route::controller(\App\Http\Controllers\GoogleDriveController::class)->group(function () {
         Route::prefix('google-drive')->group(function () {
-            Route::get('auth-url', 'getAuthUrl');
-            Route::get('callback', 'callback')->withoutMiddleware('auth:sanctum');
-            Route::post('upload', 'uploadFile');
+            Route::get('auth-url', 'getAuthUrl'); // Генерация ссылка на доступ к гуглу
+            Route::get('callback', 'callback')->withoutMiddleware('auth:sanctum'); // Ответ от гугла
+            Route::post('upload', 'uploadFile'); // Загрузить сейв для игры
         });
     });
 });

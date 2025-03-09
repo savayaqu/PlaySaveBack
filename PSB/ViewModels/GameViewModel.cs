@@ -38,6 +38,8 @@ namespace PSB.ViewModels
         [ObservableProperty] public partial string FilePath { get; set; }
         [ObservableProperty] public partial InfoBar SuccessInfoBar { get; set; }
         [ObservableProperty] public partial Boolean IsUploading { get; set; }
+        [ObservableProperty] public partial string SaveDescription { get; set; }
+        [ObservableProperty] public partial string SaveVersion { get; set; }
         [ObservableProperty] public partial ObservableCollection<Save>? Saves { get; set; } = new ObservableCollection<Save>();
         public event Action? GameLoaded;
 
@@ -204,8 +206,9 @@ namespace PSB.ViewModels
                 //TODO: предлагать на выбор
 
                 // Добавляем текстовые поля
-                content.Add(new StringContent("v1"), "version"); // Версия
+                content.Add(new StringContent(SaveVersion), "version"); // Версия
                 content.Add(new StringContent(Convert.ToString(GameId)), "game_id"); // ID игры
+                content.Add(new StringContent(SaveDescription), "description"); // ID игры
 
                 // Отправляем запрос
                 var res = await FetchAsync(
@@ -315,7 +318,33 @@ namespace PSB.ViewModels
                 GameLoaded?.Invoke();
             }
         }
+        [RelayCommand]
+        public async Task GetMySaves()
+        {
+            (var res, var body) = await FetchAsync<MySavesGameResponse>(
+                HttpMethod.Get, $"saves/{GameId}/my",
+                setError: e => Debug.WriteLine($"Error: {e}")
+            );
 
+            if (!res.IsSuccessStatusCode || body == null)
+                return;
+
+            // Логируем JSON-ответ
+            string bodyJson = JsonSerializer.Serialize(body, new JsonSerializerOptions
+            {
+                WriteIndented = true
+            });
+            Debug.WriteLine(bodyJson);
+
+            // Очистка коллекции и добавление новых элементов
+            Saves.Clear();
+            foreach (var item in body.Save) // Теперь берем body.Data, а не body напрямую
+            {
+                Saves.Add(item);
+            }
+            var gameResponse = new GameResponse { Game = Game, Library = Library, Saves = body.Save };
+            GameData.SaveGameData(gameResponse);
+        }
         public async Task GetGameAsync(bool ignoreCache)
         {
             if (!ignoreCache)

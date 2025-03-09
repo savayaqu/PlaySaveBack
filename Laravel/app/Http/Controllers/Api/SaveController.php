@@ -3,13 +3,16 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Http\Resources\SaveResource;
+use App\Models\Game;
 use Illuminate\Http\Request;
 
 class SaveController extends Controller
 {
-    public function uploadToServer(Request $request)
+    public function getMySavesGame(Game $game)
     {
-        $file = $request->file('file');
-
+        $user = auth()->user();
+        $saves = $user->saves()->where('game_id', $game->id)->get();
+        return response()->json(['saves' => SaveResource::collection($saves)]);
     }
 }

@@ -14,6 +14,7 @@ class UploadSaveRequest extends ApiRequest
             'version' => 'required|string',
             'custom_game_id' => 'nullable|string',
             'game_id' => 'nullable|string|exists:libraries,game_id',
+            'description' => 'nullable|string',
         ];
     }
 }

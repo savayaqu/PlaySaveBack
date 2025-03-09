@@ -135,6 +135,13 @@ namespace PSB.Services
 
             NavigationViewItem selectedItem = null;
 
+            if (page == null)
+            {
+                // Обработка случая, когда page равен null
+                Debug.WriteLine("Page is null. Cannot sync navigation view selection.");
+                return;
+            }
+
             // Обработка специальных страниц, таких как GamePage
             if (page is GamePage gamePage && gamePage.GameViewModel?.Game != null)
             {
