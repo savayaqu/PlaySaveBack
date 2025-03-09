@@ -38,8 +38,8 @@ namespace PSB.ViewModels
         [ObservableProperty] public partial string FilePath { get; set; }
         [ObservableProperty] public partial InfoBar SuccessInfoBar { get; set; }
         [ObservableProperty] public partial Boolean IsUploading { get; set; }
-        [ObservableProperty] public partial string SaveDescription { get; set; }
-        [ObservableProperty] public partial string SaveVersion { get; set; }
+        [ObservableProperty] public partial string SaveDescription { get; set; } = "";
+        [ObservableProperty] public partial string SaveVersion { get; set; } = "";
         [ObservableProperty] public partial ObservableCollection<Save>? Saves { get; set; } = new ObservableCollection<Save>();
         public event Action? GameLoaded;
 
@@ -260,6 +260,8 @@ namespace PSB.ViewModels
                     SuccessInfoBar.Message = "Сохранения успешно загружены на сервер.";
                     SuccessInfoBar.Severity = InfoBarSeverity.Success;
                     SuccessInfoBar.IsOpen = true;
+                    SaveDescription = "";
+                    SaveVersion = "";
                 }
                 else
                 {
@@ -289,7 +291,23 @@ namespace PSB.ViewModels
                 }
             }
         }
+        [RelayCommand]
+        public async Task DeleteSave()
+        {
+            Debug.WriteLine("Кнопка нажата");
+        }
+        [RelayCommand]
+        public async Task OverwriteSave()
+        {
+            Debug.WriteLine("Кнопка нажата");
 
+        }
+        [RelayCommand]
+        public async Task RestoreSave()
+        {
+            Debug.WriteLine("Кнопка нажата");
+
+        }
         [RelayCommand]
         public async Task AddToLibrary()
         {

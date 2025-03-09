@@ -25,6 +25,7 @@ class SaveResource extends JsonResource
            //'game_id' => $this->game_id,
            'user_cloud_service_id' => $this->user_cloud_service_id,
            'created_at' => $this->created_at->format('Y-m-d H:i:s'),
+           'updated_at' => $this->created_at->format('Y-m-d H:i:s'),
         ];
     }
 }
