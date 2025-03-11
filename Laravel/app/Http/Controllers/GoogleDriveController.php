@@ -109,7 +109,7 @@ class GoogleDriveController extends Controller
         return $folder->getId();
     }
 
-
+    // Загрузить файл
     public function uploadFile(UploadSaveRequest $request)
     {
         $user = auth()->user();
@@ -205,5 +205,222 @@ class GoogleDriveController extends Controller
 
         return response()->json(SaveResource::make($save), 201);
     }
+    // Перезаписать файл
+    public function overwriteFile(UploadSaveRequest $request, $fileId)
+    {
+        $user = auth()->user();
+        $game = Game::query()->find($request->game_id);
+        $file = $request->file('file');
+        $filePath = $file->getPathname();
+        $fileName = $file->getClientOriginalName();
+        $fileSize = $file->getSize();
 
+        $cloudService = CloudService::query()->where('name', 'Google Drive')->first();
+        $service = UserCloudService::query()->where('user_id', $user->id)->where('cloud_service_id', $cloudService->id)->first();
+
+        // Расшифровка токенов
+        $accessToken = Crypt::decryptString($service->access_token);
+        $refreshToken = Crypt::decryptString($service->refresh_token);
+
+        $client = new Client();
+        $client->setClientId(env('GOOGLE_DRIVE_CLIENT_ID'));
+        $client->setClientSecret(env('GOOGLE_DRIVE_CLIENT_SECRET'));
+        $client->setRedirectUri(env('GOOGLE_DRIVE_REDIRECT_URI'));
+        $client->setAccessToken([
+            'access_token' => $accessToken,
+            'refresh_token' => $refreshToken,
+            'expires_in' => $service->expires_at->diffInSeconds(now()),
+            'created' => now()->timestamp - ($service->expires_at->timestamp - $service->expires_at->diffInSeconds(now())),
+        ]);
+
+        if ($client->isAccessTokenExpired()) {
+            $newToken = $client->fetchAccessTokenWithRefreshToken($refreshToken);
+
+            // Шифрование новых токенов
+            $encryptedAccessToken = Crypt::encryptString($newToken['access_token']);
+            $encryptedRefreshToken = Crypt::encryptString($newToken['refresh_token'] ?? $refreshToken);
+
+            // Обновление в базе данных
+            $service->update([
+                'access_token' => $encryptedAccessToken,
+                'refresh_token' => $encryptedRefreshToken,
+                'expires_at' => now()->addSeconds($newToken['expires_in']),
+            ]);
+
+            $client->setAccessToken([
+                'access_token' => $newToken['access_token'],
+                'refresh_token' => $refreshToken,
+            ]);
+        }
+
+        $driveService = new Drive($client);
+
+        // Создаем структуру папок
+        $rootFolderName = 'PlaySaveBack';
+        $gameFolderName = $game->name;
+        $saveVersionFolderName = $request->version;
+
+        // Получаем или создаем корневую папку
+        $rootFolderId = $this->getOrCreateFolder($driveService, $rootFolderName);
+
+        // Получаем или создаем папку с названием игры
+        $gameFolderId = $this->getOrCreateFolder($driveService, $gameFolderName, $rootFolderId);
+
+        // Получаем или создаем папку с версией сохранения
+        $saveVersionFolderId = $this->getOrCreateFolder($driveService, $saveVersionFolderName, $gameFolderId);
+
+        try {
+            // Удаляем старый файл
+            $driveService->files->delete($fileId);
+
+            // Загружаем новый файл
+            $fileMetadata = new Drive\DriveFile([
+                'name' => $fileName,
+                'parents' => [$saveVersionFolderId], // Указываем папку для загрузки
+            ]);
+
+            $content = file_get_contents($filePath);
+
+            $file = $driveService->files->create($fileMetadata, [
+                'data' => $content,
+                'mimeType' => mime_content_type($filePath),
+                'uploadType' => 'multipart',
+                'fields' => 'id',
+            ]);
+
+            // Обновляем запись в базе данных
+            $save = Save::query()->where('file_id', $fileId)->first();
+            $save->update([
+                'file_id' => $file->id,
+                'file_name' => $fileName,
+                'size' => $fileSize,
+                'description' => $request->description ?? null,
+            ]);
+
+            return response()->json(SaveResource::make($save), 200);
+        } catch (\Exception $e) {
+            return response()->json(['error' => 'Failed to overwrite file: ' . $e->getMessage()], 500);
+        }
+    }
+    // Скачивание файла
+    public function downloadFile($fileId)
+    {
+        $user = auth()->user();
+        $cloudService = CloudService::query()->where('name', 'Google Drive')->first();
+        $service = UserCloudService::query()->where('user_id', $user->id)->where('cloud_service_id', $cloudService->id)->first();
+
+        // Расшифровка токенов
+        $accessToken = Crypt::decryptString($service->access_token);
+        $refreshToken = Crypt::decryptString($service->refresh_token);
+
+        $client = new Client();
+        $client->setClientId(env('GOOGLE_DRIVE_CLIENT_ID'));
+        $client->setClientSecret(env('GOOGLE_DRIVE_CLIENT_SECRET'));
+        $client->setRedirectUri(env('GOOGLE_DRIVE_REDIRECT_URI'));
+        $client->setAccessToken([
+            'access_token' => $accessToken,
+            'refresh_token' => $refreshToken,
+            'expires_in' => $service->expires_at->diffInSeconds(now()),
+            'created' => now()->timestamp - ($service->expires_at->timestamp - $service->expires_at->diffInSeconds(now())),
+        ]);
+
+        if ($client->isAccessTokenExpired()) {
+            $newToken = $client->fetchAccessTokenWithRefreshToken($refreshToken);
+
+            // Шифрование новых токенов
+            $encryptedAccessToken = Crypt::encryptString($newToken['access_token']);
+            $encryptedRefreshToken = Crypt::encryptString($newToken['refresh_token'] ?? $refreshToken);
+
+            // Обновление в базе данных
+            $service->update([
+                'access_token' => $encryptedAccessToken,
+                'refresh_token' => $encryptedRefreshToken,
+                'expires_at' => now()->addSeconds($newToken['expires_in']),
+            ]);
+
+            $client->setAccessToken([
+                'access_token' => $newToken['access_token'],
+                'refresh_token' => $refreshToken,
+            ]);
+        }
+
+        $driveService = new Drive($client);
+
+        try {
+            // Получаем метаданные файла, чтобы узнать MIME-тип и имя файла
+            $fileMetadata = $driveService->files->get($fileId, ['fields' => 'mimeType, name']);
+
+            // Получаем содержимое файла
+            $fileContent = $driveService->files->get($fileId, ['alt' => 'media']);
+
+            // Устанавливаем заголовки для скачивания
+            $headers = [
+                'Content-Type' => $fileMetadata->getMimeType(),
+                'Content-Disposition' => 'attachment; filename="' . $fileMetadata->getName() . '"',
+            ];
+
+            // Возвращаем файл как ответ
+            return response($fileContent->getBody(), 200, $headers);
+        } catch (\Exception $e) {
+            return response()->json(['error' => 'Failed to download file from Google Drive: ' . $e->getMessage()], 500);
+        }
+    }
+    // Предоставление доступа по ссылке
+    public function shareFile($fileId)
+    {
+        $user = auth()->user();
+        $cloudService = CloudService::query()->where('name', 'Google Drive')->first();
+        $service = UserCloudService::query()->where('user_id', $user->id)->where('cloud_service_id', $cloudService->id)->first();
+
+        // Расшифровка токенов
+        $accessToken = Crypt::decryptString($service->access_token);
+        $refreshToken = Crypt::decryptString($service->refresh_token);
+
+        $client = new Client();
+        $client->setClientId(env('GOOGLE_DRIVE_CLIENT_ID'));
+        $client->setClientSecret(env('GOOGLE_DRIVE_CLIENT_SECRET'));
+        $client->setRedirectUri(env('GOOGLE_DRIVE_REDIRECT_URI'));
+        $client->setAccessToken([
+            'access_token' => $accessToken,
+            'refresh_token' => $refreshToken,
+            'expires_in' => $service->expires_at->diffInSeconds(now()),
+            'created' => now()->timestamp - ($service->expires_at->timestamp - $service->expires_at->diffInSeconds(now())),
+        ]);
+
+        if ($client->isAccessTokenExpired()) {
+            $newToken = $client->fetchAccessTokenWithRefreshToken($refreshToken);
+
+            // Шифрование новых токенов
+            $encryptedAccessToken = Crypt::encryptString($newToken['access_token']);
+            $encryptedRefreshToken = Crypt::encryptString($newToken['refresh_token'] ?? $refreshToken);
+
+            // Обновление в базе данных
+            $service->update([
+                'access_token' => $encryptedAccessToken,
+                'refresh_token' => $encryptedRefreshToken,
+                'expires_at' => now()->addSeconds($newToken['expires_in']),
+            ]);
+
+            $client->setAccessToken([
+                'access_token' => $newToken['access_token'],
+                'refresh_token' => $refreshToken,
+            ]);
+        }
+
+        $driveService = new Drive($client);
+
+        try {
+            $permission = new Drive\Permission([
+                'type' => 'anyone',
+                'role' => 'reader',
+            ]);
+
+            $driveService->permissions->create($fileId, $permission);
+
+            $file = $driveService->files->get($fileId, ['fields' => 'webViewLink']);
+            return response()->json(['url' => $file->getWebViewLink()], 200);
+        } catch (\Exception $e) {
+            return response()->json(['error' => 'Failed to share file: ' . $e->getMessage()], 500);
+        }
+    }
 }

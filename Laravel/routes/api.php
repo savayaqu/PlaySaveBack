@@ -5,6 +5,7 @@ use App\Http\Controllers\Api\GameController;
 use App\Http\Controllers\Api\SaveController;
 use App\Http\Controllers\Api\UserController;
 use App\Http\Controllers\Api\LibraryController;
+use App\Http\Controllers\GoogleDriveController;
 use Illuminate\Support\Facades\Route;
 
 Route::controller(AuthController::class)->group(function () {
@@ -54,11 +55,14 @@ Route::middleware('auth:sanctum')->group(function () {
             Route::get('{game}', 'getGame'); // Просмотр игры
         });
     });
-    Route::controller(\App\Http\Controllers\GoogleDriveController::class)->group(function () {
+    Route::controller(GoogleDriveController::class)->group(function () {
         Route::prefix('google-drive')->group(function () {
             Route::get('auth-url', 'getAuthUrl'); // Генерация ссылка на доступ к гуглу
             Route::get('callback', 'callback')->withoutMiddleware('auth:sanctum'); // Ответ от гугла
             Route::post('upload', 'uploadFile'); // Загрузить сейв для игры
+            Route::post('overwrite/{fileId}', 'overwriteFile'); // Перезаписать сейв
+            Route::get('download/{fileId}', 'downloadFile'); // Скачать сейв
+            Route::get('share/{fileId}', 'shareFile'); // Предоставить доступ
         });
     });
 });
