@@ -292,15 +292,165 @@ namespace PSB.ViewModels
             }
         }
         [RelayCommand]
-        public async Task DeleteSave()
+        public async Task DeleteSave(Save save)
         {
-            Debug.WriteLine("Кнопка нажата");
+            try
+            {
+                // Отправляем запрос на удаление файла
+                var res = await FetchAsync(
+                    HttpMethod.Delete,
+                    $"google-drive/delete/{save.FileId}",
+                    setError: e => Debug.WriteLine($"Error: {e}")
+                );
+
+                if (res.IsSuccessStatusCode)
+                {
+                    // Удаляем файл из локального списка
+                    Saves?.Remove(save);
+
+                    // Показываем уведомление об успехе
+                    SuccessInfoBar.Title = "Успешно";
+                    SuccessInfoBar.Message = "Сохранение успешно удалено.";
+                    SuccessInfoBar.Severity = InfoBarSeverity.Success;
+                    SuccessInfoBar.IsOpen = true;
+
+                    Debug.WriteLine($"Сохранение {save.FileName} удалено.");
+                }
+                else
+                {
+                    // Показываем уведомление об ошибке
+                    SuccessInfoBar.Title = "Ошибка";
+                    SuccessInfoBar.Message = "Не удалось удалить сохранение.";
+                    SuccessInfoBar.Severity = InfoBarSeverity.Error;
+                    SuccessInfoBar.IsOpen = true;
+
+                    Debug.WriteLine($"Ошибка при удалении сохранения: {res.StatusCode}");
+                }
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"Ошибка: {ex.Message}");
+
+                // Показываем уведомление об ошибке
+                SuccessInfoBar.Title = "Ошибка";
+                SuccessInfoBar.Message = $"Произошла ошибка: {ex.Message}";
+                SuccessInfoBar.Severity = InfoBarSeverity.Error;
+                SuccessInfoBar.IsOpen = true;
+            }
         }
         [RelayCommand]
-        public async Task OverwriteSave()
+        public async Task OverwriteSave(Save save)
         {
-            Debug.WriteLine("Кнопка нажата");
+            string zipFilePath = string.Empty;
+            try
+            {
+                // Шаг 1: Сжимаем папку в ZIP
+                zipFilePath = Path.Combine(Path.GetTempPath(), "saves.zip");
+                Debug.WriteLine($"Временный файл: {zipFilePath}");
+                await ZipFolder(GameData.GetSavesFolderPath(Game)!, zipFilePath);
 
+                // Шаг 2: Отправляем ZIP-файл на сервер для перезаписи
+                bool uploadSuccess = await OverwriteFile(zipFilePath, save);
+
+                if (uploadSuccess)
+                {
+                    // Обновляем список сохранений
+                    _ = GetGameAsync(true);
+                    OnPropertyChanged(nameof(Saves)); // Дополнительно уведомляем об изменении
+
+                    // Показываем уведомление об успехе
+                    SuccessInfoBar.Title = "Успешно";
+                    SuccessInfoBar.Message = "Сохранение успешно перезаписано.";
+                    SuccessInfoBar.Severity = InfoBarSeverity.Success;
+                    SuccessInfoBar.IsOpen = true;
+                }
+                else
+                {
+                    // Показываем уведомление об ошибке
+                    SuccessInfoBar.Title = "Ошибка";
+                    SuccessInfoBar.Message = "Не удалось перезаписать сохранение.";
+                    SuccessInfoBar.Severity = InfoBarSeverity.Error;
+                    SuccessInfoBar.IsOpen = true;
+                }
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"Ошибка: {ex.Message}");
+
+                // Показываем уведомление об ошибке
+                SuccessInfoBar.Title = "Ошибка";
+                SuccessInfoBar.Message = $"Произошла ошибка: {ex.Message}";
+                SuccessInfoBar.Severity = InfoBarSeverity.Error;
+                SuccessInfoBar.IsOpen = true;
+            }
+            finally
+            {
+                // Удаляем временный ZIP-файл
+                if (!string.IsNullOrEmpty(zipFilePath) && File.Exists(zipFilePath))
+                {
+                    File.Delete(zipFilePath);
+                }
+            }
+        }
+
+        private async Task<bool> OverwriteFile(string filePath, Save save)
+        {
+            try
+            {
+                // Проверяем, существует ли файл
+                if (!File.Exists(filePath))
+                {
+                    Debug.WriteLine("Файл не найден.");
+                    return false;
+                }
+
+                // Начинаем загрузку
+                IsUploading = true;
+
+                // Читаем файл в массив байтов
+                var fileBytes = await File.ReadAllBytesAsync(filePath);
+
+                // Создаем MultipartFormDataContent
+                var content = new MultipartFormDataContent();
+
+                // Добавляем файл
+                var fileContent = new ByteArrayContent(fileBytes);
+                fileContent.Headers.ContentType = MediaTypeHeaderValue.Parse("application/zip");
+                content.Add(fileContent, "file", Path.GetFileName(filePath));
+
+                // Добавляем текстовые поля
+                content.Add(new StringContent(save.Version), "version"); // Версия
+                content.Add(new StringContent(Convert.ToString(GameId)), "game_id"); // ID игры
+                content.Add(new StringContent(save.Description), "description"); // Описание
+                content.Add(new StringContent(save.FileId), "file_id"); // ID файла для перезаписи
+
+                // Отправляем запрос
+                var res = await FetchAsync(
+                    HttpMethod.Post,
+                    $"google-drive/overwrite/{save.FileId}",
+                    body: content
+                );
+
+                if (res.IsSuccessStatusCode)
+                {
+                    Debug.WriteLine("Файл успешно перезаписан на сервере.");
+                    return true;
+                }
+                else
+                {
+                    Debug.WriteLine($"Ошибка при перезаписи файла: {res.StatusCode}");
+                    return false;
+                }
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"Ошибка: {ex.Message}");
+                return false;
+            }
+            finally
+            {
+                IsUploading = false;
+            }
         }
         [RelayCommand]
         public async Task RestoreSave()

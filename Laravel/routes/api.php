@@ -63,6 +63,7 @@ Route::middleware('auth:sanctum')->group(function () {
             Route::post('overwrite/{fileId}', 'overwriteFile'); // Перезаписать сейв
             Route::get('download/{fileId}', 'downloadFile'); // Скачать сейв
             Route::get('share/{fileId}', 'shareFile'); // Предоставить доступ
+            Route::delete('delete/{fileId}', 'deleteFile'); // Удалить сейв
         });
     });
 });

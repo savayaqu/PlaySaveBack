@@ -51,7 +51,7 @@ namespace PSB.ViewModels
             }
             // Обновляем информацию о пагинации
             CurrentPage = body.Meta.CurrentPage;
-            TotalPages = body.Meta.Total;
+            TotalPages = body.Meta.LastPage;
         }
         [RelayCommand]
         private async Task PreviousPageAsync()

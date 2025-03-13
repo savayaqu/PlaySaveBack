@@ -423,4 +423,64 @@ class GoogleDriveController extends Controller
             return response()->json(['error' => 'Failed to share file: ' . $e->getMessage()], 500);
         }
     }
+    // Удаление файла
+    public function deleteFile($fileId)
+    {
+        $user = auth()->user();
+        $cloudService = CloudService::query()->where('name', 'Google Drive')->first();
+        $service = UserCloudService::query()->where('user_id', $user->id)->where('cloud_service_id', $cloudService->id)->first();
+
+        // Расшифровка токенов
+        $accessToken = Crypt::decryptString($service->access_token);
+        $refreshToken = Crypt::decryptString($service->refresh_token);
+
+        $client = new Client();
+        $client->setClientId(env('GOOGLE_DRIVE_CLIENT_ID'));
+        $client->setClientSecret(env('GOOGLE_DRIVE_CLIENT_SECRET'));
+        $client->setRedirectUri(env('GOOGLE_DRIVE_REDIRECT_URI'));
+        $client->setAccessToken([
+            'access_token' => $accessToken,
+            'refresh_token' => $refreshToken,
+            'expires_in' => $service->expires_at->diffInSeconds(now()),
+            'created' => now()->timestamp - ($service->expires_at->timestamp - $service->expires_at->diffInSeconds(now())),
+        ]);
+
+        if ($client->isAccessTokenExpired()) {
+            $newToken = $client->fetchAccessTokenWithRefreshToken($refreshToken);
+
+            // Шифрование новых токенов
+            $encryptedAccessToken = Crypt::encryptString($newToken['access_token']);
+            $encryptedRefreshToken = Crypt::encryptString($newToken['refresh_token'] ?? $refreshToken);
+
+            // Обновление в базе данных
+            $service->update([
+                'access_token' => $encryptedAccessToken,
+                'refresh_token' => $encryptedRefreshToken,
+                'expires_at' => now()->addSeconds($newToken['expires_in']),
+            ]);
+
+            $client->setAccessToken([
+                'access_token' => $newToken['access_token'],
+                'refresh_token' => $refreshToken,
+            ]);
+        }
+
+        $driveService = new Drive($client);
+
+        try {
+            // Удаляем файл из Google Drive
+            $driveService->files->delete($fileId);
+
+            // Удаляем запись о файле из базы данных
+            $save = Save::query()->where('file_id', $fileId)->where('user_id', $user->id)->first();
+
+            if ($save) {
+                $save->delete();
+            }
+
+            return response()->json(['message' => 'File deleted successfully'], 200);
+        } catch (\Exception $e) {
+            return response()->json(['error' => 'Failed to delete file: ' . $e->getMessage()], 500);
+        }
+    }
 }
