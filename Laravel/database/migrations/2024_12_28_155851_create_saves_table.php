@@ -18,6 +18,8 @@ return new class extends Migration
             $table->string('version');
             $table->unsignedBigInteger('size');
             $table->text('description')->nullable();
+            $table->text('hash');
+            $table->dateTime('last_sync_at');
             $table->foreignId('user_id')->constrained();
             $table->foreignId('game_id')->nullable()->constrained('games');
             $table->foreignId('side_game_id')->nullable()->constrained('side_games', 'id');

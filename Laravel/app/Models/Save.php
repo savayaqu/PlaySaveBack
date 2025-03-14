@@ -16,6 +16,8 @@ class Save extends Model
       'game_id',
       'side_game_id',
       'user_cloud_service_id',
+      'last_sync_at',
+      'hash',
     ];
     public function user()
     {

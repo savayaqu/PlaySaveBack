@@ -15,4 +15,11 @@ class SaveController extends Controller
         $saves = $user->saves()->where('game_id', $game->id)->get();
         return response()->json(['saves' => SaveResource::collection($saves)]);
     }
+    public function getHash(Request $request)
+    {
+        $user = auth()->user();
+        $file = $request->file('file');
+        $hash = hash('sha256', file_get_contents($file)); // Вычисление хеша
+        dd($hash);
+    }
 }

@@ -53,6 +53,7 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::prefix('saves')->group(function () {
            Route::get('{game}/my', 'getMySavesGame'); // Просмотр моих сохранений к игре
         });
+        Route::post('hash', 'getHash');
     });
     Route::controller(GameController::class)->group(function () {
         Route::prefix('games')->group(function () {
