@@ -13,6 +13,7 @@ class Library extends Model
       'last_played_at',
       'time_played',
       'is_favorite',
+      'side_game_id'
     ];
     protected $attributes = [
         'is_favorite' => false,
@@ -32,6 +33,10 @@ class Library extends Model
     public function game(): BelongsTo
     {
         return $this->belongsTo(Game::class);
+    }
+    public function sideGame(): BelongsTo
+    {
+        return $this->belongsTo(SideGame::class);
     }
 }
 

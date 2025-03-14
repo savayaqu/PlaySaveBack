@@ -5,6 +5,7 @@ use App\Http\Controllers\Api\GameController;
 use App\Http\Controllers\Api\SaveController;
 use App\Http\Controllers\Api\UserController;
 use App\Http\Controllers\Api\LibraryController;
+use App\Http\Controllers\Api\SideGameController;
 use App\Http\Controllers\GoogleDriveController;
 use Illuminate\Support\Facades\Route;
 
@@ -21,22 +22,26 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::prefix('profile')->group(function () {
             Route::get('', 'getProfile');            // Просмотр своего профиля
             Route::get('services', 'getCloudServices'); //Просмотр своих подключенных облачных сервисов
-
             Route::post('', 'updateProfile');        // Обновление профиля
             Route::get('{user}', 'getOtherProfile'); // Просмотр чужого профиля
-
         });
     });
     Route::controller(LibraryController::class)->group(function () {
-       Route::prefix('library')->group(function () {
-          Route::get('', 'getLibrary');                     //Получить свою библиотеку
-           Route::prefix('game/{game}')->group(function () {
-               Route::post('', 'addToLibrary');             // Добавить игру в библиотеку
-               Route::patch('', 'toggleFavorite');          // Добавить/убрать игру в Избранное
-               Route::delete('', 'removeFromLibrary');      // Удалить игру из библиотеки
-               Route::patch('update', 'updateLibraryGame'); // Изменить данные игры в библиотеки
-           });
-       });
+        Route::prefix('library')->group(function () {
+            Route::get('', 'getLibrary');                     // Получить свою библиотеку
+            Route::prefix('game/{game}')->group(function () {
+                Route::post('', 'addToLibrary');             // Добавить игру в библиотеку
+                Route::patch('', 'toggleFavorite');          // Добавить/убрать игру в Избранное
+                Route::delete('', 'removeFromLibrary');      // Удалить игру из библиотеки
+                Route::patch('update', 'updateLibraryGame'); // Изменить данные игры в библиотеке
+            });
+            Route::prefix('sideGame/{sideGame}')->group(function () {
+                Route::post('', 'addSideGameToLibrary');             // Добавить стороннюю игру в библиотеку
+                Route::patch('', 'toggleSideGameFavorite');          // Добавить/убрать стороннюю игру в Избранное
+                Route::delete('', 'removeSideGameFromLibrary');      // Удалить стороннюю игру из библиотеки
+                Route::patch('update', 'updateSideGameLibrary'); // Изменить данные сторонней игры в библиотеке
+            });
+        });
     });
     //TODO: сделать этот контроллер
     Route::controller(SaveController::class)->group(function () {
@@ -54,6 +59,15 @@ Route::middleware('auth:sanctum')->group(function () {
             Route::get('', 'getGames');      // Просмотр всех игр
             Route::get('{game}', 'getGame'); // Просмотр игры
         });
+    });
+    Route::controller(SideGameController::class)->group(function () {
+       Route::prefix('sideGames')->group(function () {
+           Route::get('', 'getSideGames');      // Просмотр всех игр
+           Route::get('{sideGame}', 'getSideGame'); // Просмотр игры
+           Route::post('', 'addSideGame'); // Добавить стороннюю игру
+           Route::patch('', 'updateSideGame'); // Редактировать стороннюю игру
+           Route::delete('', 'removeSideGame'); // Удалить стороннюю игру
+       });
     });
     Route::controller(GoogleDriveController::class)->group(function () {
         Route::prefix('google-drive')->group(function () {

@@ -13,12 +13,14 @@ namespace PSB.Models
     {
         [JsonPropertyName("id")] public required ulong Id { get; set; }
         [JsonPropertyName("game_id")] public ulong? GameId { get; set; }
+        [JsonPropertyName("side_game_id")] public ulong? SideGameId { get; set; }
 
         [JsonConverter(typeof(NullableDateTimeConverter))]
         [JsonPropertyName("last_played_at")] public DateTime? LastPlayedAt { get; set; }
         [JsonPropertyName("time_played")] public uint? TimePlayed { get; set; }
         [JsonPropertyName("is_favorite")] public required Boolean IsFavorite { get; set; }
         [JsonPropertyName("game")] public Game? Game { get; set; }
+        [JsonPropertyName("sideGame")] public SideGame? SideGame { get; set; }
 
     }
 }

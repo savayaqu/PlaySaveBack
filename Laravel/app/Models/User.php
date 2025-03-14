@@ -70,12 +70,12 @@ class User extends Authenticatable
     {
         return $this->hasMany(UserCloudService::class);
     }
-    public function saveAccesses(): HasMany
-    {
-        return $this->hasMany(SaveAccess::class);
-    }
     public function libraries(): HasMany
     {
         return $this->hasMany(Library::class);
+    }
+    public function sideGames(): HasMany
+    {
+        return $this->hasMany(SideGame::class);
     }
 }

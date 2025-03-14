@@ -12,8 +12,7 @@ namespace PSB.Api.Response
     public class LibraryResponse
     {
         [JsonPropertyName("id")] public required int Id { get; set; }
-        //[JsonPropertyName("custom_game_id")] public ulong? CustomGameId { get; set; }
-        //[JsonPropertyName("game_id")] public ulong? GameId { get; set; }
+
         [JsonConverter(typeof(NullableDateTimeConverter))]
         [JsonPropertyName("last_played_at")] public DateTime? LastPlayedAt { get; set; }
         [JsonPropertyName("time_played")] public uint? TimePlayed { get; set; }

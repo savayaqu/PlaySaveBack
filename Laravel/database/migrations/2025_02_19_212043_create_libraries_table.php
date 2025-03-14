@@ -14,8 +14,10 @@ return new class extends Migration
         Schema::create('libraries', function (Blueprint $table) {
             $table->id();
             $table->foreignId('user_id')->constrained('users');
-            $table->foreignId('game_id')->constrained('games');
+            $table->foreignId('game_id')->nullable()->constrained('games');
+            $table->foreignId('side_game_id')->nullable()->constrained('side_games');
             $table->unique(['user_id', 'game_id']);
+            $table->unique(['user_id', 'side_game_id']);
             $table->dateTime('last_played_at')->nullable();
             $table->unsignedInteger('time_played')->nullable();
             $table->boolean('is_favorite');

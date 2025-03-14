@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class CloudService extends Model
 {
-    protected $fillable = ['name', 'api_endpoint', 'description'];
+    protected $fillable = ['name', 'icon', 'description'];
     public function userCloudServices()
     {
         return $this->hasMany(UserCloudService::class);

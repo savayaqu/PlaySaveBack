@@ -19,7 +19,8 @@ return new class extends Migration
             $table->unsignedBigInteger('size');
             $table->text('description')->nullable();
             $table->foreignId('user_id')->constrained();
-            $table->foreignId('game_id')->constrained();
+            $table->foreignId('game_id')->nullable()->constrained('games');
+            $table->foreignId('side_game_id')->nullable()->constrained('side_games', 'id');
             $table->foreignId('user_cloud_service_id')->constrained('user_cloud_service', 'id');
             $table->timestamps();
         });

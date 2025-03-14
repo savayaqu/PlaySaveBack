@@ -14,6 +14,7 @@ class Save extends Model
       'description',
       'user_id',
       'game_id',
+      'side_game_id',
       'user_cloud_service_id',
     ];
     public function user()
@@ -24,12 +25,13 @@ class Save extends Model
     {
         return $this->belongsTo(Game::class);
     }
+    public function sideGame()
+    {
+        return $this->belongsTo(SideGame::class);
+    }
     public function userCloudService()
     {
         return $this->belongsTo(UserCloudService::class);
     }
-    public function saveAccesses()
-    {
-        return $this->hasMany(SaveAccess::class);
-    }
+
 }

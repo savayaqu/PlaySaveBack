@@ -11,14 +11,11 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('save_accesses', function (Blueprint $table) {
+        Schema::create('side_games', function (Blueprint $table) {
             $table->id();
+            $table->string('name');
             $table->foreignId('user_id')->constrained('users');
-            $table->foreignId('save_id')->constrained('saves');
-            $table->enum('access_type', ['one_time', 'permanent'])->default('one_time');
-            $table->timestamp('expires_at')->nullable();
-            $table->string('token')->nullable()->unique();
-            $table->boolean('is_post')->default(false);
+            $table->unique(['user_id', 'name']);
             $table->timestamps();
         });
     }
@@ -28,6 +25,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('save_accesses');
+        Schema::dropIfExists('side_games');
     }
 };

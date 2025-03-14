@@ -14,9 +14,8 @@ return new class extends Migration
         Schema::create('cloud_services', function (Blueprint $table) {
             $table->id();
             $table->string('name')->unique();
-            $table->string('api_endpoint')->unique();
             $table->text('description')->nullable();
-            $table->string('icon')->nullable();
+            $table->string('icon');
             $table->timestamps();
         });
     }

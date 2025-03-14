@@ -36,12 +36,12 @@ public class LibraryService
             // Удаляем старые элементы библиотеки (игры и заголовки)
             var existingItems = _navView.MenuItems
                 .OfType<NavigationViewItem>()
-                .Where(item => item.Tag?.ToString()?.StartsWith("Game_") == true)
+                .Where(item => item.Tag?.ToString()?.StartsWith("Game_") == true || item.Tag?.ToString()?.StartsWith("SideGame_") == true)
                 .ToList();
 
             var existingHeaders = _navView.MenuItems
                 .OfType<NavigationViewItemHeader>()
-                .Where(header => header.Content?.ToString() is "УСТАНОВЛЕНЫ" or "ИЗБРАННОЕ" or "БЕЗ КАТЕГОРИИ")
+                .Where(header => header.Content?.ToString() is "УСТАНОВЛЕНЫ" or "ИЗБРАННОЕ" or "БЕЗ КАТЕГОРИИ" or "СТОРОННИЕ ИГРЫ")
                 .ToList();
 
             foreach (var item in existingItems) _navView.MenuItems.Remove(item);
@@ -60,8 +60,12 @@ public class LibraryService
                 .Where(game => game?.Game != null && GameData.GetFilePath(game.Game) == null && !game.IsFavorite)
                 .ToList();
 
+            var sideGames = _profileViewModel.Libraries
+                .Where(game => game?.SideGame != null)
+                .ToList();
+
             // Функция для добавления заголовка и игр
-            void AddCategory(string headerText, List<Library> games)
+            void AddCategory(string headerText, List<Library> games, bool isSideGame = false)
             {
                 if (games.Count == 0) return;
 
@@ -70,24 +74,36 @@ public class LibraryService
 
                 foreach (var game in games)
                 {
-                    var gameItem = new NavigationViewItem
+                    if (game.Game != null && !isSideGame)
                     {
-                        Content = game.Game?.Name,
-                        Tag = $"Game_{game.Game?.Id}|{game.Game?.Name}",
-                        //Icon = new FontIcon { Glyph = "\uE7FC" }
-                    };
-                    if (GameData.GetFilePath(game.Game) != null)
-                    {
-                        var exeIcon = IconFromExe.GetIconElement(GameData.GetFilePath(game.Game));
-                        if (exeIcon != null)
-                            gameItem.Icon = exeIcon;
+                        var gameItem = new NavigationViewItem
+                        {
+                            Content = game.Game.Name,
+                            Tag = $"Game_{game.Game.Id}|{game.Game.Name}",
+                        };
+                        if (GameData.GetFilePath(game.Game) != null)
+                        {
+                            var exeIcon = IconFromExe.GetIconElement(GameData.GetFilePath(game.Game));
+                            if (exeIcon != null)
+                                gameItem.Icon = exeIcon;
+                        }
+                        else
+                        {
+                            // Если путь к исполняемому файлу отсутствует, используем стандартную иконку
+                            gameItem.Icon = new FontIcon { Glyph = "\uE7FC" };
+                        }
+                        _navView.MenuItems.Add(gameItem);
                     }
-                    else
+                    else if (game.SideGame != null && isSideGame)
                     {
-                        // Если путь к исполняемому файлу отсутствует, используем стандартную иконку
-                        gameItem.Icon = new FontIcon { Glyph = "\uE7FC" };
+                        var gameItem = new NavigationViewItem
+                        {
+                            Content = game.SideGame.Name,
+                            Tag = $"SideGame_{game.SideGame.Id}|{game.SideGame.Name}",
+                            Icon = new FontIcon { Glyph = "\uE7FC" }, // Стандартная иконка для сторонних игр
+                        };
+                        _navView.MenuItems.Add(gameItem);
                     }
-                    _navView.MenuItems.Add(gameItem);
                 }
             }
 
@@ -95,6 +111,7 @@ public class LibraryService
             AddCategory("УСТАНОВЛЕНЫ", installedGames);
             AddCategory("ИЗБРАННОЕ", favoriteGames);
             AddCategory("БЕЗ КАТЕГОРИИ", uncategorizedGames);
+            AddCategory("СТОРОННИЕ ИГРЫ", sideGames, true); // Добавляем категорию для сторонних игр
 
             // Синхронизируем выделение после обновления меню
             _navigationService.SyncNavigationViewSelection(_navigationService.GetCurrentPage());

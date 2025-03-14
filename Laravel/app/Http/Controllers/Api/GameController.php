@@ -31,4 +31,10 @@ class GameController extends Controller
             'saves' => $saves->isEmpty() ? null : SaveResource::collection($saves),
         ]);
     }
+    //public function addCustomGame(AddGameRequest $request): JsonResponse
+    //{
+    //    $user = auth()->user();
+    //    $games = Game::all();
+    //
+    //}
 }

@@ -88,66 +88,28 @@
                         </Button>
                     </StackPanel>
 
-                    <ListView ItemsSource="{x:Bind GameViewModel.Saves, Mode=TwoWay}" BorderThickness="0" Padding="0">
-
-                        <!-- Заголовок таблицы -->
-                        <ListView.HeaderTemplate>
-                            <DataTemplate>
-                                <Grid Padding="5" VerticalAlignment="Center" HorizontalAlignment="Left" ColumnSpacing="6">
-                                    <Grid.ColumnDefinitions>
-                                        <ColumnDefinition Width="*" MinWidth="150" />
-                                        <ColumnDefinition Width="*" MinWidth="80" />
-                                        <ColumnDefinition Width="*" MinWidth="80" />
-                                        <ColumnDefinition Width="*" MinWidth="200" />
-                                        <ColumnDefinition Width="*" MinWidth="120" />
-                                        <ColumnDefinition Width="*" MinWidth="120" />
-                                        <ColumnDefinition Width="*" MinWidth="100" />
-                                        <ColumnDefinition Width="*" MinWidth="200" />
-                                    </Grid.ColumnDefinitions>
-
-                                    <!-- Заголовки -->
-                                    <TextBlock Grid.Column="0" Text="Имя файла" FontWeight="Bold" HorizontalAlignment="Center" />
-                                    <TextBlock Grid.Column="1" Text="Версия" FontWeight="Bold" HorizontalAlignment="Center" />
-                                    <TextBlock Grid.Column="2" Text="Размер" FontWeight="Bold" HorizontalAlignment="Center" />
-                                    <TextBlock Grid.Column="3" Text="Описание" FontWeight="Bold" HorizontalAlignment="Center" />
-                                    <TextBlock Grid.Column="4" Text="Обновлено" FontWeight="Bold" HorizontalAlignment="Center" />
-                                    <TextBlock Grid.Column="5" Text="Создано" FontWeight="Bold" HorizontalAlignment="Center" />
-                                    <TextBlock Grid.Column="6" Text="ID сервиса" FontWeight="Bold" HorizontalAlignment="Center" />
-                                    <TextBlock Grid.Column="7" Text="Действия" FontWeight="Bold" HorizontalAlignment="Center" />
-                                </Grid>
-                            </DataTemplate>
-                        </ListView.HeaderTemplate>
-
+                    <ListView ItemsSource="{x:Bind GameViewModel.Saves, Mode=TwoWay}" BorderThickness="0" Padding="0" SingleSelectionFollowsFocus="False" IsItemClickEnabled="False">
                         <!-- Разметка для каждого элемента -->
                         <ListView.ItemTemplate>
                             <DataTemplate x:DataType="models:Save">
-                                <Grid BorderThickness="0,0,0,1" Padding="10" VerticalAlignment="Center" HorizontalAlignment="Stretch" ColumnSpacing="6">
-                                    <Grid.RowDefinitions>
-                                        <RowDefinition Height="Auto" />
-                                        <RowDefinition Height="Auto" />
-                                    </Grid.RowDefinitions>
-                                    <Grid.ColumnDefinitions>
-                                        <ColumnDefinition Width="*" MinWidth="150" />
-                                        <ColumnDefinition Width="*" MinWidth="80" />
-                                        <ColumnDefinition Width="*" MinWidth="80" />
-                                        <ColumnDefinition Width="*" MinWidth="200" />
-                                        <ColumnDefinition Width="*" MinWidth="120" />
-                                        <ColumnDefinition Width="*" MinWidth="120" />
-                                        <ColumnDefinition Width="*" MinWidth="100" />
-                                        <ColumnDefinition Width="*" MinWidth="200" />
-                                    </Grid.ColumnDefinitions>
-
+                                <StackPanel Orientation="Horizontal">
                                     <!-- Данные первой строки -->
-                                    <TextBlock Grid.Row="0" Grid.Column="0" Text="{x:Bind FileName}" HorizontalAlignment="Center" />
-                                    <TextBlock Grid.Row="0" Grid.Column="1" Text="{x:Bind Version}" HorizontalAlignment="Center" />
-                                    <TextBlock Grid.Row="0" Grid.Column="2" Text="{x:Bind Size}" HorizontalAlignment="Center" />
-                                    <TextBlock Grid.Row="0" Grid.Column="3" Text="{x:Bind Description}" HorizontalAlignment="Center" />
-                                    <TextBlock Grid.Row="0" Grid.Column="4" Text="{x:Bind UpdatedAt}" HorizontalAlignment="Center" />
-                                    <TextBlock Grid.Row="0" Grid.Column="5" Text="{x:Bind CreatedAt}" HorizontalAlignment="Center" />
-                                    <TextBlock Grid.Row="0" Grid.Column="6" Text="{x:Bind UserCloudServiceId}" HorizontalAlignment="Center" />
+                                    <StackPanel>
+                                        <TextBlock HorizontalAlignment="Center" >
+                                         <Run Text="Текст перед привязкой: " />
+                                         <Run Text="{x:Bind FileName}" />
+                                    </TextBlock>
+                                    <TextBlock Text="{x:Bind Version}" HorizontalAlignment="Center" />
+                                    <TextBlock Text="{x:Bind Size}" HorizontalAlignment="Center" />
+                                    <TextBlock Text="{x:Bind Description}" HorizontalAlignment="Center" />
+                                    <TextBlock Text="{x:Bind UpdatedAt}" HorizontalAlignment="Center" />
+                                    <TextBlock Text="{x:Bind CreatedAt}" HorizontalAlignment="Center" />
+                                    <TextBlock Text="{x:Bind UserCloudServiceId}" HorizontalAlignment="Center" />
+                                    </StackPanel>
+                                    
 
                                     <!-- Кнопки действий (вторая строка) -->
-                                    <StackPanel Grid.Row="0" Grid.Column="7" HorizontalAlignment="Center" VerticalAlignment="Center" Orientation="Horizontal" Spacing="6">
+                                    <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" Orientation="Vertical" Spacing="6">
                                         <Button Command="{x:Bind vm:GameViewModel.Instance.DeleteSaveCommand}" CommandParameter="{x:Bind}" >
                                             <FontIcon Glyph="&#xE74D;" />
                                         </Button>
@@ -175,7 +137,7 @@
                                             <FontIcon Glyph="&#xE896;" />
                                         </Button>
                                     </StackPanel>
-                                </Grid>
+                                </StackPanel>
                             </DataTemplate>
                         </ListView.ItemTemplate>
                     </ListView>
