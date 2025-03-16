@@ -11,9 +11,14 @@ namespace PSB.Utils
         private static readonly ApplicationDataContainer LocalSettings = ApplicationData.Current.LocalSettings;
 
         // Генерация уникального ключа для игры
-        private static string GetGameKey(T game) => $"{game.Type}_{game.Id}_Game";
-        private static string GetGameKey(ulong gameId, string type) => $"{type}_{gameId}_Game";
-
+        private static string GetGameKey(T game)
+        {
+            if (game == null)
+            {
+                throw new ArgumentNullException(nameof(game), "Game cannot be null.");
+            }
+            return $"{game.Type}_{game.Id}_Game";
+        }
         // Сохранить данные игры
         public static void SaveGame(T game)
         {
@@ -29,11 +34,11 @@ namespace PSB.Utils
         }
 
         // Загрузить данные игры
-        public static T? LoadGame(ulong gameId, string type)
+        public static T? LoadGame(T game)
         {
             try
             {
-                var key = GetGameKey(gameId, type);
+                var key = GetGameKey(game);
                 if (LocalSettings.Values.TryGetValue(key, out var gameJson))
                 {
                     return JsonSerializer.Deserialize<T>(gameJson.ToString()!);
@@ -48,13 +53,13 @@ namespace PSB.Utils
         }
 
         // Удалить данные игры
-        public static void RemoveGame(ulong gameId, string type)
+        public static void RemoveGame(T game)
         {
             try
             {
-                var key = GetGameKey(gameId, type);
+                var key = GetGameKey(game);
                 LocalSettings.Values.Remove(key);
-                Debug.WriteLine($"Данные игры '{gameId}' (тип: {type}) удалены.");
+                Debug.WriteLine($"Данные игры '{game.Id}' (тип: {game.Type}) удалены.");
             }
             catch (Exception ex)
             {

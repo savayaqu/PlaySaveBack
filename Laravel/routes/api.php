@@ -51,7 +51,8 @@ Route::middleware('auth:sanctum')->group(function () {
         //Добавление сохранения
         //Удаление сохранения
         Route::prefix('saves')->group(function () {
-           Route::get('{game}/my', 'getMySavesGame'); // Просмотр моих сохранений к игре
+           Route::get('game/{game}/my', 'getMySavesGame'); // Просмотр моих сохранений к игре
+           Route::get('sideGame/{sideGame}/my', 'getMySavesGame'); // Просмотр моих сохранений к сторонней игре
         });
         Route::post('hash', 'getHash');
     });

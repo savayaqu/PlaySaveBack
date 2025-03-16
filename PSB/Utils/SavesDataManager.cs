@@ -13,8 +13,14 @@ namespace PSB.Utils
         private static readonly ApplicationDataContainer LocalSettings = ApplicationData.Current.LocalSettings;
 
         // Генерация уникального ключа для сохранений
-        private static string GetSavesKey(T game) => $"{game.Type}_{game.Id}_Saves";
-        private static string GetSavesKey(ulong gameId, string type) => $"{type}_{gameId}_Saves";
+        private static string GetSavesKey(T game)
+        {
+            if (game == null)
+            {
+                throw new ArgumentNullException(nameof(game), "Game cannot be null.");
+            }
+            return $"{game.Type}_{game.Id}_Saves";
+        }
 
         // Сохранить данные сохранений
         public static void SaveSaves(T game, List<Save> saves)
@@ -31,11 +37,11 @@ namespace PSB.Utils
         }
 
         // Загрузить данные сохранений
-        public static List<Save>? LoadSaves(ulong gameId, string type)
+        public static List<Save>? LoadSaves(T game)
         {
             try
             {
-                var key = GetSavesKey(gameId, type);
+                var key = GetSavesKey(game);
                 if (LocalSettings.Values.TryGetValue(key, out var savesJson))
                 {
                     return JsonSerializer.Deserialize<List<Save>>(savesJson.ToString()!);
@@ -50,13 +56,13 @@ namespace PSB.Utils
         }
 
         // Удалить данные сохранений
-        public static void RemoveSaves(ulong gameId, string type)
+        public static void RemoveSaves(T game)
         {
             try
             {
-                var key = GetSavesKey(gameId, type);
+                var key = GetSavesKey(game);
                 LocalSettings.Values.Remove(key);
-                Debug.WriteLine($"Данные сохранений для игры '{gameId}' (тип: {type}) удалены.");
+                Debug.WriteLine($"Данные сохранений для игры '{game.Id}' (тип: {game.Type}) удалены.");
             }
             catch (Exception ex)
             {

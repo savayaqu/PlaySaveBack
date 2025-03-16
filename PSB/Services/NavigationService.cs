@@ -7,6 +7,7 @@ using Microsoft.UI.Xaml.Navigation;
 using PSB.Views;
 using System.Linq;
 using Microsoft.UI.Xaml.Media.Animation;
+using PSB.Models;
 
 namespace PSB.Services
 {
@@ -47,10 +48,11 @@ namespace PSB.Services
 
             try
             {
-                if (pageTag.StartsWith("Game_"))
+                if (pageTag.StartsWith("Game_") || pageTag.StartsWith("SideGame_"))
                 {
                     ulong gameId = ExtractGameId(pageTag);
                     string gameName = ExtractGameName(pageTag);
+                    string type = pageTag.StartsWith("Game_") ? "Game" : "SideGame";
 
                     if (_frame.Content is GamePage currentGamePage && currentGamePage.GameViewModel?.GameId == gameId)
                     {
@@ -59,7 +61,13 @@ namespace PSB.Services
                         return;
                     }
 
-                    _frame.Navigate(typeof(GamePage), gameId);
+                    var parameters = new GameNavigationParameters
+                    {
+                        Type = type,
+                        GameId = gameId
+                    };
+
+                    _frame.Navigate(typeof(GamePage), parameters);
                     _headerText.Text = gameName;
                     return;
                 }

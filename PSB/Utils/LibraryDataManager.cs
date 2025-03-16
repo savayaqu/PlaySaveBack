@@ -12,8 +12,14 @@ namespace PSB.Utils
         private static readonly ApplicationDataContainer LocalSettings = ApplicationData.Current.LocalSettings;
 
         // Генерация уникального ключа для библиотеки
-        private static string GetLibraryKey(T game) => $"{game.Type}_{game.Id}_Library";
-        private static string GetLibraryKey(ulong gameId, string type) => $"{type}_{gameId}_Library";
+        private static string GetLibraryKey(T game)
+        {
+            if (game == null)
+            {
+                throw new ArgumentNullException(nameof(game), "Game cannot be null.");
+            }
+            return $"{game.Type}_{game.Id}_Library";
+        }
 
         // Сохранить данные библиотеки
         public static void SaveLibrary(T game, Library library)
@@ -30,11 +36,11 @@ namespace PSB.Utils
         }
 
         // Загрузить данные библиотеки
-        public static Library? LoadLibrary(ulong gameId, string type)
+        public static Library? LoadLibrary(T game)
         {
             try
             {
-                var key = GetLibraryKey(gameId, type);
+                var key = GetLibraryKey(game);
                 if (LocalSettings.Values.TryGetValue(key, out var libraryJson))
                 {
                     return JsonSerializer.Deserialize<Library>(libraryJson.ToString()!);
@@ -49,13 +55,13 @@ namespace PSB.Utils
         }
 
         // Удалить данные библиотеки
-        public static void RemoveLibrary(ulong gameId, string type)
+        public static void RemoveLibrary(T game)
         {
             try
             {
-                var key = GetLibraryKey(gameId, type);
+                var key = GetLibraryKey(game);
                 LocalSettings.Values.Remove(key);
-                Debug.WriteLine($"Данные библиотеки для игры '{gameId}' (тип: {type}) удалены.");
+                Debug.WriteLine($"Данные библиотеки для игры '{game.Id}' (тип: {game.Type}) удалены.");
             }
             catch (Exception ex)
             {

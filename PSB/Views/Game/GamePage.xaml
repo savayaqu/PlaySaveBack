@@ -16,7 +16,10 @@
         <StackPanel>
             <Grid>
                 <!-- Картинка -->
-                <Image Height="420" Source="{x:Bind GameViewModel.Game.Header, Mode=OneWay}" Margin="0,-32,0,0" Stretch="UniformToFill"/>
+                <Image Height="420" 
+       Source="{x:Bind ((models:Game)GameViewModel.Game).Header, Mode=OneWay}" 
+       Margin="0,-32,0,0" 
+       Stretch="UniformToFill"/>
                 <!-- Блок с информацией -->
                 <StackPanel VerticalAlignment="Bottom" Background="#CC000000">
                     <Grid>

@@ -111,8 +111,8 @@ public class LibraryService
             // Добавляем категории, если в них есть игры
             AddCategory("УСТАНОВЛЕНЫ", installedGames);
             AddCategory("ИЗБРАННОЕ", favoriteGames);
-            AddCategory("БЕЗ КАТЕГОРИИ", uncategorizedGames);
             AddCategory("СТОРОННИЕ ИГРЫ", sideGames, true); // Добавляем категорию для сторонних игр
+            AddCategory("БЕЗ КАТЕГОРИИ", uncategorizedGames);
 
             // Синхронизируем выделение после обновления меню
             _navigationService.SyncNavigationViewSelection(_navigationService.GetCurrentPage());

@@ -4,6 +4,7 @@ using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Navigation;
 using PSB.Services;
 using PSB.ViewModels;
+using Windows.Storage;
 
 namespace PSB
 {
@@ -25,7 +26,8 @@ namespace PSB
         {
             Instance = this;
             this.InitializeComponent();
-
+            // Очистка локалки
+            ApplicationData.Current.LocalSettings.Values.Clear();
             ProfileViewModel = new ProfileViewModel();
             // Инициализируем сервисы
             _authService = new AuthService(ProfileViewModel, AuthNav);

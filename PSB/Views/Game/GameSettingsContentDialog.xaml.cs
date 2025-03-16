@@ -1,4 +1,5 @@
 using Microsoft.UI.Xaml.Controls;
+using PSB.Interfaces;
 using PSB.Models;
 using PSB.ViewModels;
 
@@ -14,7 +15,7 @@ namespace PSB.ContentDialogs
     {
         GameSettingsContentViewModel GameSettingsContentViewModel { get; set; }
         GameViewModel GameViewModel { get; set; }
-        public GameSettingsContentDialog(Game game)
+        public GameSettingsContentDialog(IGame game)
         {
             this.InitializeComponent();
             GameSettingsContentViewModel = new GameSettingsContentViewModel(game);

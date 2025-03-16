@@ -21,6 +21,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Net.Http.Json;
 using PSB.Helpers;
+using PSB.Interfaces;
 
 namespace PSB.ViewModels
 {
@@ -29,7 +30,8 @@ namespace PSB.ViewModels
         public ProfileViewModel ProfileViewModel { get; set; } = MainWindow.Instance?.ProfileViewModel!;
         public static GameViewModel? Instance { get; private set; }
         [ObservableProperty] public partial ulong GameId {  get; set; }
-        [ObservableProperty] public partial Game Game { get; set; }
+        [ObservableProperty] public partial string Type{  get; set; }
+        [ObservableProperty] public partial IGame Game { get; set; }
         [ObservableProperty] public partial Library Library { get; set; }
         [ObservableProperty] public partial string LastPlayedText {  get; set; }
         [ObservableProperty] public partial string PlayedHoursText { get; set; }
@@ -54,11 +56,12 @@ namespace PSB.ViewModels
         {
             OnPropertyChanged(nameof(FavoriteIcon));
         }
-        public GameViewModel(ulong gameId)
+        public GameViewModel(ulong gameId, string type)
         {
 
             Instance = this;
             GameId = gameId;
+            Type = type.ToLower();
 
             SuccessInfoBar = new InfoBar
             {
@@ -150,7 +153,7 @@ namespace PSB.ViewModels
                 {
                     // Отправляем данные на сервер
                     var res = await FetchAsync(
-                        HttpMethod.Patch, $"library/game/{GameId}/update",
+                        HttpMethod.Patch, $"library/{Type}/{GameId}/update",
                         isFetch => Debug.WriteLine("isFetch " + isFetch),
                         error => Debug.WriteLine("error " + error),
                         new UpdateLibraryGameRequest(Library.TimePlayed, endTime.ToString("yyyy-MM-dd HH:mm:ss")),
@@ -158,11 +161,11 @@ namespace PSB.ViewModels
                     );
 
                     // Сохраняем обновленные данные с использованием новых менеджеров
-                    GameDataManager<Game>.SaveGame(Game);
-                    LibraryDataManager<Game>.SaveLibrary(Game, Library);
+                    GameDataManager<IGame>.SaveGame(Game);
+                    LibraryDataManager<IGame>.SaveLibrary(Game, Library);
                     if (Saves != null)
                     {
-                        SavesDataManager<Game>.SaveSaves(Game, Saves.ToList());
+                        SavesDataManager<IGame>.SaveSaves(Game, Saves.ToList());
                     }
 
                     GameLoaded?.Invoke();
@@ -194,7 +197,7 @@ namespace PSB.ViewModels
         public async Task ToggleFavorite()
         {
             var res = await FetchAsync(
-                HttpMethod.Patch, $"library/game/{GameId}",
+                HttpMethod.Patch, $"library/{Type}/{GameId}",
                 setError: e => Debug.WriteLine($"Error: {e}")
             );
 
@@ -362,7 +365,7 @@ namespace PSB.ViewModels
         public async Task AddToLibrary()
         {
             (var res, var body) = await FetchAsync<Library>(
-                HttpMethod.Post, $"library/game/{GameId}",
+                HttpMethod.Post, $"library/{Type}/{GameId}",
                 setError: e => Debug.WriteLine($"Error: {e}")
             );
             if (!res.IsSuccessStatusCode)
@@ -375,11 +378,11 @@ namespace PSB.ViewModels
                 ProfileViewModel.Libraries.Add(Library);
 
                 // Обновляем кэш с использованием новых менеджеров
-                GameDataManager<Game>.SaveGame(Game);
-                LibraryDataManager<Game>.SaveLibrary(Game, Library);
+                GameDataManager<IGame>.SaveGame(Game);
+                LibraryDataManager<IGame>.SaveLibrary(Game, Library);
                 if (Saves != null)
                 {
-                    SavesDataManager<Game>.SaveSaves(Game, Saves.ToList());
+                    SavesDataManager<IGame>.SaveSaves(Game, Saves.ToList());
                 }
 
                 // Вызываем обновление интерфейса
@@ -390,7 +393,7 @@ namespace PSB.ViewModels
         public async Task GetMySaves()
         {
             (var res, var body) = await FetchAsync<MySavesGameResponse>(
-                HttpMethod.Get, $"saves/{GameId}/my",
+                HttpMethod.Get, $"saves/{Type}/{GameId}/my",
                 setError: e => Debug.WriteLine($"Error: {e}")
             );
 
@@ -413,7 +416,7 @@ namespace PSB.ViewModels
             }
 
             // Сохраняем сохранения с использованием нового менеджера
-            SavesDataManager<Game>.SaveSaves(Game, [.. Saves]);
+            SavesDataManager<IGame>.SaveSaves(Game, [.. Saves]);
         }
         public async Task GetGameAsync(bool ignoreCache)
         {
@@ -422,9 +425,9 @@ namespace PSB.ViewModels
                 if (!InLibrary)
                 {
                     // Проверяем, есть ли данные в кэше
-                    var cachedGame = GameDataManager<Game>.LoadGame(GameId, "Game");
-                    var cachedLibrary = LibraryDataManager<Game>.LoadLibrary(GameId, "Game");
-                    var cachedSaves = SavesDataManager<Game>.LoadSaves(GameId, "Game");
+                    var cachedGame = GameDataManager<IGame>.LoadGame(Game);
+                    var cachedLibrary = LibraryDataManager<IGame>.LoadLibrary(Game);
+                    var cachedSaves = SavesDataManager<IGame>.LoadSaves(Game);
 
                     if (cachedGame != null)
                     {
@@ -434,8 +437,8 @@ namespace PSB.ViewModels
                         {
                             Saves = new ObservableCollection<Save>(cachedSaves);
                         }
-                        FilePath = PathDataManager<Game>.GetFilePath(Game)!;
-                        FolderPath = PathDataManager<Game>.GetSavesFolderPath(Game)!;
+                        FilePath = PathDataManager<IGame>.GetFilePath(Game)!;
+                        FolderPath = PathDataManager<IGame>.GetSavesFolderPath(Game)!;
                         ExeExists = !string.IsNullOrEmpty(FilePath);
 
                         // Обновляем библиотеку, если она есть в кэше
@@ -449,15 +452,15 @@ namespace PSB.ViewModels
 
             // Загружаем с сервера, если нет данных в кэше или нужно обновить
             (var res, var body) = await FetchAsync<GameResponse>(
-                HttpMethod.Get, $"games/{GameId}",
+                HttpMethod.Get, $"{Type}s/{GameId}",
                 setError: e => Debug.WriteLine($"Error: {e}")
             );
 
             if (res.IsSuccessStatusCode)
             {
                 Game = body!.Game;
-                FilePath = PathDataManager<Game>.GetFilePath(Game)!;
-                FolderPath = PathDataManager<Game>.GetSavesFolderPath(Game)!;
+                FilePath = PathDataManager<IGame>.GetFilePath(Game)!;
+                FolderPath = PathDataManager<IGame>.GetSavesFolderPath(Game)!;
                 ExeExists = !string.IsNullOrEmpty(FilePath);
 
                 Library = body.Library;
@@ -469,9 +472,9 @@ namespace PSB.ViewModels
                 }
 
                 // Сохраняем новые данные в кэш с использованием новых менеджеров
-                GameDataManager<Game>.SaveGame(Game);
-                LibraryDataManager<Game>.SaveLibrary(Game, Library);
-                SavesDataManager<Game>.SaveSaves(Game, body.Saves?.ToList() ?? new List<Save>());
+                GameDataManager<IGame>.SaveGame(Game);
+                LibraryDataManager<IGame>.SaveLibrary(Game, Library);
+                SavesDataManager<IGame>.SaveSaves(Game, body.Saves?.ToList() ?? new List<Save>());
                 Debug.WriteLine($"Данные для игры '{GameId}' сохранены в кэше.");
             }
 

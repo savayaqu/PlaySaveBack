@@ -1,5 +1,6 @@
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Navigation;
+using PSB.Models;
 using PSB.ViewModels;
 using Windows.ApplicationModel.Contacts;
 using Windows.Gaming.Input;
@@ -23,12 +24,12 @@ namespace PSB.Views
         {
             base.OnNavigatedTo(e);
 
-            if (e.Parameter is ulong gameId)
+            if (e.Parameter is GameNavigationParameters parameters)
             {
                 // Если GameViewModel уже существует, пропускаем создание нового
-                if (GameViewModel == null || GameViewModel.GameId != gameId)
+                if (GameViewModel == null || GameViewModel.GameId != parameters.GameId)
                 {
-                    GameViewModel = new GameViewModel(gameId);
+                    GameViewModel = new GameViewModel(parameters.GameId, parameters.Type);
                     DataContext = GameViewModel;
 
                     // Подписываемся на событие загрузки данных
