@@ -9,6 +9,7 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Microsoft.UI.Xaml.Media.Imaging;
 using PSB.Helpers;
+using PSB.Interfaces;
 using PSB.Models;
 using PSB.Utils;
 using Windows.Gaming.Input;
@@ -32,8 +33,8 @@ namespace PSB.ViewModels
         {
             Game = game;
             GameName = Game.Name;
-            SelectedFile = GameData.GetFilePath(Game);
-            SelectedSavesFolder = GameData.GetSavesFolderPath(Game);
+            SelectedFile = PathDataManager<IGame>.GetFilePath(Game);
+            SelectedSavesFolder = PathDataManager<IGame>.GetSavesFolderPath(Game);
         }
         [RelayCommand]
         private async Task ChooseFolderSaves()
@@ -64,7 +65,7 @@ namespace PSB.ViewModels
             StorageFolder folder = await openPicker.PickSingleFolderAsync();
             if (folder != null)
             {
-                GameData.SetSavesFolderPath(Game, folder.Path);
+                PathDataManager<IGame>.SetSavesFolderPath(Game, folder.Path);
                 StorageApplicationPermissions.FutureAccessList.AddOrReplace("PickedFolderToken", folder);
                 SelectedSavesFolder = folder.Path;
             }
@@ -85,7 +86,7 @@ namespace PSB.ViewModels
             var file = await openPicker.PickSingleFileAsync();
             if (file != null)
             {
-                GameData.SetFilePath(Game, file.Path);
+                PathDataManager<IGame>.SetFilePath(Game, file.Path);
                 SelectedFile = file.Path;
                 Debug.WriteLine("Game name " + file.Name);
                 Debug.WriteLine("Game DisplayName " + file.DisplayName);
@@ -95,7 +96,7 @@ namespace PSB.ViewModels
 
                 if (savesFolder != null)
                 {
-                    GameData.SetSavesFolderPath(Game, savesFolder);
+                    PathDataManager<IGame>.SetSavesFolderPath(Game, savesFolder);
                     SelectedSavesFolder = savesFolder;
                     Debug.WriteLine($"Папка Saves найдена: {savesFolder}");
                 }
@@ -190,7 +191,8 @@ namespace PSB.ViewModels
 
             if (res.IsSuccessStatusCode)
             {
-                GameData.RemoveGameData(Game);
+                //TODO: очистка всего для игры
+                //GameData.RemoveGameData(Game);
 
                 // Удаляем игру из библиотеки
                 var libraryItem = ProfileViewModel.Libraries.FirstOrDefault(l => l.Game.Id == Game.Id);

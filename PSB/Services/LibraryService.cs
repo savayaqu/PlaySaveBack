@@ -1,6 +1,7 @@
 ﻿using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Media.Imaging;
 using PSB.Helpers;
+using PSB.Interfaces;
 using PSB.Models;
 using PSB.Services;
 using PSB.Utils;
@@ -49,15 +50,15 @@ public class LibraryService
 
             // Разделяем игры по категориям
             var installedGames = _profileViewModel.Libraries
-                .Where(game => game?.Game != null && GameData.GetFilePath(game.Game) != null)
+                .Where(game => game?.Game != null && PathDataManager<IGame>.GetFilePath(game.Game) != null)
                 .ToList();
 
             var favoriteGames = _profileViewModel.Libraries
-                .Where(game => game?.Game != null && game.IsFavorite && GameData.GetFilePath(game.Game) == null)
+                .Where(game => game?.Game != null && game.IsFavorite && PathDataManager<IGame>.GetFilePath(game.Game) == null)
                 .ToList();
 
             var uncategorizedGames = _profileViewModel.Libraries
-                .Where(game => game?.Game != null && GameData.GetFilePath(game.Game) == null && !game.IsFavorite)
+                .Where(game => game?.Game != null && PathDataManager<IGame>.GetFilePath(game.Game) == null && !game.IsFavorite)
                 .ToList();
 
             var sideGames = _profileViewModel.Libraries
@@ -81,9 +82,9 @@ public class LibraryService
                             Content = game.Game.Name,
                             Tag = $"Game_{game.Game.Id}|{game.Game.Name}",
                         };
-                        if (GameData.GetFilePath(game.Game) != null)
+                        if (PathDataManager<IGame>.GetFilePath(game.Game) != null)
                         {
-                            var exeIcon = IconFromExe.GetIconElement(GameData.GetFilePath(game.Game));
+                            var exeIcon = IconFromExe.GetIconElement(PathDataManager<IGame>.GetFilePath(game.Game));
                             if (exeIcon != null)
                                 gameItem.Icon = exeIcon;
                         }
