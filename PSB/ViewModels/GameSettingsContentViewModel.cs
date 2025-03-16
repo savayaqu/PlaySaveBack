@@ -27,17 +27,14 @@ namespace PSB.ViewModels
         [ObservableProperty] public partial string? SelectedFile { get; set; }
         [ObservableProperty] public partial string? SelectedSavesFolder { get; set; }
         [ObservableProperty] public partial string? GameName { get; set; }
-        [ObservableProperty] public partial Game Game { get; set; }
-        [ObservableProperty] public partial SideGame SideGame { get; set; }
-
-        [ObservableProperty] public partial IGame IGame { get; set; }
-        //TODO: Придумать что-нибудь с иконкой и картиной .exe
+        [ObservableProperty] public partial IGame Game { get; set; }
         public GameSettingsContentViewModel(IGame iGame)
         {
+
+            Game = iGame;
             GameName = Game.Name;
             SelectedFile = PathDataManager<IGame>.GetFilePath(Game);
             SelectedSavesFolder = PathDataManager<IGame>.GetSavesFolderPath(Game);
-            IGame = iGame;
         }
         [RelayCommand]
         private async Task ChooseFolderSaves()

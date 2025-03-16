@@ -83,8 +83,10 @@ namespace PSB.ViewModels
         {
             if (FolderPath == null)
                 return;
+
             var zipCreator = new ZipCreator();
             (string folderName, string zipPath, string hash, ulong size) = await zipCreator.CreateZip(FolderPath, Game.Name, SaveVersion);
+
             Save newSave = new()
             {
                 FileId = folderName,
@@ -99,7 +101,14 @@ namespace PSB.ViewModels
                 ZipPath = zipPath,
                 CreatedAt = DateTime.Now,
             };
+
+            // Добавляем новое сохранение в коллекцию
             Saves.Add(newSave);
+
+            // Сохраняем обновленную коллекцию локально
+            SavesDataManager<IGame>.SaveSaves(Game, Saves.ToList());
+
+            Debug.WriteLine($"Сохранение '{newSave.FileName}' успешно создано и сохранено локально.");
         }
         [RelayCommand]
         private async Task SyncSave()
@@ -407,35 +416,60 @@ namespace PSB.ViewModels
             });
             Debug.WriteLine(bodyJson);
 
+            // Получаем текущие локальные сохранения
+            var localSaves = Saves?.Where(s => !s.IsSynced).ToList() ?? new List<Save>();
+
             // Очистка коллекции и добавление новых элементов
             Saves.Clear();
-            foreach (var item in body.Save) // Теперь берем body.Data, а не body напрямую
+
+            // Добавляем сохранения с сервера
+            foreach (var item in body.Save)
             {
                 item.IsSynced = true;
                 Saves.Add(item);
             }
 
-            // Сохраняем сохранения с использованием нового менеджера
-            SavesDataManager<IGame>.SaveSaves(Game, [.. Saves]);
+            // Добавляем локальные сохранения, которые не были синхронизированы
+            foreach (var localSave in localSaves)
+            {
+                Saves.Add(localSave);
+            }
+
+            // Сохраняем объединенную коллекцию локально
+            SavesDataManager<IGame>.SaveSaves(Game, Saves.ToList());
+
+            Debug.WriteLine("Сохранения успешно загружены с сервера и объединены с локальными.");
         }
         public async Task GetGameAsync(bool ignoreCache)
         {
+            var sds = GameDataManager<IGame>.LoadGame(Type, GameId);
+            Debug.WriteLine(sds);
             if (!ignoreCache)
             {
                 if (!InLibrary)
                 {
                     // Проверяем, есть ли данные в кэше
-                    var cachedGame = GameDataManager<IGame>.LoadGame(Game);
-                    var cachedLibrary = LibraryDataManager<IGame>.LoadLibrary(Game);
-                    var cachedSaves = SavesDataManager<IGame>.LoadSaves(Game);
-
-                    if (cachedGame != null)
+                    if (Type == "Game")
                     {
-                        // Данные загружены из кэша
-                        Game = cachedGame;
+                        Game = GameDataManager<Game>.LoadGame(Type, GameId);
+                    }
+                    else if (Type == "SideGame")
+                    {
+                        Game = GameDataManager<SideGame>.LoadGame(Type, GameId);
+                    }
+                    Debug.WriteLine($"Cached game loaded: {Game != null}");
+
+                    var cachedLibrary = LibraryDataManager<IGame>.LoadLibrary(Type, GameId);
+                    var cachedSaves = SavesDataManager<IGame>.LoadSaves(Type, GameId);
+
+                    if (Game != null)
+                    {
+                        Debug.WriteLine("Данные загружены из кэша.");
                         if (cachedSaves != null)
                         {
-                            Saves = new ObservableCollection<Save>(cachedSaves);
+                            // Объединяем локальные и серверные сохранения
+                            var localSaves = Saves?.Where(s => !s.IsSynced).ToList() ?? new List<Save>();
+                            Saves = new ObservableCollection<Save>(cachedSaves.Concat(localSaves));
                         }
                         FilePath = PathDataManager<IGame>.GetFilePath(Game)!;
                         FolderPath = PathDataManager<IGame>.GetSavesFolderPath(Game)!;
@@ -450,7 +484,7 @@ namespace PSB.ViewModels
                 }
             }
 
-            // Загружаем с сервера, если нет данных в кэше или нужно обновить
+            Debug.WriteLine("Загрузка данных с сервера...");
             (var res, var body) = await FetchAsync<GameResponse>(
                 HttpMethod.Get, $"{Type}s/{GameId}",
                 setError: e => Debug.WriteLine($"Error: {e}")
@@ -458,6 +492,7 @@ namespace PSB.ViewModels
 
             if (res.IsSuccessStatusCode)
             {
+                Debug.WriteLine("Данные успешно загружены с сервера.");
                 Game = body!.Game;
                 FilePath = PathDataManager<IGame>.GetFilePath(Game)!;
                 FolderPath = PathDataManager<IGame>.GetSavesFolderPath(Game)!;
@@ -468,13 +503,39 @@ namespace PSB.ViewModels
 
                 if (body.Saves != null)
                 {
-                    Saves = new ObservableCollection<Save>(body.Saves);
+                    // Получаем текущие локальные сохранения
+                    var localSaves = Saves?.Where(s => !s.IsSynced).ToList() ?? new List<Save>();
+
+                    // Очистка коллекции и добавление новых элементов
+                    Saves.Clear();
+
+                    // Добавляем сохранения с сервера
+                    foreach (var item in body.Saves)
+                    {
+                        item.IsSynced = true;
+                        Saves.Add(item);
+                    }
+
+                    // Добавляем локальные сохранения, которые не были синхронизированы
+                    foreach (var localSave in localSaves)
+                    {
+                        Saves.Add(localSave);
+                    }
                 }
 
                 // Сохраняем новые данные в кэш с использованием новых менеджеров
-                GameDataManager<IGame>.SaveGame(Game);
+                if (Type == "Game")
+                {
+                    GameDataManager<Game>.SaveGame((Game)Game);
+                }
+                else if (Type == "SideGame")
+                {
+                    GameDataManager<SideGame>.SaveGame((SideGame)Game);
+                }
+
                 LibraryDataManager<IGame>.SaveLibrary(Game, Library);
-                SavesDataManager<IGame>.SaveSaves(Game, body.Saves?.ToList() ?? new List<Save>());
+                SavesDataManager<IGame>.SaveSaves(Game, Saves.ToList());
+
                 Debug.WriteLine($"Данные для игры '{GameId}' сохранены в кэше.");
             }
 

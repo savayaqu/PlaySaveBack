@@ -11,14 +11,8 @@ namespace PSB.Utils
         private static readonly ApplicationDataContainer LocalSettings = ApplicationData.Current.LocalSettings;
 
         // Генерация уникального ключа для игры
-        private static string GetGameKey(T game)
-        {
-            if (game == null)
-            {
-                throw new ArgumentNullException(nameof(game), "Game cannot be null.");
-            }
-            return $"{game.Type}_{game.Id}_Game";
-        }
+        private static string GetGameKey(T game) => $"{game.Type}_{game.Id}_Game";
+
         // Сохранить данные игры
         public static void SaveGame(T game)
         {
@@ -34,14 +28,20 @@ namespace PSB.Utils
         }
 
         // Загрузить данные игры
-        public static T? LoadGame(T game)
+        public static T? LoadGame(string type, ulong gameId)
         {
             try
             {
-                var key = GetGameKey(game);
+                var key = $"{type}_{gameId}_Game";
                 if (LocalSettings.Values.TryGetValue(key, out var gameJson))
                 {
+                    Debug.WriteLine($"Данные игры '{gameId}' (тип: {type}) успешно загружены из кэша.");
+                    Debug.WriteLine($"Ключ: {key}, Значение: {gameJson}");
                     return JsonSerializer.Deserialize<T>(gameJson.ToString()!);
+                }
+                else
+                {
+                    Debug.WriteLine($"Данные игры '{gameId}' (тип: {type}) не найдены в кэше.");
                 }
             }
             catch (Exception ex)
@@ -53,13 +53,13 @@ namespace PSB.Utils
         }
 
         // Удалить данные игры
-        public static void RemoveGame(T game)
+        public static void RemoveGame(string type, ulong gameId)
         {
             try
             {
-                var key = GetGameKey(game);
+                var key = $"{type}_{gameId}_Game";
                 LocalSettings.Values.Remove(key);
-                Debug.WriteLine($"Данные игры '{game.Id}' (тип: {game.Type}) удалены.");
+                Debug.WriteLine($"Данные игры '{gameId}' (тип: {type}) удалены.");
             }
             catch (Exception ex)
             {

@@ -1,6 +1,7 @@
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Navigation;
 using PSB.Models;
+using PSB.Services;
 using PSB.ViewModels;
 using Windows.ApplicationModel.Contacts;
 using Windows.Gaming.Input;
@@ -44,6 +45,7 @@ namespace PSB.Views
             if (GameViewModel?.Game != null)
             {
                 App.MainWindow.HeaderTextBlock.Text = GameViewModel.Game.Name;
+                App.NavigationService.SyncNavigationViewSelection(App.NavigationService.GetCurrentPage());
             }
         }
     }
