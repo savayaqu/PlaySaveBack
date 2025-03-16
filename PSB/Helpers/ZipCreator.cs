@@ -21,7 +21,7 @@ namespace PSB.Helpers
 
     public class ZipCreator
     {
-        public async Task<string> CreateZipAndPrintHash(string folderPath)
+        public async Task<(string folderName, string zipFilePath, string hash, ulong sizeInBytes)> CreateZip(string folderPath, string gameName, string saveVersion)
         {
             // Получаем путь к рабочему столу
             string desktopPath = Environment.GetFolderPath(Environment.SpecialFolder.Desktop);
@@ -30,18 +30,27 @@ namespace PSB.Helpers
             string folderName = new DirectoryInfo(folderPath).Name;
 
             // Создаём путь для ZIP-архива на рабочем столе
-            string zipFilePath = Path.Combine(desktopPath, $"{folderName}.zip");
+            string zipFilePath = Path.Combine($"{desktopPath}/PlaySaveBack/{gameName}/{saveVersion}", $"{folderName}.zip");
 
             // Создаём ZIP-архив
-            var zip =  await ZipFolder(folderPath, zipFilePath);
+            await ZipFolder(folderPath, zipFilePath);
 
             // Вычисляем хеш архива
             string hash = CalculateFileHash(zipFilePath);
-            return zip;
+            ulong sizeInBytes = (ulong)new FileInfo(zipFilePath).Length;
+            // Возвращаем кортеж с именем папки, путём к ZIP-файлу и хешем
+            return (folderName, zipFilePath, hash, sizeInBytes);
         }
 
         private async Task<string> ZipFolder(string folderPath, string zipFilePath)
         {
+            // Проверяем, существует ли папка для ZIP-архива
+            string zipDirectory = Path.GetDirectoryName(zipFilePath);
+            if (!Directory.Exists(zipDirectory))
+            {
+                Directory.CreateDirectory(zipDirectory); // Создаём папку, если её нет
+            }
+
             if (File.Exists(zipFilePath))
             {
                 File.Delete(zipFilePath); // Удаляем существующий ZIP-файл, если он есть

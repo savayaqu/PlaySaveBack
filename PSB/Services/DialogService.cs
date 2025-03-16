@@ -32,7 +32,6 @@ namespace PSB.Services
                 Debug.WriteLine("Ошибка: XamlRoot не установлен!");
                 throw new InvalidOperationException("XamlRoot is not set. Call SetXamlRoot first.");
             }
-
             dialog.XamlRoot = _xamlRoot;
             _currentDialog = dialog; // Сохраняем ссылку на диалог
             Debug.WriteLine("Открываем диалог...");

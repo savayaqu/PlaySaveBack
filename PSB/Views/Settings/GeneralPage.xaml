@@ -9,8 +9,20 @@
     mc:Ignorable="d"
     Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
 
-    <Grid>
-        <TextBlock Text="ЭТО СТРАНИЦА ГЛВАНАЯ"/>
-
-    </Grid>
+    <StackPanel Orientation="Vertical" Spacing="24" Padding="16">
+        <TextBlock Text="Основные" Style="{StaticResource TitleTextBlockStyle}"/>
+        <StackPanel Spacing="6">
+            <TextBlock Text="Путь до истории сохранений" Style="{StaticResource BodyTextBlockStyle}"/>
+            <Grid ColumnSpacing="6" Grid.ColumnDefinitions="*,Auto,Auto">
+                <TextBox IsReadOnly="True" Text="C:\Users\Savayaqu\PlaySaveBack" Grid.Column="0"/>
+                <Button Content="Изменить" Grid.Column="1"/>
+                <Button Content="Открыть" Grid.Column="2"/>
+            </Grid>
+            <TextBlock Text="Все ваши сохранения, созданные этим приложением будут распологаться здесь"/>
+        </StackPanel>
+        <TextBlock Text="Поведение" Style="{StaticResource BodyTextBlockStyle}"/>
+        <StackPanel Orientation="Horizontal" HorizontalAlignment="Left" VerticalAlignment="Center">
+            <CheckBox Content="Удалять локальные сохранения после синхронизации"/>
+        </StackPanel>
+    </StackPanel>
 </Page>

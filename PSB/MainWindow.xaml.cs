@@ -1,17 +1,9 @@
 using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq;
-using System.Threading.Tasks;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Navigation;
-using PSB.Utils;
-using PSB.ViewModels;
-using PSB.Views;
-using PSB.Models;
 using PSB.Services;
-using Windows.Storage;
+using PSB.ViewModels;
 
 namespace PSB
 {

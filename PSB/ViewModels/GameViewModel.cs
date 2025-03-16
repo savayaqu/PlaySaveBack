@@ -20,6 +20,7 @@ using System.Text;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Net.Http.Json;
+using PSB.Helpers;
 
 namespace PSB.ViewModels
 {
@@ -27,7 +28,6 @@ namespace PSB.ViewModels
     {
         public ProfileViewModel ProfileViewModel { get; set; } = MainWindow.Instance?.ProfileViewModel!;
         public static GameViewModel? Instance { get; private set; }
-
         [ObservableProperty] public partial ulong GameId {  get; set; }
         [ObservableProperty] public partial Game Game { get; set; }
         [ObservableProperty] public partial Library Library { get; set; }
@@ -36,6 +36,7 @@ namespace PSB.ViewModels
         [ObservableProperty] public partial Boolean IsFavorite { get; set; }
         [ObservableProperty] public partial Boolean InLibrary { get; set; } = false;
         [ObservableProperty] public partial string FilePath { get; set; }
+        [ObservableProperty] public partial string FolderPath { get; set; }
         [ObservableProperty] public partial InfoBar SuccessInfoBar { get; set; }
         [ObservableProperty] public partial Boolean IsUploading { get; set; }
         [ObservableProperty] public partial string SaveDescription { get; set; } = "";
@@ -72,6 +73,45 @@ namespace PSB.ViewModels
             {
                 GameLoaded?.Invoke();
             }, TaskScheduler.FromCurrentSynchronizationContext());
+
+        }
+        [RelayCommand]
+        private async Task CreateSave()
+        {
+            if (FolderPath == null)
+                return;
+            var zipCreator = new ZipCreator();
+            (string folderName, string zipPath, string hash, ulong size) = await zipCreator.CreateZip(FolderPath, Game.Name, SaveVersion);
+            Save newSave = new()
+            {
+                FileId = folderName,
+                FileName = $"{folderName}.zip",
+                Version = SaveVersion,
+                LastSyncAt = null,
+                GameId = GameId,
+                Description = SaveDescription,
+                Hash = hash,
+                Size = size,
+                IsSynced = false,
+                ZipPath = zipPath,
+                CreatedAt = DateTime.Now,
+            };
+            Saves.Add(newSave);
+        }
+        [RelayCommand]
+        private async Task SyncSave()
+        {
+            Debug.WriteLine("кнопка синхрона");
+        }
+        [RelayCommand]
+        private async Task OverwriteSave()
+        {
+            Debug.WriteLine("кнопка перезаписи");
+        }
+        [RelayCommand]
+        public async Task RestoreSave()
+        {
+            Debug.WriteLine("Кнопка нажата");
 
         }
         [RelayCommand(CanExecute = nameof(ExeExists))]
@@ -116,12 +156,15 @@ namespace PSB.ViewModels
                         new UpdateLibraryGameRequest(Library.TimePlayed, endTime.ToString("yyyy-MM-dd HH:mm:ss")),
                         serialize: true
                     );
-                    GameData.SaveGameData(new GameResponse
+
+                    // Сохраняем обновленные данные с использованием новых менеджеров
+                    GameDataManager<Game>.SaveGame(Game);
+                    LibraryDataManager<Game>.SaveLibrary(Game, Library);
+                    if (Saves != null)
                     {
-                        Game = Game,
-                        Library = Library,
-                        Saves = Saves?.ToList()
-                    });
+                        SavesDataManager<Game>.SaveSaves(Game, Saves.ToList());
+                    }
+
                     GameLoaded?.Invoke();
                 }
                 catch (HttpRequestException ex)
@@ -169,16 +212,6 @@ namespace PSB.ViewModels
             {
                 App.LibraryService.UpdateLibraryMenu();
             }
-        }
-        public async Task<string> ZipFolder(string folderPath, string zipFilePath)
-        {
-            if (File.Exists(zipFilePath))
-            {
-                File.Delete(zipFilePath); // Удаляем существующий ZIP-файл, если он есть
-            }
-
-            ZipFile.CreateFromDirectory(folderPath, zipFilePath); // Создаём ZIP-архив
-            return zipFilePath;
         }
         public async Task<bool> UploadFile(string filePath)
         {
@@ -242,11 +275,6 @@ namespace PSB.ViewModels
             string zipFilePath = string.Empty;
             try
             {
-                // Шаг 1: Сжимаем папку в ZIP
-                zipFilePath = Path.Combine(Path.GetTempPath(), "saves.zip");
-                Debug.WriteLine($"Временный файл: {zipFilePath}");
-                await ZipFolder(GameData.GetSavesFolderPath(Game)!, zipFilePath);
-
                 // Шаг 2: Отправляем ZIP-файл на сервер
                 bool uploadSuccess = await UploadFile(zipFilePath);
 
@@ -281,14 +309,6 @@ namespace PSB.ViewModels
                 SuccessInfoBar.Message = $"Произошла ошибка: {ex.Message}";
                 SuccessInfoBar.Severity = InfoBarSeverity.Error;
                 SuccessInfoBar.IsOpen = true;
-            }
-            finally
-            {
-                // Удаляем временный ZIP-файл
-                if (!string.IsNullOrEmpty(zipFilePath) && File.Exists(zipFilePath))
-                {
-                    File.Delete(zipFilePath);
-                }
             }
         }
         [RelayCommand]
@@ -339,126 +359,6 @@ namespace PSB.ViewModels
             }
         }
         [RelayCommand]
-        public async Task OverwriteSave(Save save)
-        {
-            string zipFilePath = string.Empty;
-            try
-            {
-                // Шаг 1: Сжимаем папку в ZIP
-                zipFilePath = Path.Combine(Path.GetTempPath(), "saves.zip");
-                Debug.WriteLine($"Временный файл: {zipFilePath}");
-                await ZipFolder(GameData.GetSavesFolderPath(Game)!, zipFilePath);
-
-                // Шаг 2: Отправляем ZIP-файл на сервер для перезаписи
-                bool uploadSuccess = await OverwriteFile(zipFilePath, save);
-
-                if (uploadSuccess)
-                {
-                    // Обновляем список сохранений
-                    _ = GetGameAsync(true);
-                    OnPropertyChanged(nameof(Saves)); // Дополнительно уведомляем об изменении
-
-                    // Показываем уведомление об успехе
-                    SuccessInfoBar.Title = "Успешно";
-                    SuccessInfoBar.Message = "Сохранение успешно перезаписано.";
-                    SuccessInfoBar.Severity = InfoBarSeverity.Success;
-                    SuccessInfoBar.IsOpen = true;
-                }
-                else
-                {
-                    // Показываем уведомление об ошибке
-                    SuccessInfoBar.Title = "Ошибка";
-                    SuccessInfoBar.Message = "Не удалось перезаписать сохранение.";
-                    SuccessInfoBar.Severity = InfoBarSeverity.Error;
-                    SuccessInfoBar.IsOpen = true;
-                }
-            }
-            catch (Exception ex)
-            {
-                Debug.WriteLine($"Ошибка: {ex.Message}");
-
-                // Показываем уведомление об ошибке
-                SuccessInfoBar.Title = "Ошибка";
-                SuccessInfoBar.Message = $"Произошла ошибка: {ex.Message}";
-                SuccessInfoBar.Severity = InfoBarSeverity.Error;
-                SuccessInfoBar.IsOpen = true;
-            }
-            finally
-            {
-                // Удаляем временный ZIP-файл
-                if (!string.IsNullOrEmpty(zipFilePath) && File.Exists(zipFilePath))
-                {
-                    File.Delete(zipFilePath);
-                }
-            }
-        }
-
-        private async Task<bool> OverwriteFile(string filePath, Save save)
-        {
-            try
-            {
-                // Проверяем, существует ли файл
-                if (!File.Exists(filePath))
-                {
-                    Debug.WriteLine("Файл не найден.");
-                    return false;
-                }
-
-                // Начинаем загрузку
-                IsUploading = true;
-
-                // Читаем файл в массив байтов
-                var fileBytes = await File.ReadAllBytesAsync(filePath);
-
-                // Создаем MultipartFormDataContent
-                var content = new MultipartFormDataContent();
-
-                // Добавляем файл
-                var fileContent = new ByteArrayContent(fileBytes);
-                fileContent.Headers.ContentType = MediaTypeHeaderValue.Parse("application/zip");
-                content.Add(fileContent, "file", Path.GetFileName(filePath));
-
-                // Добавляем текстовые поля
-                content.Add(new StringContent(save.Version), "version"); // Версия
-                content.Add(new StringContent(Convert.ToString(GameId)), "game_id"); // ID игры
-                content.Add(new StringContent(save.Description), "description"); // Описание
-                content.Add(new StringContent(save.FileId), "file_id"); // ID файла для перезаписи
-
-                // Отправляем запрос
-                var res = await FetchAsync(
-                    HttpMethod.Post,
-                    $"google-drive/overwrite/{save.FileId}",
-                    body: content
-                );
-
-                if (res.IsSuccessStatusCode)
-                {
-                    Debug.WriteLine("Файл успешно перезаписан на сервере.");
-                    return true;
-                }
-                else
-                {
-                    Debug.WriteLine($"Ошибка при перезаписи файла: {res.StatusCode}");
-                    return false;
-                }
-            }
-            catch (Exception ex)
-            {
-                Debug.WriteLine($"Ошибка: {ex.Message}");
-                return false;
-            }
-            finally
-            {
-                IsUploading = false;
-            }
-        }
-        [RelayCommand]
-        public async Task RestoreSave()
-        {
-            Debug.WriteLine("Кнопка нажата");
-
-        }
-        [RelayCommand]
         public async Task AddToLibrary()
         {
             (var res, var body) = await FetchAsync<Library>(
@@ -474,13 +374,13 @@ namespace PSB.ViewModels
                 InLibrary = true;
                 ProfileViewModel.Libraries.Add(Library);
 
-                // Обновляем кэш
-                GameData.SaveGameData(new GameResponse
+                // Обновляем кэш с использованием новых менеджеров
+                GameDataManager<Game>.SaveGame(Game);
+                LibraryDataManager<Game>.SaveLibrary(Game, Library);
+                if (Saves != null)
                 {
-                    Game = Game,
-                    Library = Library,
-                    Saves = Saves?.ToList()
-                });
+                    SavesDataManager<Game>.SaveSaves(Game, Saves.ToList());
+                }
 
                 // Вызываем обновление интерфейса
                 GameLoaded?.Invoke();
@@ -508,38 +408,43 @@ namespace PSB.ViewModels
             Saves.Clear();
             foreach (var item in body.Save) // Теперь берем body.Data, а не body напрямую
             {
+                item.IsSynced = true;
                 Saves.Add(item);
             }
-            var gameResponse = new GameResponse { Game = Game, Library = Library, Saves = body.Save };
-            GameData.SaveGameData(gameResponse);
+
+            // Сохраняем сохранения с использованием нового менеджера
+            SavesDataManager<Game>.SaveSaves(Game, [.. Saves]);
         }
         public async Task GetGameAsync(bool ignoreCache)
         {
             if (!ignoreCache)
             {
-                if(!InLibrary)
+                if (!InLibrary)
                 {
                     // Проверяем, есть ли данные в кэше
-                    var cachedGameResponse = GameData.LoadGameData(GameId);
-                    if (cachedGameResponse != null)
+                    var cachedGame = GameDataManager<Game>.LoadGame(GameId, "Game");
+                    var cachedLibrary = LibraryDataManager<Game>.LoadLibrary(GameId, "Game");
+                    var cachedSaves = SavesDataManager<Game>.LoadSaves(GameId, "Game");
+
+                    if (cachedGame != null)
                     {
                         // Данные загружены из кэша
-                        Game = cachedGameResponse.Game;
-                        if (cachedGameResponse.Saves != null)
+                        Game = cachedGame;
+                        if (cachedSaves != null)
                         {
-                            Saves = new ObservableCollection<Save>(cachedGameResponse.Saves);
+                            Saves = new ObservableCollection<Save>(cachedSaves);
                         }
-                        FilePath = GameData.GetFilePath(Game)!;
+                        FilePath = PathDataManager<Game>.GetFilePath(Game)!;
+                        FolderPath = PathDataManager<Game>.GetSavesFolderPath(Game)!;
                         ExeExists = !string.IsNullOrEmpty(FilePath);
 
                         // Обновляем библиотеку, если она есть в кэше
-                        Library = cachedGameResponse.Library;
+                        Library = cachedLibrary;
                         UpdateLibraryDetails(Library);
                         GameLoaded?.Invoke();
                         return;
                     }
                 }
-                
             }
 
             // Загружаем с сервера, если нет данных в кэше или нужно обновить
@@ -551,24 +456,27 @@ namespace PSB.ViewModels
             if (res.IsSuccessStatusCode)
             {
                 Game = body!.Game;
-                FilePath = GameData.GetFilePath(Game)!;
+                FilePath = PathDataManager<Game>.GetFilePath(Game)!;
+                FolderPath = PathDataManager<Game>.GetSavesFolderPath(Game)!;
                 ExeExists = !string.IsNullOrEmpty(FilePath);
 
                 Library = body.Library;
                 UpdateLibraryDetails(Library);
 
-                if(body.Saves != null)
+                if (body.Saves != null)
                 {
                     Saves = new ObservableCollection<Save>(body.Saves);
                 }
-                // Сохраняем новые данные в кэш
-                GameData.SaveGameData(body);
+
+                // Сохраняем новые данные в кэш с использованием новых менеджеров
+                GameDataManager<Game>.SaveGame(Game);
+                LibraryDataManager<Game>.SaveLibrary(Game, Library);
+                SavesDataManager<Game>.SaveSaves(Game, body.Saves?.ToList() ?? new List<Save>());
                 Debug.WriteLine($"Данные для игры '{GameId}' сохранены в кэше.");
             }
 
             GameLoaded?.Invoke();
         }
-
         private void UpdateLibraryDetails(Library? library)
         {
             if (library != null)

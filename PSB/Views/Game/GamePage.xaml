@@ -6,10 +6,12 @@
     xmlns:local="using:PSB.Views"
     xmlns:vm="using:PSB.ViewModels"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" xmlns:models="using:PSB.Models" xmlns:core="using:Windows.Media.Core"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:models="using:PSB.Models"
     mc:Ignorable="d"
     Background="{ThemeResource ApplicationPageBackgroundThemeBrush}"
     Name="{x:Bind GameViewModel.Game.Name, Mode=OneWay}">
+
     <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
         <StackPanel>
             <Grid>
@@ -64,11 +66,11 @@
                 </StackPanel>
             </Grid>
             <!-- Остальной контент -->
-            <InfoBar Title="{x:Bind GameViewModel.SuccessInfoBar.Title,         Mode=OneWay}"
-         Message="{x:Bind GameViewModel.SuccessInfoBar.Message,     Mode=OneWay}"
-         Severity="{x:Bind GameViewModel.SuccessInfoBar.Severity,   Mode=OneWay}"
-         IsOpen="{x:Bind GameViewModel.SuccessInfoBar.IsOpen,       Mode=OneWay}"
-         TabIndex="10"/>
+            <InfoBar Title="{x:Bind GameViewModel.SuccessInfoBar.Title, Mode=OneWay}"
+                      Message="{x:Bind GameViewModel.SuccessInfoBar.Message, Mode=OneWay}"
+                      Severity="{x:Bind GameViewModel.SuccessInfoBar.Severity, Mode=OneWay}"
+                      IsOpen="{x:Bind GameViewModel.SuccessInfoBar.IsOpen, Mode=OneWay}"
+                      TabIndex="10"/>
             <StackPanel Margin="16,0">
                 <StackPanel Orientation="Vertical" Spacing="12">
                     <StackPanel Orientation="Horizontal">
@@ -88,59 +90,69 @@
                         </Button>
                     </StackPanel>
 
-                    <ListView ItemsSource="{x:Bind GameViewModel.Saves, Mode=TwoWay}" BorderThickness="0" Padding="0" SingleSelectionFollowsFocus="False" IsItemClickEnabled="False">
-                        <!-- Разметка для каждого элемента -->
-                        <ListView.ItemTemplate>
-                            <DataTemplate x:DataType="models:Save">
-                                <StackPanel Orientation="Horizontal">
-                                    <!-- Данные первой строки -->
-                                    <StackPanel>
-                                        <TextBlock HorizontalAlignment="Center" >
-                                         <Run Text="Текст перед привязкой: " />
-                                         <Run Text="{x:Bind FileName}" />
-                                    </TextBlock>
-                                    <TextBlock Text="{x:Bind Version}" HorizontalAlignment="Center" />
-                                    <TextBlock Text="{x:Bind Size}" HorizontalAlignment="Center" />
-                                    <TextBlock Text="{x:Bind Description}" HorizontalAlignment="Center" />
-                                    <TextBlock Text="{x:Bind UpdatedAt}" HorizontalAlignment="Center" />
-                                    <TextBlock Text="{x:Bind CreatedAt}" HorizontalAlignment="Center" />
-                                    <TextBlock Text="{x:Bind UserCloudServiceId}" HorizontalAlignment="Center" />
-                                    </StackPanel>
-                                    
+                    <Grid RowDefinitions="*,*">
+                        <!-- Заголовки таблицы -->
+                        <Grid Grid.Row="0" ColumnDefinitions="*,*,*,*" ColumnSpacing="12" Padding="8">
+                            <TextBlock Text="Название" VerticalAlignment="Center" HorizontalAlignment="Stretch"/>
+                            <TextBlock Text="Версия" Grid.Column="1" VerticalAlignment="Center" HorizontalAlignment="Stretch"/>
+                            <TextBlock Text="Размер" Grid.Column="2" VerticalAlignment="Center" HorizontalAlignment="Stretch"/>
+                            <TextBlock Text="Дата создания" Grid.Column="3" VerticalAlignment="Center" HorizontalAlignment="Stretch"/>
+                        </Grid>
 
-                                    <!-- Кнопки действий (вторая строка) -->
-                                    <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" Orientation="Vertical" Spacing="6">
-                                        <Button Command="{x:Bind vm:GameViewModel.Instance.DeleteSaveCommand}" CommandParameter="{x:Bind}" >
-                                            <FontIcon Glyph="&#xE74D;" />
-                                        </Button>
-                                        <Button>
-                                            <FontIcon Glyph="&#xE777;" />
-                                            <Button.Flyout>
-                                                <Flyout>
-                                                    <StackPanel Spacing="6">
-                                                        <!-- Версия сохранения -->
-                                                        <TextBox PlaceholderText="Версия сохранения" Text="{x:Bind Version, Mode=TwoWay}" />
+                        <!-- Список данных -->
+                        <ListView Grid.Row="1" ItemsSource="{x:Bind GameViewModel.Saves, Mode=TwoWay}" BorderThickness="0" Padding="0" SingleSelectionFollowsFocus="False" IsItemClickEnabled="False">
+                            <ListView.ItemTemplate>
+                                <DataTemplate x:DataType="models:Save">
+                                    <Grid Grid.RowDefinitions="Auto,Auto" ColumnSpacing="12" Padding="8">
+                                        <!-- Данные первой строки -->
+                                        <Grid Grid.Row="0" ColumnDefinitions="*,*,*,*" ColumnSpacing="12">
+                                            <TextBlock Text="{x:Bind FileName}" VerticalAlignment="Center" HorizontalAlignment="Stretch"/>
+                                            <TextBlock Text="{x:Bind Version}" Grid.Column="1" VerticalAlignment="Center" HorizontalAlignment="Stretch"/>
+                                            <TextBlock Text="{x:Bind Size}" Grid.Column="2" VerticalAlignment="Center" HorizontalAlignment="Stretch"/>
+                                            <TextBlock Text="{x:Bind CreatedAt}" Grid.Column="3" VerticalAlignment="Center" HorizontalAlignment="Stretch"/>
+                                        </Grid>
 
-                                                        <!-- Описание сохранения -->
-                                                        <TextBox PlaceholderText="Описание сохранения" Text="{x:Bind Description, Mode=TwoWay}" />
+                                        <!-- Кнопки действий (вторая строка) -->
+                                        <StackPanel Grid.Row="1" Orientation="Horizontal" Spacing="6">
+                                            <Button Command="{x:Bind vm:GameViewModel.Instance.SyncSaveCommand}" CommandParameter="{x:Bind}" Visibility="{x:Bind IsSynced, Converter={StaticResource BoolToVisibilityConverter}, ConverterParameter=True}">
+                                                <StackPanel Orientation="Horizontal">
+                                                    <FontIcon Glyph="&#xE895;" />
+                                                    <TextBlock Text="Синхронизировать"/>
+                                                </StackPanel>
+                                            </Button>
+                                            <Button Command="{x:Bind vm:GameViewModel.Instance.RestoreSaveCommand}" CommandParameter="{x:Bind}">
+                                                <StackPanel Orientation="Horizontal">
+                                                    <FontIcon Glyph="&#xE896;" />
+                                                    <TextBlock Text="Восстановить"/>
+                                                </StackPanel>
+                                            </Button>
+                                            <Button>
+                                                <StackPanel Orientation="Horizontal">
+                                                    <FontIcon Glyph="&#xE777;" />
+                                                    <TextBlock Text="Перезаписать"/>
+                                                </StackPanel>
+                                                <Button.Flyout>
+                                                    <Flyout>
+                                                        <StackPanel Spacing="6">
+                                                            <TextBox PlaceholderText="Описание сохранения" Text="{x:Bind Description, Mode=TwoWay}"/>
+                                                            <Button HorizontalAlignment="Center" Command="{x:Bind vm:GameViewModel.Instance.OverwriteSaveCommand}" CommandParameter="{x:Bind}" Content="Перезаписать"/>
+                                                        </StackPanel>
+                                                    </Flyout>
+                                                </Button.Flyout>
+                                            </Button>
+                                            <Button Command="{x:Bind vm:GameViewModel.Instance.DeleteSaveCommand}" CommandParameter="{x:Bind}">
+                                                <StackPanel Orientation="Horizontal">
+                                                    <FontIcon Glyph="&#xE74D;" />
+                                                    <TextBlock Text="Удалить"/>
+                                                </StackPanel>
+                                            </Button>
+                                        </StackPanel>
+                                    </Grid>
+                                </DataTemplate>
+                            </ListView.ItemTemplate>
+                        </ListView>
+                    </Grid>
 
-                                                        <!-- Кнопка для перезаписи -->
-                                                        <Button HorizontalAlignment="Center" 
-                                                            Command="{x:Bind vm:GameViewModel.Instance.OverwriteSaveCommand}" 
-                                                            CommandParameter="{x:Bind}" 
-                                                            Content="Перезаписать" />
-                                                    </StackPanel>
-                                                </Flyout>
-                                            </Button.Flyout>
-                                        </Button>
-                                        <Button Command="{x:Bind vm:GameViewModel.Instance.RestoreSaveCommand}" CommandParameter="{x:Bind}">
-                                            <FontIcon Glyph="&#xE896;" />
-                                        </Button>
-                                    </StackPanel>
-                                </StackPanel>
-                            </DataTemplate>
-                        </ListView.ItemTemplate>
-                    </ListView>
 
 
                     <StackPanel Orientation="Vertical" Spacing="16">
@@ -155,7 +167,7 @@
                                     <StackPanel Spacing="6">
                                         <TextBox PlaceholderText="Версия сохранения" Text="{x:Bind GameViewModel.SaveVersion, Mode=TwoWay}"/>
                                         <TextBox PlaceholderText="Описание сохранения" Text="{x:Bind GameViewModel.SaveDescription, Mode=TwoWay}"/>
-                                        <Button HorizontalAlignment="Center" Command="{x:Bind GameViewModel.UploadSaveCommand}" Content="Создать"></Button>
+                                        <Button HorizontalAlignment="Center" Command="{x:Bind GameViewModel.CreateSaveCommand}" Content="Создать"></Button>
                                     </StackPanel>
                                 </Flyout>
                             </Button.Flyout>
