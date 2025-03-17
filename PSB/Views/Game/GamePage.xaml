@@ -117,7 +117,7 @@
 
                                         <!-- Кнопки действий (вторая строка) -->
                                         <StackPanel Grid.Row="1" Orientation="Horizontal" Spacing="6">
-                                            <Button Command="{x:Bind vm:GameViewModel.Instance.SyncSaveCommand}" CommandParameter="{x:Bind}" Visibility="{x:Bind IsSynced, Converter={StaticResource BoolToVisibilityConverter}, ConverterParameter=True}">
+                                            <Button Command="{x:Bind vm:GameViewModel.Instance.SyncSaveCommand}" CommandParameter="{x:Bind}" Visibility="{x:Bind IsSynced, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}, ConverterParameter=True}">
                                                 <StackPanel Orientation="Horizontal">
                                                     <FontIcon Glyph="&#xE895;" />
                                                     <TextBlock Text="Синхронизировать"/>

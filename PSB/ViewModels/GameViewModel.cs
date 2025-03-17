@@ -81,11 +81,12 @@ namespace PSB.ViewModels
         [RelayCommand]
         private async Task CreateSave()
         {
-            if (FolderPath == null)
-                return;
+            if (FolderPath == null) return;
+
             var zipCreator = new ZipCreator();
-            (string folderName, string zipPath, string hash, ulong size) = await zipCreator.CreateZip(FolderPath, Game.Name, SaveVersion);
-            Save newSave = new()
+            var (folderName, zipPath, hash, size) = await zipCreator.CreateZip(FolderPath, Game.Name, SaveVersion);
+
+            var newSave = new Save
             {
                 FileId = folderName,
                 FileName = $"{folderName}.zip",
@@ -99,12 +100,27 @@ namespace PSB.ViewModels
                 ZipPath = zipPath,
                 CreatedAt = DateTime.Now,
             };
+
             Saves.Add(newSave);
             SavesDataManager<IGame>.SaveSaves(Game, Saves.ToList());
         }
         [RelayCommand]
-        private async Task SyncSave()
+        private async Task SyncSave(Save save)
         {
+            if(save.IsSynced == true) return;
+            SaveVersion = save.Version;
+            SaveDescription = save.Description;
+            bool uploadSuccess = await UploadFile(save.ZipPath);
+            if (uploadSuccess)
+            {
+                save.IsSynced = true;
+                SaveVersion = "";
+                SaveDescription = "";
+
+                // Обновляем коллекцию и уведомляем интерфейс
+                OnPropertyChanged(nameof(Saves));
+                GameLoaded?.Invoke();
+            }
             Debug.WriteLine("кнопка синхрона");
         }
         [RelayCommand]
@@ -219,49 +235,112 @@ namespace PSB.ViewModels
         }
         public async Task<bool> UploadFile(string filePath)
         {
+            if (!File.Exists(filePath))
+            {
+                Debug.WriteLine("Файл не найден.");
+                return false;
+            }
+
             try
             {
-                // Проверяем, существует ли файл
-                if (!File.Exists(filePath))
-                {
-                    Debug.WriteLine("Файл не найден.");
-                    return false;
-                }
-                // Начинаем загрузку
                 IsUploading = true;
+
                 // Читаем файл в массив байтов
                 var fileBytes = await File.ReadAllBytesAsync(filePath);
 
                 // Создаем MultipartFormDataContent
-                var content = new MultipartFormDataContent();
+                var content = new MultipartFormDataContent
+        {
+            { new ByteArrayContent(fileBytes), "file", Path.GetFileName(filePath) },
+            { new StringContent(SaveVersion), "version" },
+            { new StringContent(GameId.ToString()), "game_id" },
+            { new StringContent(SaveDescription), "description" }
+        };
 
-                // Добавляем файл
-                var fileContent = new ByteArrayContent(fileBytes);
-                fileContent.Headers.ContentType = MediaTypeHeaderValue.Parse("application/zip");
-                content.Add(fileContent, "file", Path.GetFileName(filePath));
+                // Создаем HttpClient
+                using var httpClient = new HttpClient();
 
-                //TODO: предлагать на выбор
+                // Устанавливаем базовый URL
+                httpClient.BaseAddress = new Uri("https://savayaqu.duckdns.org/playsaveback/api/");
 
-                // Добавляем текстовые поля
-                content.Add(new StringContent(SaveVersion), "version"); // Версия
-                content.Add(new StringContent(Convert.ToString(GameId)), "game_id"); // ID игры
-                content.Add(new StringContent(SaveDescription), "description"); // ID игры
+                // Добавляем Bearer Token в заголовки
+                if (!string.IsNullOrEmpty(AuthData.Token))
+                {
+                    httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", AuthData.Token);
+                }
 
                 // Отправляем запрос
-                var res = await FetchAsync(
-                    HttpMethod.Post,
-                    "google-drive/upload",
-                    body: content
-                );
-                
-                if (res.IsSuccessStatusCode)
+                var response = await httpClient.PostAsync("google-drive/upload", content);
+
+                // Логируем статус ответа
+                Debug.WriteLine($"Статус ответа: {response.StatusCode}");
+
+                // Логируем заголовки ответа
+                Debug.WriteLine("Заголовки ответа:");
+                foreach (var header in response.Headers)
                 {
-                    Debug.WriteLine("Файл успешно загружен на сервер.");
+                    Debug.WriteLine($"{header.Key}: {string.Join(", ", header.Value)}");
+                }
+
+                // Читаем ответ как строку
+                var responseContent = await response.Content.ReadAsStringAsync();
+                Debug.WriteLine("Ответ от сервера (сырой): " + responseContent);
+
+                // Проверяем, что ответ не пустой
+                if (string.IsNullOrEmpty(responseContent))
+                {
+                    Debug.WriteLine("Ответ от сервера пустой.");
+                    return false;
+                }
+
+                // Если статус ответа 401 Unauthorized
+                if (response.StatusCode == System.Net.HttpStatusCode.Unauthorized)
+                {
+                    Debug.WriteLine("Ошибка авторизации: Неверный или отсутствующий токен.");
+                    return false;
+                }
+
+                // Если статус ответа не успешный
+                if (!response.IsSuccessStatusCode)
+                {
+                    Debug.WriteLine($"Ошибка при загрузке файла: {response.StatusCode}");
+                    return false;
+                }
+
+                // Десериализуем ответ в объект Save
+                try
+                {
+                    var updatedSave = JsonSerializer.Deserialize<Save>(responseContent);
+                    if (updatedSave == null)
+                    {
+                        Debug.WriteLine("Не удалось десериализовать ответ от сервера.");
+                        return false;
+                    }
+
+                    // Находим текущее сохранение в коллекции Saves
+                    var existingSave = Saves.FirstOrDefault(s => s.FileId == updatedSave.FileId);
+                    if (existingSave != null)
+                    {
+                        // Обновляем данные текущего сохранения
+                        existingSave.FileName = updatedSave.FileName;
+                        existingSave.Version = updatedSave.Version;
+                        existingSave.Size = updatedSave.Size;
+                        existingSave.Description = updatedSave.Description;
+                        existingSave.LastSyncAt = updatedSave.LastSyncAt;
+                        existingSave.Hash = updatedSave.Hash;
+                        existingSave.IsSynced = true;
+
+                        // Уведомляем интерфейс об изменениях
+                        OnPropertyChanged(nameof(Saves));
+                        GameLoaded?.Invoke();
+                    }
+
+                    Debug.WriteLine("Сохранение успешно синхронизировано и обновлено.");
                     return true;
                 }
-                else
+                catch (JsonException jsonEx)
                 {
-                    Debug.WriteLine($"Ошибка при загрузке файла: {res.StatusCode}");
+                    Debug.WriteLine($"Ошибка десериализации JSON: {jsonEx.Message}");
                     return false;
                 }
             }
@@ -270,7 +349,10 @@ namespace PSB.ViewModels
                 Debug.WriteLine($"Ошибка: {ex.Message}");
                 return false;
             }
-            finally { IsUploading = false; } 
+            finally
+            {
+                IsUploading = false;
+            }
         }
 
         [RelayCommand]
@@ -318,6 +400,11 @@ namespace PSB.ViewModels
         [RelayCommand]
         public async Task DeleteSave(Save save)
         {
+            if(save.IsSynced == false)
+            {
+                Saves?.Remove(save);
+                return;
+            }
             try
             {
                 // Отправляем запрос на удаление файла
@@ -439,8 +526,6 @@ namespace PSB.ViewModels
                 {
                     // Проверяем, есть ли данные в кэше
                     var cachedGame = GameDataManager.LoadGame(Type, GameId);
-                    Debug.WriteLine("------------------------------------------------------");
-                    Debug.WriteLine(cachedGame);
                     var cachedLibrary = LibraryDataManager<IGame>.LoadLibrary(Type, GameId);
                     var cachedSaves = SavesDataManager<IGame>.LoadSaves(Type, GameId);
 

@@ -14,7 +14,7 @@ namespace PSB
         public ProfileViewModel ProfileViewModel { get; set; }
 
         private readonly NavigationService _navigationService;
-        private readonly LibraryService _libraryService;
+        //private readonly LibraryService _libraryService;
         private readonly AuthService _authService;
 
         public Frame ContentFrameControl => ContentFrame;
@@ -32,7 +32,7 @@ namespace PSB
             // Инициализируем сервисы
             _authService = new AuthService(ProfileViewModel, AuthNav);
             _navigationService = new NavigationService(ContentFrame, NavView, HeaderText);
-            _libraryService = new LibraryService(NavView, ProfileViewModel, _navigationService);
+            //_libraryService = new LibraryService(NavView, ProfileViewModel, _navigationService);
 
             // Обновляем авторизацию при старте
             _ = _authService.UpdateAuthNavAsync();

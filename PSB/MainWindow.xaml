@@ -14,13 +14,14 @@
             x:Name="NavView"
             IsBackEnabled="True"
             AlwaysShowHeader="True"
-            PaneTitle="Menu"
             PaneDisplayMode="Left"
             SelectionFollowsFocus="Disabled"
             IsTabStop="False"
             IsBackButtonVisible="Collapsed"
             IsSettingsVisible="False"
-            IsTitleBarAutoPaddingEnabled="False">
+            IsTitleBarAutoPaddingEnabled="False"
+            IsPaneToggleButtonVisible="False"
+            IsPaneOpen="True">
 
         <!-- Заголовок с кнопкой "Назад" -->
         <NavigationView.Header >
@@ -51,13 +52,12 @@
 
 
             <NavigationViewItem Content="Home Page" Tag="HomePage" Icon="Home" IsSelected="True"/>
-            <NavigationViewItem Content="Catalog" Tag="CatalogPage">
+            <NavigationViewItem Content="КАТАЛОГ" Tag="CatalogPage">
                 <NavigationViewItem.Icon>
                     <FontIcon Glyph="&#xF0E2;"/>
                 </NavigationViewItem.Icon>
             </NavigationViewItem>
-            <NavigationViewItem Content="Settings" Tag="SettingsPage" Icon="Setting"/>
-            <NavigationViewItemHeader Content="БИБЛИОТЕКА" />
+            <NavigationViewItem Content="НАСТРОЙКИ" Tag="SettingsPage" Icon="Setting"/>
         </NavigationView.MenuItems>
         <Frame x:Name="ContentFrame" />
     </NavigationView>

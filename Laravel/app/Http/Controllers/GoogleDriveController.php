@@ -74,7 +74,6 @@ class GoogleDriveController extends Controller
     public function uploadFile(UploadSaveRequest $request)
     {
         $user = auth()->user();
-        $game = Game::query()->find($request->game_id);
         $fileRequest = $request->file('file');
         $filePath = $fileRequest->getPathname();
         $fileName = $fileRequest->getClientOriginalName();
@@ -85,6 +84,16 @@ class GoogleDriveController extends Controller
 
         $googleDriveService = new GoogleDriveService($service);
 
+        // Определяем, какой ID использовать: side_game_id или game_id
+        $gameId = $request->game_id;
+        $sideGameId = $request->side_game_id;
+
+        // Получаем название игры для создания папки
+        $game = Game::query()->find($gameId); // Если game_id передан, используем его
+        if ($sideGameId) {
+            $game = Game::query()->where('side_game_id', $sideGameId)->first(); // Если side_game_id передан, ищем игру по нему
+        }
+
         // Создаем структуру папок
         $rootFolderId = $googleDriveService->getOrCreateFolder('PlaySaveBack');
         $gameFolderId = $googleDriveService->getOrCreateFolder($game->name, $rootFolderId);
@@ -93,19 +102,28 @@ class GoogleDriveController extends Controller
         // Загружаем файл
         $fileId = $googleDriveService->uploadFile($filePath, $fileName, $saveVersionFolderId);
 
-        // Сохраняем информацию о файле в базе данных
-        $save = Save::query()->create([
+        // Подготавливаем данные для создания Save
+        $saveData = [
             'file_id' => $fileId,
             'file_name' => $fileName,
-            'game_id' => $request->game_id,
             'version' => $request->version,
-            'description' => $request->description ?? null,
             'size' => $fileSize,
+            'description' => $request->description ?? null,
             'user_id' => $user->id,
             'hash' => hash('sha256', file_get_contents($fileRequest)),
             'last_sync_at' => Carbon::now(),
             'user_cloud_service_id' => $service->id,
-        ]);
+        ];
+
+        // Заполняем либо game_id, либо side_game_id
+        if ($sideGameId) {
+            $saveData['side_game_id'] = $sideGameId;
+        } else {
+            $saveData['game_id'] = $gameId;
+        }
+
+        // Сохраняем информацию о файле в базе данных
+        $save = Save::query()->create($saveData);
 
         return response()->json(SaveResource::make($save), 201);
     }
