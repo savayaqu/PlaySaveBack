@@ -2,29 +2,27 @@
 using System.Diagnostics;
 using System.Text.Json;
 using PSB.Interfaces;
+using PSB.Models;
 using Windows.Storage;
 
 namespace PSB.Utils
 {
-    public static class GameDataManager<T> where T : IGame
+    public static class GameDataManager
     {
         private static readonly ApplicationDataContainer LocalSettings = ApplicationData.Current.LocalSettings;
 
-        // Генерация уникального ключа для игры
-        private static string GetGameKey(T game)
+        private static readonly JsonSerializerOptions JsonOptions = new()
         {
-            if (game == null)
-            {
-                throw new ArgumentNullException(nameof(game), "Game cannot be null.");
-            }
-            return $"{game.Type}_{game.Id}_Game";
-        }
-        // Сохранить данные игры
-        public static void SaveGame(T game)
+            TypeInfoResolver = GameJsonContext.Default
+        };
+
+        private static string GetGameKey(IGame game) => $"{game.Type}_{game.Id}_Game";
+
+        public static void SaveGame(IGame game)
         {
             try
             {
-                LocalSettings.Values[GetGameKey(game)] = JsonSerializer.Serialize(game);
+                LocalSettings.Values[GetGameKey(game)] = JsonSerializer.Serialize(game, JsonOptions);
                 Debug.WriteLine($"Данные игры '{game.Id}' (тип: {game.Type}) успешно сохранены.");
             }
             catch (Exception ex)
@@ -33,38 +31,23 @@ namespace PSB.Utils
             }
         }
 
-        // Загрузить данные игры
-        public static T? LoadGame(T game)
+        public static IGame? LoadGame(string type, ulong gameId)
         {
             try
             {
-                var key = GetGameKey(game);
+                var key = $"{type}_{gameId}_Game";
                 if (LocalSettings.Values.TryGetValue(key, out var gameJson))
                 {
-                    return JsonSerializer.Deserialize<T>(gameJson.ToString()!);
+                    Debug.WriteLine($"Данные игры '{gameId}' (тип: {type}) успешно загружены из кэша.");
+                    return JsonSerializer.Deserialize<IGame>(gameJson.ToString()!, JsonOptions);
                 }
             }
             catch (Exception ex)
             {
                 Debug.WriteLine($"Ошибка при загрузке данных игры: {ex.Message}");
             }
-
-            return default;
-        }
-
-        // Удалить данные игры
-        public static void RemoveGame(T game)
-        {
-            try
-            {
-                var key = GetGameKey(game);
-                LocalSettings.Values.Remove(key);
-                Debug.WriteLine($"Данные игры '{game.Id}' (тип: {game.Type}) удалены.");
-            }
-            catch (Exception ex)
-            {
-                Debug.WriteLine($"Ошибка при удалении данных игры: {ex.Message}");
-            }
+            return null;
         }
     }
+
 }

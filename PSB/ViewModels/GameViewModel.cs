@@ -161,7 +161,7 @@ namespace PSB.ViewModels
                     );
 
                     // Сохраняем обновленные данные с использованием новых менеджеров
-                    GameDataManager<IGame>.SaveGame(Game);
+                    GameDataManager.SaveGame(Game);
                     LibraryDataManager<IGame>.SaveLibrary(Game, Library);
                     if (Saves != null)
                     {
@@ -378,7 +378,7 @@ namespace PSB.ViewModels
                 ProfileViewModel.Libraries.Add(Library);
 
                 // Обновляем кэш с использованием новых менеджеров
-                GameDataManager<IGame>.SaveGame(Game);
+                GameDataManager.SaveGame(Game);
                 LibraryDataManager<IGame>.SaveLibrary(Game, Library);
                 if (Saves != null)
                 {
@@ -419,15 +419,17 @@ namespace PSB.ViewModels
             SavesDataManager<IGame>.SaveSaves(Game, [.. Saves]);
         }
         public async Task GetGameAsync(bool ignoreCache)
-        {
+        {            
             if (!ignoreCache)
             {
                 if (!InLibrary)
                 {
                     // Проверяем, есть ли данные в кэше
-                    var cachedGame = GameDataManager<IGame>.LoadGame(Game);
-                    var cachedLibrary = LibraryDataManager<IGame>.LoadLibrary(Game);
-                    var cachedSaves = SavesDataManager<IGame>.LoadSaves(Game);
+                    var cachedGame = GameDataManager.LoadGame(Type, GameId);
+                    Debug.WriteLine("------------------------------------------------------");
+                    Debug.WriteLine(cachedGame);
+                    var cachedLibrary = LibraryDataManager<IGame>.LoadLibrary(Type, GameId);
+                    var cachedSaves = SavesDataManager<IGame>.LoadSaves(Type, GameId);
 
                     if (cachedGame != null)
                     {
@@ -472,7 +474,7 @@ namespace PSB.ViewModels
                 }
 
                 // Сохраняем новые данные в кэш с использованием новых менеджеров
-                GameDataManager<IGame>.SaveGame(Game);
+                GameDataManager.SaveGame(Game);
                 LibraryDataManager<IGame>.SaveLibrary(Game, Library);
                 SavesDataManager<IGame>.SaveSaves(Game, body.Saves?.ToList() ?? new List<Save>());
                 Debug.WriteLine($"Данные для игры '{GameId}' сохранены в кэше.");

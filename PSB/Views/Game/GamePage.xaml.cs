@@ -44,6 +44,7 @@ namespace PSB.Views
             if (GameViewModel?.Game != null)
             {
                 App.MainWindow.HeaderTextBlock.Text = GameViewModel.Game.Name;
+                App.NavigationService.SyncNavigationViewSelection(App.NavigationService.GetCurrentPage());
             }
         }
     }

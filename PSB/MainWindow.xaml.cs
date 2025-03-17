@@ -27,7 +27,7 @@ namespace PSB
             Instance = this;
             this.InitializeComponent();
             // Очистка локалки
-            ApplicationData.Current.LocalSettings.Values.Clear();
+            //ApplicationData.Current.LocalSettings.Values.Clear();
             ProfileViewModel = new ProfileViewModel();
             // Инициализируем сервисы
             _authService = new AuthService(ProfileViewModel, AuthNav);

@@ -13,21 +13,14 @@ namespace PSB.Utils
         private static readonly ApplicationDataContainer LocalSettings = ApplicationData.Current.LocalSettings;
 
         // Генерация уникального ключа для сохранений
-        private static string GetSavesKey(T game)
-        {
-            if (game == null)
-            {
-                throw new ArgumentNullException(nameof(game), "Game cannot be null.");
-            }
-            return $"{game.Type}_{game.Id}_Saves";
-        }
+        private static string GetSavesKey(string type, ulong gameId) => $"{type}_{gameId}_Saves";
 
         // Сохранить данные сохранений
         public static void SaveSaves(T game, List<Save> saves)
         {
             try
             {
-                LocalSettings.Values[GetSavesKey(game)] = JsonSerializer.Serialize(saves);
+                LocalSettings.Values[GetSavesKey(game.Type, game.Id)] = JsonSerializer.Serialize(saves);
                 Debug.WriteLine($"Данные сохранений для игры '{game.Id}' (тип: {game.Type}) успешно сохранены.");
             }
             catch (Exception ex)
@@ -37,11 +30,11 @@ namespace PSB.Utils
         }
 
         // Загрузить данные сохранений
-        public static List<Save>? LoadSaves(T game)
+        public static List<Save>? LoadSaves(string type, ulong gameId)
         {
             try
             {
-                var key = GetSavesKey(game);
+                var key = GetSavesKey(type, gameId);
                 if (LocalSettings.Values.TryGetValue(key, out var savesJson))
                 {
                     return JsonSerializer.Deserialize<List<Save>>(savesJson.ToString()!);
@@ -56,13 +49,13 @@ namespace PSB.Utils
         }
 
         // Удалить данные сохранений
-        public static void RemoveSaves(T game)
+        public static void RemoveSaves(string type, ulong gameId)
         {
             try
             {
-                var key = GetSavesKey(game);
+                var key = GetSavesKey(type, gameId);
                 LocalSettings.Values.Remove(key);
-                Debug.WriteLine($"Данные сохранений для игры '{game.Id}' (тип: {game.Type}) удалены.");
+                Debug.WriteLine($"Данные сохранений для игры '{gameId}' (тип: {type}) удалены.");
             }
             catch (Exception ex)
             {
