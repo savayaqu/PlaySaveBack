@@ -9,57 +9,8 @@ namespace PSB.Utils
 {
     public static class LibraryDataManager<T> where T : IGame
     {
-        private static readonly ApplicationDataContainer LocalSettings = ApplicationData.Current.LocalSettings;
-
-        // Генерация уникального ключа для библиотеки
-        private static string GetLibraryKey(string type, ulong gameId) => $"{type}_{gameId}_Library";
-
-        // Сохранить данные библиотеки
-        public static void SaveLibrary(T game, Library library)
-        {
-            try
-            {
-                LocalSettings.Values[GetLibraryKey(game.Type, game.Id)] = JsonSerializer.Serialize(library);
-                Debug.WriteLine($"Данные библиотеки для игры '{game.Id}' (тип: {game.Type}) успешно сохранены.");
-            }
-            catch (Exception ex)
-            {
-                Debug.WriteLine($"Ошибка при сохранении данных библиотеки: {ex.Message}");
-            }
-        }
-
-        // Загрузить данные библиотеки
-        public static Library? LoadLibrary(string type, ulong gameId)
-        {
-            try
-            {
-                var key = GetLibraryKey(type, gameId);
-                if (LocalSettings.Values.TryGetValue(key, out var libraryJson))
-                {
-                    return JsonSerializer.Deserialize<Library>(libraryJson.ToString()!);
-                }
-            }
-            catch (Exception ex)
-            {
-                Debug.WriteLine($"Ошибка при загрузке данных библиотеки: {ex.Message}");
-            }
-
-            return null;
-        }
-
-        // Удалить данные библиотеки
-        public static void RemoveLibrary(string type, ulong gameId)
-        {
-            try
-            {
-                var key = GetLibraryKey(type, gameId);
-                LocalSettings.Values.Remove(key);
-                Debug.WriteLine($"Данные библиотеки для игры '{gameId}' (тип: {type}) удалены.");
-            }
-            catch (Exception ex)
-            {
-                Debug.WriteLine($"Ошибка при удалении данных библиотеки: {ex.Message}");
-            }
-        }
+        public static void SaveLibrary(T game, Library library) => BaseDataManager<Library>.SaveData(game.Type, game.Id, library, "Library");
+        public static Library? LoadLibrary(string type, ulong gameId) => BaseDataManager<Library>.LoadData(type, gameId, "Library");
+        public static void RemoveLibrary(string type, ulong gameId) => BaseDataManager<Library>.RemoveData(type, gameId, "Library");
     }
 }

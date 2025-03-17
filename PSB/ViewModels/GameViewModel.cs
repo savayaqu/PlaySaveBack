@@ -100,6 +100,7 @@ namespace PSB.ViewModels
                 CreatedAt = DateTime.Now,
             };
             Saves.Add(newSave);
+            SavesDataManager<IGame>.SaveSaves(Game, Saves.ToList());
         }
         [RelayCommand]
         private async Task SyncSave()
@@ -407,17 +408,29 @@ namespace PSB.ViewModels
             });
             Debug.WriteLine(bodyJson);
 
-            // Очистка коллекции и добавление новых элементов
+            // Сохраняем локальные несинхронизированные сохранения
+            var localSaves = Saves?.Where(s => !s.IsSynced).ToList() ?? new List<Save>();
+
+            // Очистка коллекции
             Saves.Clear();
-            foreach (var item in body.Save) // Теперь берем body.Data, а не body напрямую
+
+            // Добавление сохранений с сервера
+            foreach (var item in body.Save)
             {
                 item.IsSynced = true;
                 Saves.Add(item);
             }
 
+            // Добавляем обратно локальные сохранения
+            foreach (var localSave in localSaves)
+            {
+                Saves.Add(localSave);
+            }
+
             // Сохраняем сохранения с использованием нового менеджера
             SavesDataManager<IGame>.SaveSaves(Game, [.. Saves]);
         }
+
         public async Task GetGameAsync(bool ignoreCache)
         {            
             if (!ignoreCache)

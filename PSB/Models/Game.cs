@@ -5,6 +5,10 @@ namespace PSB.Models
 {
     public class Game : IGame
     {
+        [JsonPropertyOrder(0)]  // Указываем, что это первое поле в JSON
+        [JsonPropertyName("type")]
+        public string Type { get; set; } = "Game";  // Теперь JSON его учитывает
+
         [JsonPropertyName("id")] public required ulong Id { get; set; }
         [JsonPropertyName("name")] public required string Name { get; set; }
         [JsonPropertyName("platform")] public required int Platform { get; set; }
@@ -12,6 +16,5 @@ namespace PSB.Models
         [JsonPropertyName("header")] public string? Header { get; set; }        
         [JsonPropertyName("library_img")] public string? LibraryImg{ get; set; }
 
-        public string Type => "Game";
     }
 }
