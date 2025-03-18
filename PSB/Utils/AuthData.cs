@@ -10,6 +10,9 @@ using User = PSB.Models.User;
 using static PSB.Utils.Fetch;
 using System.Net.Http;
 using Microsoft.UI.Xaml.Controls;
+using PSB.Api.Response;
+using PSB.Models;
+using System.Collections.ObjectModel;
 
 namespace PSB.Utils
 {
@@ -17,20 +20,7 @@ namespace PSB.Utils
     {
         private static readonly ApplicationDataContainer LocalSettings = ApplicationData.Current.LocalSettings;
 
-        public static async Task SaveAndNavigate(string? token, User? user)
-        {
-            Token = token;
-            User = user;
-            await App.AuthService.UpdateAuthNavAsync();
-        }
-        public static async Task ExitAndNavigate(Action<bool>? setIsFetch = null)
-        {
-            await FetchAsync(HttpMethod.Get, "logout", setIsFetch);
-            Token = null;
-            User = null;
-            await App.AuthService.UpdateAuthNavAsync();
-
-        }
+        // Токен
         private static string? _token = null;
         public static string? Token
         {
@@ -38,14 +28,11 @@ namespace PSB.Utils
             set
             {
                 _token = value;
-
-                if (value == null)
-                    LocalSettings.Values["token"] = null;
-                else
-                    LocalSettings.Values["token"] = value;
+                LocalSettings.Values["token"] = value;
             }
         }
 
+        // Профиль пользователя
         private static User? _user = null;
         public static User? User
         {
@@ -57,18 +44,86 @@ namespace PSB.Utils
                     if (setting != null)
                         _user = JsonSerializer.Deserialize<User>((string)setting);
                 }
-                Debug.WriteLine("user" + _user);
-
                 return _user;
             }
             set
             {
                 _user = value;
-                Debug.WriteLine("user" + _user);
-                if (value == null)
-                    LocalSettings.Values["user"] = null;
-                else
-                    LocalSettings.Values["user"] = JsonSerializer.Serialize(value);
+                LocalSettings.Values["user"] = value == null ? null : JsonSerializer.Serialize(value);
+            }
+        }
+
+        // Библиотека пользователя
+        private static ObservableCollection<Library>? _libraries = null;
+        public static ObservableCollection<Library> Libraries
+        {
+            get
+            {
+                if (_libraries == null)
+                {
+                    var setting = LocalSettings.Values["libraries"];
+                    if (setting != null)
+                        _libraries = JsonSerializer.Deserialize<ObservableCollection<Library>>((string)setting);
+                    else
+                        _libraries = new ObservableCollection<Library>();
+                }
+                return _libraries;
+            }
+            set
+            {
+                _libraries = value;
+                LocalSettings.Values["libraries"] = value == null ? null : JsonSerializer.Serialize(value);
+            }
+        }
+
+        // Сохранение токена и пользователя
+        public static async Task SaveAndNavigate(string? token, User? user)
+        {
+            Token = token;
+            User = user;
+            await App.AuthService.UpdateAuthNavAsync();
+        }
+
+        // Выход и очистка данных
+        public static async Task ExitAndNavigate(Action<bool>? setIsFetch = null)
+        {
+            await FetchAsync(HttpMethod.Get, "logout", setIsFetch);
+            Token = null;
+            User = null;
+            Libraries.Clear();
+            ApplicationData.Current.LocalSettings.Values.Clear();
+            await App.AuthService.UpdateAuthNavAsync();
+        }
+
+        // Загрузка профиля
+        public static async Task LoadProfileAsync()
+        {
+            (var res, var body) = await FetchAsync<User>(
+                HttpMethod.Get, "profile",
+                setError: e => Debug.WriteLine($"Ошибка при получении профиля: {e}")
+            );
+
+            if (res.IsSuccessStatusCode && body != null)
+            {
+                User = body;
+            }
+        }
+
+        // Загрузка библиотеки
+        public static async Task LoadLibraryAsync()
+        {
+            (var res, var body) = await FetchAsync<PaginatedResponse<Library>>(
+                HttpMethod.Get, "library?limit=0",
+                setError: e => Debug.WriteLine($"Ошибка при получении библиотеки: {e}")
+            );
+
+            if (res.IsSuccessStatusCode && body != null)
+            {
+                Libraries.Clear();
+                foreach (var item in body.Data)
+                {
+                    Libraries.Add(item);
+                }
             }
         }
     }

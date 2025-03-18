@@ -15,6 +15,7 @@ namespace PSB.Views
         public SettingsPage()
         {
             this.InitializeComponent();
+            SettingPanel.Translation += new System.Numerics.Vector3(0, 0, 40);
         }
         private void SelectorBar_SelectionChanged(SelectorBar sender, SelectorBarSelectionChangedEventArgs e)
         {

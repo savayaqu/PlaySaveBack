@@ -21,16 +21,18 @@ namespace PSB.ViewModels
             _ = LoadGamesAsync();
         }
         [ObservableProperty] public partial ObservableCollection<Game> Games { get; set; } = new();
-        [ObservableProperty] public partial int CurrentPage { get; set; } = 1;
-        [ObservableProperty] public partial int TotalPages { get; set; } = 1;
-        [ObservableProperty] public partial string PageInput { get; set; }
+        [ObservableProperty] public partial int? CurrentPage { get; set; } = 1;
+        [ObservableProperty] public partial int? TotalPages { get; set; } = 1;
+        [ObservableProperty] public partial string? PageInput { get; set; }
+        [ObservableProperty] public partial int? Total { get; set; }
+        [ObservableProperty] public partial string? Name { get; set; } = null;
 
 
         [RelayCommand]
-        public async Task LoadGamesAsync(int page = 1)
+        public async Task LoadGamesAsync(int? page = 1)
         {
             (var res, var body) = await FetchAsync<PaginatedResponse<Game>>(
-                HttpMethod.Get, $"games?page={page}",
+                HttpMethod.Get, $"games?page={page}&name={Name}",
                 setError: e => Debug.WriteLine($"Error: {e}")
             );
             if (!res.IsSuccessStatusCode || body == null)
@@ -52,6 +54,8 @@ namespace PSB.ViewModels
             // Обновляем информацию о пагинации
             CurrentPage = body.Meta.CurrentPage;
             TotalPages = body.Meta.LastPage;
+            Total = body.Meta.Total;
+            Name = null;
         }
         [RelayCommand]
         private async Task PreviousPageAsync()
@@ -82,8 +86,8 @@ namespace PSB.ViewModels
                 }
                 else
                 {
-                    // Если номер страницы некорректен, переходим на следующую страницу
-                    await LoadGamesAsync(CurrentPage + 1);
+                    // Если номер страницы некорректен - остаёмся
+                    await LoadGamesAsync(CurrentPage);
                 }
             }
             else

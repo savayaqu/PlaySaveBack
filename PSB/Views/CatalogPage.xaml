@@ -8,11 +8,14 @@
     mc:Ignorable="d"
     Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
 
-    <Grid Padding="20" HorizontalAlignment="Center" VerticalAlignment="Center" >
-        <Grid.RowDefinitions>
-            <RowDefinition Height="*"/>
-            <RowDefinition Height="Auto"/>
-        </Grid.RowDefinitions>
+    <Grid Padding="20" HorizontalAlignment="Center" VerticalAlignment="Center" RowDefinitions="*,Auto" >
+        <!--<Grid ColumnDefinitions="Auto,200"  Margin="0,-63,-60,0"  HorizontalAlignment="Right" VerticalAlignment="Top">
+            <Button Command="{x:Bind CatalogViewModel.LoadGamesCommand, Mode=OneWay}">
+                <FontIcon Glyph="&#xE721;"/>
+            </Button>
+            <TextBox Grid.Column="1" Text="{x:Bind CatalogViewModel.Name, Mode=TwoWay}" PlaceholderText="Find me" Width="200" Height="35" TabIndex="10" />
+        </Grid>-->
+        <AutoSuggestBox Width="200" Height="35" Text="{x:Bind CatalogViewModel.Name, Mode=TwoWay}" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,-63,-60,0" QueryIcon="Find" QuerySubmitted="AutoSuggestBox_QuerySubmitted"/>
         <GridView Grid.Column="0" ItemsSource="{x:Bind CatalogViewModel.Games, Mode=OneWay}"
                   HorizontalAlignment="Stretch"
                   VerticalAlignment="Stretch"
@@ -22,36 +25,39 @@
 
             <GridView.ItemsPanel>
                 <ItemsPanelTemplate>
-                    <ItemsWrapGrid Orientation="Horizontal"/>
+                    <ItemsWrapGrid Orientation="Horizontal" ItemHeight="215" ItemWidth="460"/>
                 </ItemsPanelTemplate>
             </GridView.ItemsPanel>
 
             <GridView.ItemTemplate>
                 <DataTemplate>
-                    <StackPanel Width="200" Margin="10"
-                                HorizontalAlignment="Center"
-                                Tapped="OnGameTapped">
-                        <Image Source="{Binding LibraryImg}" Width="200" Height="150" Stretch="UniformToFill"/>
-                        <TextBlock Text="{Binding Name}" FontSize="16" TextAlignment="Center" Margin="0,5,0,0"/>
-                    </StackPanel>
+                    <Viewbox   MaxWidth="460" MaxHeight="215" MinWidth="230" MinHeight="107">
+                        <Image Stretch="UniformToFill" Tapped="OnGameTapped" ToolTipService.ToolTip="{Binding Name}" Source="{Binding CatalogImg}"/>
+                    </Viewbox>
                 </DataTemplate>
             </GridView.ItemTemplate>
         </GridView>
         <!-- Пагинация -->
-        <StackPanel Grid.Column="1" Orientation="Vertical" HorizontalAlignment="Center" VerticalAlignment="Bottom" Grid.Row="1" Margin="0,20,0,0">
-            <StackPanel Orientation="Horizontal">
-                <Button Command="{x:Bind CatalogViewModel.PreviousPageCommand}" Margin="0,0,10,0">
+        <StackPanel Grid.Column="1" Orientation="Vertical" VerticalAlignment="Bottom" Grid.Row="1">
+            <StackPanel Orientation="Horizontal" Spacing="6" HorizontalAlignment="Center">
+                <Button Command="{x:Bind CatalogViewModel.PreviousPageCommand}">
                     <FontIcon Glyph="&#xE892;" />
                 </Button>
-                <TextBlock Text="{x:Bind CatalogViewModel.CurrentPage, Mode=OneWay}" VerticalAlignment="Center" Margin="10,0"/>
-                <TextBlock Text="/" VerticalAlignment="Center" Margin="10,0"/>
-                <TextBlock Text="{x:Bind CatalogViewModel.TotalPages, Mode=OneWay}" VerticalAlignment="Center" Margin="10,0"/>
-                <Button Command="{x:Bind CatalogViewModel.NextPageCommand}" Margin="10,0,0,0">
+                <TextBlock Text="{x:Bind CatalogViewModel.CurrentPage, Mode=OneWay}" VerticalAlignment="Center"/>
+                <TextBlock Text="/" VerticalAlignment="Center"/>
+                <TextBlock Text="{x:Bind CatalogViewModel.TotalPages, Mode=OneWay}" VerticalAlignment="Center"/>
+                <Button Command="{x:Bind CatalogViewModel.NextPageCommand}">
                     <FontIcon Glyph="&#xE893;" />
                 </Button>
             </StackPanel>
             <StackPanel Orientation="Horizontal" Spacing="6">
-                <TextBlock Text="Jump to " VerticalAlignment="Center" />
+                <TextBlock TextAlignment="Center" HorizontalAlignment="Left">
+                    <Run Text="Total: "/>
+                    <Run Text="{x:Bind CatalogViewModel.Total, Mode=OneWay}"/>
+                </TextBlock>
+            </StackPanel>
+            <StackPanel Spacing="6" HorizontalAlignment="Center" Orientation="Horizontal" VerticalAlignment="Center">
+                <TextBlock Text="Jump to " TextAlignment="Center" />
                 <TextBox Text="{x:Bind CatalogViewModel.PageInput, Mode=TwoWay}" Width="50"/>
                 <Button Content="GO" Command="{x:Bind CatalogViewModel.JumpToPageCommand}"/>
             </StackPanel>

@@ -21,11 +21,12 @@
             IsSettingsVisible="False"
             IsTitleBarAutoPaddingEnabled="False"
             IsPaneToggleButtonVisible="False"
-            IsPaneOpen="True">
+            IsPaneOpen="True"
+        Background="{StaticResource AcrylicBackgroundFillColorBaseBrush}">
 
         <!-- Заголовок с кнопкой "Назад" -->
         <NavigationView.Header >
-            <StackPanel Orientation="Horizontal" VerticalAlignment="Center" Spacing="15" Margin="-35,-46,0,0">
+            <!--<StackPanel Orientation="Horizontal" VerticalAlignment="Center" Spacing="15" Margin="-35,-46,0,0">
                 <Button x:Name="BackButton" 
                             Content="&#xE72B;" 
                             FontFamily="Segoe MDL2 Assets" 
@@ -35,7 +36,20 @@
                    Text="HomePage" 
                    VerticalAlignment="Center" 
                    FontSize="16"/>
-            </StackPanel>
+            </StackPanel>-->
+            <Grid ColumnDefinitions="50, Auto" VerticalAlignment="Center" ColumnSpacing="10" Margin="-35,-46,0,0">
+                <Button x:Name="BackButton" 
+                     Content="&#xE72B;" 
+                     FontFamily="Segoe MDL2 Assets" 
+                     FontSize="16"
+                     Click="BackButton_Click"
+                     Grid.Column="0"/>
+                <TextBlock x:Name="HeaderText" 
+                     Text="HomePage" 
+                     VerticalAlignment="Center" 
+                     Style="{StaticResource SubtitleTextBlockStyle}"
+                     Grid.Column="1"/>
+            </Grid>
         </NavigationView.Header>
         <NavigationView.MenuItems>
             <NavigationViewItem Margin="0, 10, 0, 10" Height="100" x:Name="AuthNav">
@@ -51,13 +65,14 @@
             </NavigationViewItem>
 
 
-            <NavigationViewItem Content="Home Page" Tag="HomePage" Icon="Home" IsSelected="True"/>
-            <NavigationViewItem Content="КАТАЛОГ" Tag="CatalogPage">
+            <NavigationViewItem Content="Главная" Tag="HomePage" Icon="Home" IsSelected="True"/>
+            <NavigationViewItem Content="Сохранения" Tag="HomePage" Icon="Save"/>
+            <NavigationViewItem Content="Каталог" Tag="CatalogPage">
                 <NavigationViewItem.Icon>
                     <FontIcon Glyph="&#xF0E2;"/>
                 </NavigationViewItem.Icon>
             </NavigationViewItem>
-            <NavigationViewItem Content="НАСТРОЙКИ" Tag="SettingsPage" Icon="Setting"/>
+            <NavigationViewItem Content="Настройки" Tag="SettingsPage" Icon="Setting"/>
         </NavigationView.MenuItems>
         <Frame x:Name="ContentFrame" />
     </NavigationView>

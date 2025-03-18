@@ -15,26 +15,28 @@ namespace PSB.ViewModels
 {
     public partial class ProfileViewModel : ObservableObject
     {
-        [ObservableProperty] public partial ObservableCollection<Library> Libraries { get; set; } = new();
-        [ObservableProperty] public partial User? User { get; set; } = AuthData.User;
+        // Профиль и библиотека берутся из AuthData
+        public User? User => AuthData.User;
+        public ObservableCollection<Library> Libraries => AuthData.Libraries;
+
         public ProfileViewModel()
         {
-            _ = LoadProfileAsync();
-            _ = LoadLibraryAsync();
+            //_ = LoadProfileAsync();
+            //_ = LoadLibraryAsync();
         }
+
         [RelayCommand]
         public async Task LoadProfileAsync()
         {
-            (var res, var body) = await FetchAsync<User>(
-                HttpMethod.Get, "profile",
-                setError: e => Debug.WriteLine($"Ошибка при получении профиля: {e}")
-            );
+            await AuthData.LoadProfileAsync();
+            OnPropertyChanged(nameof(User)); // Уведомляем интерфейс об изменении
+        }
 
-            if (res.IsSuccessStatusCode && body != null)
-            {
-                User = body;
-                AuthData.User = User;
-            }
+        [RelayCommand]
+        public async Task LoadLibraryAsync()
+        {
+            await AuthData.LoadLibraryAsync();
+            OnPropertyChanged(nameof(Libraries)); // Уведомляем интерфейс об изменении
         }
 
         [RelayCommand]
@@ -42,31 +44,5 @@ namespace PSB.ViewModels
         {
             _ = AuthData.ExitAndNavigate();
         }
-        [RelayCommand]
-        public async Task LoadLibraryAsync()
-        {
-            (var res, var body) = await FetchAsync<PaginatedResponse<Library>>(
-                HttpMethod.Get, "library",
-                setError: e => Debug.WriteLine($"Error: {e}")
-            );
-
-            if (!res.IsSuccessStatusCode || body == null)
-                return;
-
-            // Логируем JSON-ответ
-            string bodyJson = JsonSerializer.Serialize(body, new JsonSerializerOptions
-            {
-                WriteIndented = true
-            });
-            //Debug.WriteLine(bodyJson);
-
-            // Очистка коллекции и добавление новых элементов
-            Libraries.Clear();
-            foreach (var item in body.Data) // Теперь берем body.Data, а не body напрямую
-            {
-                Libraries.Add(item);
-            }
-        }
-
     }
 }

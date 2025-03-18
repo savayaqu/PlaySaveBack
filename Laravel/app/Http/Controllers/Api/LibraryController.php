@@ -14,10 +14,20 @@ use Illuminate\Http\Request;
 
 class LibraryController extends Controller
 {
-    public function getLibrary(): JsonResponse
+    public function getLibrary(Request $request): JsonResponse
     {
         $user = auth()->user();
-        $libraries = $user->libraries()->with(['game', 'sideGame'])->simplePaginate(30);
+
+        // Проверяем, есть ли параметр limit в запросе и равен ли он 0
+        if ($request->has('limit') && $request->input('limit') == 0) {
+            // Если limit равен 0, загружаем все записи без пагинации
+            $libraries = $user->libraries()->with(['game', 'sideGame'])->get();
+        } else {
+            // Иначе используем пагинацию с указанным лимитом или по умолчанию 30
+            $perPage = $request->input('limit', 30);
+            $libraries = $user->libraries()->with(['game', 'sideGame'])->simplePaginate($perPage);
+        }
+
         return LibraryResource::collection($libraries)->response();
     }
 

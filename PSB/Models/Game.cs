@@ -15,6 +15,7 @@ namespace PSB.Models
         [JsonPropertyName("game_code")] public required string GameCode { get; set; }
         [JsonPropertyName("header")] public string? Header { get; set; }        
         [JsonPropertyName("library_img")] public string? LibraryImg{ get; set; }
+        [JsonPropertyName("catalog_img")] public string? CatalogImg{ get; set; }
 
     }
 }

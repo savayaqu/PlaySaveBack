@@ -17,7 +17,12 @@ class GameController extends Controller
 {
     public function getGames(Request $request): JsonResponse
     {
-        $games = Game::query()->paginate(30);
+        $name = $request->query('name');
+        $games = Game::query()
+            ->when($name, function ($query, $name) {
+                return $query->where('name', 'like', '%' . $name . '%');
+            })
+            ->paginate(30);
         return GameResource::collection($games)->response();
     }
     public function getGame(Game $game): JsonResponse

@@ -41,5 +41,9 @@ namespace PSB.Views
                 App.NavigationService.Navigate(gameTag);
             }
         }
+        private async void AutoSuggestBox_QuerySubmitted(AutoSuggestBox sender, AutoSuggestBoxQuerySubmittedEventArgs args)
+        {
+           await CatalogViewModel.LoadGamesAsync();
+        }
     }
 }

@@ -14,24 +14,26 @@
 
     <StackPanel Spacing="10">
         <TextBlock Text="Файл" FontWeight="Bold"/>
-        <StackPanel Orientation="Horizontal">
-            <TextBox IsReadOnly="True" Text="{x:Bind GameSettingsContentViewModel.SelectedFile, Mode=OneWay}"/>
-            <Button Content="Выбрать" Command="{x:Bind GameSettingsContentViewModel.ChooseFileCommand}"/>
-        </StackPanel>
+        <Grid ColumnDefinitions="*,Auto" ColumnSpacing="6">
+            <TextBox Grid.Column="0" IsReadOnly="True" Text="{x:Bind GameSettingsContentViewModel.SelectedFile, Mode=OneWay}"/>
+            <Button  Grid.Column="1" Content="Выбрать" Command="{x:Bind GameSettingsContentViewModel.ChooseFileCommand}"/>
+        </Grid>
 
         <TextBlock Text="Сохранения" FontWeight="Bold"/>
         <StackPanel Orientation="Horizontal">
-            <TextBox IsReadOnly="True" Text="{x:Bind GameSettingsContentViewModel.SelectedSavesFolder, Mode=OneWay}"/>
-            <Button Content="Выбрать" Command="{x:Bind GameSettingsContentViewModel.ChooseFolderSavesCommand}"/>
+            
         </StackPanel>
-
+        <Grid ColumnDefinitions="*,Auto" ColumnSpacing="6">
+            <TextBox Grid.Column="0" IsReadOnly="True" Text="{x:Bind GameSettingsContentViewModel.SelectedSavesFolder, Mode=OneWay}"/>
+            <Button Grid.Column="1" Content="Выбрать" Command="{x:Bind GameSettingsContentViewModel.ChooseFolderSavesCommand}"/>
+        </Grid>
         <TextBlock Text="Поведение сохранений" FontWeight="Bold"/>
         <TextBlock Text="Создавать новые сохранения (до 5 максимум) после изменения сохранений или перезаписывать. Сохранение ручное или автоматическое."/>
 
-        <TextBlock Text="Опасная зона" FontWeight="Bold" Foreground="Red"/>
+        <TextBlock Text="Опасная зона" FontWeight="Bold" Foreground="{StaticResource AccentAcrylicBackgroundFillColorDefaultBrush}"/>
         <StackPanel Orientation="Horizontal">
-            <Button Content="Удалить из библиотеки" Background="LightCoral" Command="{x:Bind GameSettingsContentViewModel.RemoveFromLibraryCommand}"/>
-            <Button Content="Удалить все сохранения" Background="LightCoral" Command="{x:Bind GameSettingsContentViewModel.RemoveAllSavesCommand}"/>
+            <Button Content="Удалить из библиотеки" Background="{StaticResource AccentAcrylicBackgroundFillColorDefaultBrush}" Command="{x:Bind GameSettingsContentViewModel.RemoveFromLibraryCommand}"/>
+            <Button Content="Удалить все сохранения" Background="{StaticResource AccentAcrylicBackgroundFillColorDefaultBrush}" Command="{x:Bind GameSettingsContentViewModel.RemoveAllSavesCommand}"/>
         </StackPanel>
     </StackPanel>
 </ContentDialog>
