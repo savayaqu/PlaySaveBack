@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?>
 <Page
     x:Class="PSB.Views.CatalogPage"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
@@ -15,7 +16,12 @@
             </Button>
             <TextBox Grid.Column="1" Text="{x:Bind CatalogViewModel.Name, Mode=TwoWay}" PlaceholderText="Find me" Width="200" Height="35" TabIndex="10" />
         </Grid>-->
-        <AutoSuggestBox Width="200" Height="35" Text="{x:Bind CatalogViewModel.Name, Mode=TwoWay}" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,-63,-60,0" QueryIcon="Find" QuerySubmitted="AutoSuggestBox_QuerySubmitted"/>
+        <AutoSuggestBox Width="200" Height="35"
+                        Text="{x:Bind CatalogViewModel.Name, Mode=TwoWay}"
+                        HorizontalAlignment="Right" VerticalAlignment="Top"
+                        Margin="0,-63,-60,0" QueryIcon="Find"
+                        QuerySubmitted="AutoSuggestBox_QuerySubmitted"
+                        PlaceholderText="Поиск"/>
         <GridView Grid.Column="0" ItemsSource="{x:Bind CatalogViewModel.Games, Mode=OneWay}"
                   HorizontalAlignment="Stretch"
                   VerticalAlignment="Stretch"
@@ -37,7 +43,7 @@
                 </DataTemplate>
             </GridView.ItemTemplate>
         </GridView>
-        <!-- ��������� -->
+        <!-- Навигация -->
         <StackPanel Grid.Column="1" Orientation="Vertical" VerticalAlignment="Bottom" Grid.Row="1">
             <StackPanel Orientation="Horizontal" Spacing="6" HorizontalAlignment="Center">
                 <Button Command="{x:Bind CatalogViewModel.PreviousPageCommand}">
@@ -52,12 +58,12 @@
             </StackPanel>
             <StackPanel Orientation="Horizontal" Spacing="6">
                 <TextBlock TextAlignment="Center" HorizontalAlignment="Left">
-                    <Run Text="Total: "/>
+                    <Run Text="Всего: "/>
                     <Run Text="{x:Bind CatalogViewModel.Total, Mode=OneWay}"/>
                 </TextBlock>
             </StackPanel>
             <StackPanel Spacing="6" HorizontalAlignment="Center" Orientation="Horizontal" VerticalAlignment="Center">
-                <TextBlock Text="Jump to " TextAlignment="Center" />
+                <TextBlock Text="Перейти на " TextAlignment="Center" />
                 <TextBox Text="{x:Bind CatalogViewModel.PageInput, Mode=TwoWay}" Width="50"/>
                 <Button Content="GO" Command="{x:Bind CatalogViewModel.JumpToPageCommand}"/>
             </StackPanel>
