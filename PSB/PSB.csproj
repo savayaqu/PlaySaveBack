@@ -20,6 +20,7 @@
     <None Remove="Views\HomePage.xaml" />
     <None Remove="Views\LoginPage.xaml" />
     <None Remove="Views\ProfilePage.xaml" />
+    <None Remove="Views\SavePage.xaml" />
     <None Remove="Views\SettingsPage.xaml" />
     <None Remove="Views\Settings\Account\UpdateEmailContentDialog.xaml" />
     <None Remove="Views\Settings\Account\UpdatePasswordContentDialog.xaml" />
@@ -49,6 +50,7 @@
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.0" />
+    <PackageReference Include="CommunityToolkit.WinUI.Converters" Version="8.1.240916" />
     <PackageReference Include="HtmlAgilityPack" Version="1.11.72" />
     <PackageReference Include="Microsoft.Web.WebView2" Version="1.0.2957.106" />
     <PackageReference Include="Microsoft.Windows.SDK.BuildTools" Version="10.0.26100.1742" />
@@ -59,6 +61,11 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Views\Game\" />
+  </ItemGroup>
+  <ItemGroup>
+    <Page Update="Views\SavePage.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
   </ItemGroup>
   <ItemGroup>
     <Page Update="Views\Settings\Account\UpdatePasswordContentDialog.xaml">

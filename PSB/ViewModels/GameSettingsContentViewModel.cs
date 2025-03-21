@@ -11,7 +11,7 @@ using Microsoft.UI.Xaml.Media.Imaging;
 using PSB.Helpers;
 using PSB.Interfaces;
 using PSB.Models;
-using PSB.Utils;
+using PSB.Utils.Game;
 using Windows.Gaming.Input;
 using Windows.Storage;
 using Windows.Storage.AccessCache;

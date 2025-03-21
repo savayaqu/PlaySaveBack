@@ -1,5 +1,7 @@
 ﻿using Microsoft.UI.Xaml;
 using PSB.Services;
+using PSB.Utils;
+using Windows.Devices.Bluetooth.Advertisement;
 
 // To learn more about WinUI, the WinUI project structure,
 // and more about our project templates, see: http://aka.ms/winui-project-info.
@@ -20,11 +22,13 @@ namespace PSB
         public static NavigationService NavigationService { get; private set; }
         public static LibraryService LibraryService { get; private set; }
         public static AuthService AuthService { get; private set; }
+        public static SaveManager SaveManager { get; private set; }
 
         public App()
         {
             this.InitializeComponent();
             DialogService = new DialogService();
+            SaveManager = new SaveManager();
         }
 
         /// <summary>
@@ -44,7 +48,6 @@ namespace PSB
 
             // Инициализируем AuthService
             AuthService = new AuthService(MainWindow.ProfileViewModel, MainWindow.AuthNavControl);
-
             MainWindow.Activate();
         }
 

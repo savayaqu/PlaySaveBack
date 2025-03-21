@@ -22,6 +22,7 @@ using System.Collections.ObjectModel;
 using System.Net.Http.Json;
 using PSB.Helpers;
 using PSB.Interfaces;
+using PSB.Utils.Game;
 
 namespace PSB.ViewModels
 {
@@ -43,7 +44,8 @@ namespace PSB.ViewModels
         [ObservableProperty] public partial Boolean IsUploading { get; set; }
         [ObservableProperty] public partial string SaveDescription { get; set; } = "";
         [ObservableProperty] public partial string SaveVersion { get; set; } = "";
-        [ObservableProperty] public partial ObservableCollection<Save>? Saves { get; set; } = new ObservableCollection<Save>();
+        public SaveManager SaveManager => App.SaveManager;
+
         public event Action? GameLoaded;
 
         [ObservableProperty]
@@ -62,7 +64,6 @@ namespace PSB.ViewModels
             Instance = this;
             GameId = gameId;
             Type = type.ToLower();
-
             SuccessInfoBar = new InfoBar
             {
                 Title = "",
@@ -101,8 +102,10 @@ namespace PSB.ViewModels
                 CreatedAt = DateTime.Now,
             };
 
-            Saves.Add(newSave);
-            SavesDataManager<IGame>.SaveSaves(Game, Saves.ToList());
+            SaveManager.AddSave(newSave);
+            SaveManager.Test += 1;
+            Debug.WriteLine("количество несинхр" + SaveManager.UnsyncedSavesCount);
+            SavesDataManager<IGame>.SaveSaves(Game, SaveManager.Saves.ToList());
         }
         [RelayCommand]
         private async Task SyncSave(Save save)
@@ -113,15 +116,12 @@ namespace PSB.ViewModels
             bool uploadSuccess = await UploadFile(save.ZipPath);
             if (uploadSuccess)
             {
-                save.IsSynced = true;
                 SaveVersion = "";
                 SaveDescription = "";
 
-                // Обновляем коллекцию и уведомляем интерфейс
-                OnPropertyChanged(nameof(Saves));
+                SaveManager.MarkAsSynced(save);
                 GameLoaded?.Invoke();
             }
-            Debug.WriteLine("кнопка синхрона");
         }
         [RelayCommand]
         private async Task OverwriteSave()
@@ -180,9 +180,9 @@ namespace PSB.ViewModels
                     // Сохраняем обновленные данные с использованием новых менеджеров
                     GameDataManager.SaveGame(Game);
                     LibraryDataManager<IGame>.SaveLibrary(Game, Library);
-                    if (Saves != null)
+                    if (SaveManager.Saves != null)
                     {
-                        SavesDataManager<IGame>.SaveSaves(Game, Saves.ToList());
+                        SavesDataManager<IGame>.SaveSaves(Game, SaveManager.Saves.ToList());
                     }
 
                     GameLoaded?.Invoke();
@@ -318,7 +318,7 @@ namespace PSB.ViewModels
                     }
 
                     // Находим текущее сохранение в коллекции Saves
-                    var existingSave = Saves.FirstOrDefault(s => s.FileId == updatedSave.FileId);
+                    var existingSave = SaveManager.Saves.FirstOrDefault(s => s.FileId == updatedSave.FileId);
                     if (existingSave != null)
                     {
                         // Обновляем данные текущего сохранения
@@ -331,7 +331,7 @@ namespace PSB.ViewModels
                         existingSave.IsSynced = true;
 
                         // Уведомляем интерфейс об изменениях
-                        OnPropertyChanged(nameof(Saves));
+                        OnPropertyChanged(nameof(SaveManager.Saves));
                         GameLoaded?.Invoke();
                     }
 
@@ -367,7 +367,7 @@ namespace PSB.ViewModels
                 if (uploadSuccess)
                 {
                     _ = GetGameAsync(true);
-                    OnPropertyChanged(nameof(Saves)); // Дополнительно уведомляем об изменении
+                    OnPropertyChanged(nameof(SaveManager.Saves)); // Дополнительно уведомляем об изменении
 
                     // Показываем уведомление об успехе
                     SuccessInfoBar.Title = "Успешно";
@@ -402,7 +402,7 @@ namespace PSB.ViewModels
         {
             if(save.IsSynced == false)
             {
-                Saves?.Remove(save);
+                SaveManager.Saves?.Remove(save);
                 return;
             }
             try
@@ -417,7 +417,7 @@ namespace PSB.ViewModels
                 if (res.IsSuccessStatusCode)
                 {
                     // Удаляем файл из локального списка
-                    Saves?.Remove(save);
+                    SaveManager.Saves?.Remove(save);
 
                     // Показываем уведомление об успехе
                     SuccessInfoBar.Title = "Успешно";
@@ -468,9 +468,9 @@ namespace PSB.ViewModels
                 // Обновляем кэш с использованием новых менеджеров
                 GameDataManager.SaveGame(Game);
                 LibraryDataManager<IGame>.SaveLibrary(Game, Library);
-                if (Saves != null)
+                if (SaveManager.Saves != null)
                 {
-                    SavesDataManager<IGame>.SaveSaves(Game, Saves.ToList());
+                    SavesDataManager<IGame>.SaveSaves(Game, SaveManager.Saves.ToList());
                 }
 
                 // Вызываем обновление интерфейса
@@ -496,26 +496,26 @@ namespace PSB.ViewModels
             Debug.WriteLine(bodyJson);
 
             // Сохраняем локальные несинхронизированные сохранения
-            var localSaves = Saves?.Where(s => !s.IsSynced).ToList() ?? new List<Save>();
+            var localSaves = SaveManager.Saves?.Where(s => !s.IsSynced).ToList() ?? new List<Save>();
 
             // Очистка коллекции
-            Saves.Clear();
+            SaveManager.Saves.Clear();
 
             // Добавление сохранений с сервера
             foreach (var item in body.Save)
             {
                 item.IsSynced = true;
-                Saves.Add(item);
+                SaveManager.Saves.Add(item);
             }
 
             // Добавляем обратно локальные сохранения
             foreach (var localSave in localSaves)
             {
-                Saves.Add(localSave);
+                SaveManager.Saves.Add(localSave);
             }
 
             // Сохраняем сохранения с использованием нового менеджера
-            SavesDataManager<IGame>.SaveSaves(Game, [.. Saves]);
+            SavesDataManager<IGame>.SaveSaves(Game, [.. SaveManager.Saves]);
         }
 
         public async Task GetGameAsync(bool ignoreCache)
@@ -535,7 +535,7 @@ namespace PSB.ViewModels
                         Game = cachedGame;
                         if (cachedSaves != null)
                         {
-                            Saves = new ObservableCollection<Save>(cachedSaves);
+                            SaveManager.Saves = new ObservableCollection<Save>(cachedSaves);
                         }
                         FilePath = PathDataManager<IGame>.GetFilePath(Game)!;
                         FolderPath = PathDataManager<IGame>.GetSavesFolderPath(Game)!;
@@ -568,7 +568,7 @@ namespace PSB.ViewModels
 
                 if (body.Saves != null)
                 {
-                    Saves = new ObservableCollection<Save>(body.Saves);
+                    SaveManager.Saves = new ObservableCollection<Save>(body.Saves);
                 }
 
                 // Сохраняем новые данные в кэш с использованием новых менеджеров

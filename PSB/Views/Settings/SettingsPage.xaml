@@ -15,7 +15,6 @@
             <StackPanel HorizontalAlignment="Center">
                 <SelectorBar SelectionChanged="SelectorBar_SelectionChanged" Padding="10">
                     <SelectorBarItem Text="Главная" Tag="General" IsSelected="True"/>
-                    <SelectorBarItem Text="Общие" Tag="Behavior"/>
                     <SelectorBarItem Text="Аккаунт" Tag="Account"/>
                 </SelectorBar>
             </StackPanel>

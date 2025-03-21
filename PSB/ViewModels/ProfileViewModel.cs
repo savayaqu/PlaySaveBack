@@ -16,7 +16,7 @@ namespace PSB.ViewModels
     public partial class ProfileViewModel : ObservableObject
     {
         // Профиль и библиотека берутся из AuthData
-        public User? User => AuthData.User;
+        [ObservableProperty] public partial User? User { get; set; } = AuthData.User;
         public ObservableCollection<Library> Libraries => AuthData.Libraries;
 
         public ProfileViewModel()
@@ -29,7 +29,6 @@ namespace PSB.ViewModels
         public async Task LoadProfileAsync()
         {
             await AuthData.LoadProfileAsync();
-            OnPropertyChanged(nameof(User)); // Уведомляем интерфейс об изменении
         }
 
         [RelayCommand]

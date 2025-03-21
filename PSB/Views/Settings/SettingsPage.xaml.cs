@@ -27,9 +27,6 @@ namespace PSB.Views
                 case "General":
                     pageType = typeof(GeneralPage);
                     break;
-                case "Behavior":
-                    pageType = typeof(BehaviorPage);
-                    break;
                 case "Account":
                     pageType = typeof(AccountPage);
                     break;

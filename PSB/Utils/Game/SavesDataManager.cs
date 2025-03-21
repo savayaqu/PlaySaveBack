@@ -6,7 +6,7 @@ using PSB.Interfaces;
 using PSB.Models;
 using Windows.Storage;
 
-namespace PSB.Utils
+namespace PSB.Utils.Game
 {
     public static class SavesDataManager<T> where T : IGame
     {

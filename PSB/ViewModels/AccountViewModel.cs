@@ -17,7 +17,7 @@ namespace PSB.ViewModels
 {
     public partial class AccountViewModel: ObservableObject
     {
-        [ObservableProperty] public partial User? User { get; set; } = AuthData.User;
+        [ObservableProperty] public partial User? User { get; set; } = App.MainWindow.ProfileViewModel.User;
         public AccountViewModel() {}
 
         [RelayCommand]

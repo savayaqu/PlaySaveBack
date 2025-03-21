@@ -5,7 +5,7 @@ using PSB.Interfaces;
 using PSB.Models;
 using Windows.Storage;
 
-namespace PSB.Utils
+namespace PSB.Utils.Game
 {
     public static class LibraryDataManager<T> where T : IGame
     {

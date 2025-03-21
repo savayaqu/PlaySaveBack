@@ -9,35 +9,35 @@
     mc:Ignorable="d"
     Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
 
-    <StackPanel>
-        <TextBlock Text="Аккаунт" FontWeight="ExtraBold"/>
+    <StackPanel Orientation="Vertical" Padding="16" Spacing="12">
+        <TextBlock Text="Аккаунт" Style="{StaticResource TitleTextBlockStyle}"/>
         <TextBlock Text="Видимость профиля"/>
         <ComboBox></ComboBox>
-        <TextBlock Text="Выберите, кто может видеть ваш профиль и библиотеку"/>
-        
-        
-        <TextBlock Text="Текущий email"/>
-        <TextBlock Text="{x:Bind AccountViewModel.User.Email, Mode=TwoWay}"/>
-        <StackPanel Orientation="Horizontal" Spacing="12">
+        <TextBlock Style="{StaticResource CaptionTextBlockStyle}" Text="Выберите, кто может видеть ваш профиль и библиотеку"/>
+
+
+        <TextBlock Style="{StaticResource BodyStrongTextBlockStyle}" Text="Текущий email: "/>
+        <TextBlock Text="{x:Bind ProfileViewModel.User.Email, Mode=TwoWay}"/>
+        <StackPanel Orientation="Horizontal" Spacing="8">
             <Button Command="{x:Bind AccountViewModel.UpdateEmailCommand}">
-                <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                <StackPanel Orientation="Horizontal" VerticalAlignment="Center" Spacing="8">
                     <FontIcon Glyph="&#xE715;" />
-                    <TextBlock Text="Обновить электронную почту" Margin="8,0,0,0" />
+                    <TextBlock Text="Обновить электронную почту"/>
                 </StackPanel>
             </Button>
             <Button Command="{x:Bind AccountViewModel.UpdatePasswordCommand}">
-                <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                <StackPanel Orientation="Horizontal" VerticalAlignment="Center" Spacing="8">
                     <FontIcon Glyph="&#xE8D7;" />
-                    <TextBlock Text="Обновить пароль" Margin="8,0,0,0" />
+                    <TextBlock Text="Обновить пароль"/>
                 </StackPanel>
             </Button>
         </StackPanel>
-        <TextBlock Text="Облачные сервисы"/>
+        <TextBlock Style="{StaticResource BodyStrongTextBlockStyle}" Text="Облачные сервисы"/>
         <StackPanel Orientation="Horizontal" Spacing="12">
             <Button Command="{x:Bind AccountViewModel.ConnectionGoogleDriveCommand, Mode=OneTime}">
-                <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                <StackPanel Orientation="Horizontal" VerticalAlignment="Center" Spacing="8">
                     <FontIcon Glyph="&#xE753;" />
-                    <TextBlock Text="Подключить Google Drive" Margin="8,0,0,0" />
+                    <TextBlock Text="Подключить Google Drive"/>
                 </StackPanel>
             </Button>
         </StackPanel>

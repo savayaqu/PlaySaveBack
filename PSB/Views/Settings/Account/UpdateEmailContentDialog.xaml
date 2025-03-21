@@ -24,6 +24,7 @@
         <TextBlock Text="Текущая почта:"/>
         <TextBlock Text="{x:Bind UpdateEmailViewModel.User.Email, Mode=OneWay}"/>
         <TextBox PlaceholderText="Новая почта" Text="{x:Bind UpdateEmailViewModel.Email, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
+        <TextBlock Text="{x:Bind UpdateEmailViewModel.ErrorEmail, Mode=OneWay}" Visibility="{x:Bind Converter={StaticResource EmptyToVisibilityConverter}}" Foreground="{StaticResource SystemFillColorAttentionBrush}"/>
         <Button Content="Обновить почту" Command="{x:Bind UpdateEmailViewModel.UpdateEmailCommand, Mode=OneTime}"/>
     </StackPanel>
 </ContentDialog>

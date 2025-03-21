@@ -3,7 +3,7 @@ using System.Diagnostics;
 using PSB.Interfaces;
 using Windows.Storage;
 
-namespace PSB.Utils
+namespace PSB.Utils.Game
 {
     public static class PathDataManager<T> where T : IGame
     {

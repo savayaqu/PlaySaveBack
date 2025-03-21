@@ -18,7 +18,7 @@
             <!-- Конвертеры -->
             <converters:BoolToVisibilityConverter x:Key="BoolToVisibilityConverter"/>
             <converters:TimePlayedConverter x:Key="TimePlayedConverter"/>
-
+            <converters:EmptyToVisibilityConverter x:Key="EmptyToVisibilityConverter" />
         </ResourceDictionary>
     </Application.Resources>
 </Application>

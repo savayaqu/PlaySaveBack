@@ -1,8 +1,10 @@
 using System;
+using System.Diagnostics;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Navigation;
 using PSB.Services;
+using PSB.Utils;
 using PSB.ViewModels;
 using Windows.Storage;
 
@@ -12,6 +14,7 @@ namespace PSB
     {
         public static MainWindow? Instance { get; private set; }
         public ProfileViewModel ProfileViewModel { get; set; }
+        public SaveManager SaveManager =>  App.SaveManager;
 
         private readonly NavigationService _navigationService;
         //private readonly LibraryService _libraryService;
@@ -32,7 +35,6 @@ namespace PSB
             // Инициализируем сервисы
             _authService = new AuthService(ProfileViewModel, AuthNav);
             _navigationService = new NavigationService(ContentFrame, NavView, HeaderText);
-            //_libraryService = new LibraryService(NavView, ProfileViewModel, _navigationService);
 
             // Обновляем авторизацию при старте
             _ = _authService.UpdateAuthNavAsync();

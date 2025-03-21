@@ -26,17 +26,6 @@
 
         <!-- Заголовок с кнопкой "Назад" -->
         <NavigationView.Header >
-            <!--<StackPanel Orientation="Horizontal" VerticalAlignment="Center" Spacing="15" Margin="-35,-46,0,0">
-                <Button x:Name="BackButton" 
-                            Content="&#xE72B;" 
-                            FontFamily="Segoe MDL2 Assets" 
-                            FontSize="16"
-                            Click="BackButton_Click"/>
-                <TextBlock x:Name="HeaderText" 
-                   Text="HomePage" 
-                   VerticalAlignment="Center" 
-                   FontSize="16"/>
-            </StackPanel>-->
             <Grid ColumnDefinitions="50, Auto" VerticalAlignment="Center" ColumnSpacing="10" Margin="-35,-46,0,0">
                 <Button x:Name="BackButton" 
                      Content="&#xE72B;" 
@@ -66,7 +55,11 @@
 
 
             <NavigationViewItem Content="Главная" Tag="HomePage" Icon="Home" IsSelected="True"/>
-            <NavigationViewItem Content="Сохранения" Tag="HomePage" Icon="Save"/>
+            <NavigationViewItem Content="Сохранения" Tag="SavePage" Icon="Save">
+                <NavigationViewItem.InfoBadge>
+                    <InfoBadge Value="{x:Bind SaveManager.UnsyncedSavesCount, Mode=OneWay}"/>
+                </NavigationViewItem.InfoBadge>
+            </NavigationViewItem>
             <NavigationViewItem Content="Каталог" Tag="CatalogPage">
                 <NavigationViewItem.Icon>
                     <FontIcon Glyph="&#xF0E2;"/>
