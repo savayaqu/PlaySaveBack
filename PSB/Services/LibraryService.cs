@@ -4,7 +4,7 @@ using PSB.Helpers;
 using PSB.Interfaces;
 using PSB.Models;
 using PSB.Services;
-using PSB.Utils;
+using PSB.Utils.Game;
 using PSB.ViewModels;
 using System.Collections.Generic;
 using System.Linq;
@@ -150,16 +150,7 @@ public class LibraryService
                 {
                     Content = $"{headerText} ({games.Count})",
                     IsExpanded = _categoryCollapseState.TryGetValue(headerText, out var isExpanded) ? isExpanded : true,
-                    Icon = new FontIcon { Glyph = "\uE70D" }, // Иконка для заголовка
                     SelectsOnInvoked = false // Отключаем выбор элемента
-                };
-
-                // Подписка на событие сворачивания/разворачивания
-                header.Tapped += (s, e) =>
-                {
-                    header.IsExpanded = !header.IsExpanded;
-                    _categoryCollapseState[headerText] = header.IsExpanded;
-                    UpdateLibraryMenu(filteredGames); // Обновляем меню после изменения состояния
                 };
 
                 _navView.MenuItems.Add(header);
@@ -169,9 +160,10 @@ public class LibraryService
                 {
                     foreach (var game in games)
                     {
+                        NavigationViewItem gameItem;
                         if (game.Game != null && !isSideGame)
                         {
-                            var gameItem = new NavigationViewItem
+                            gameItem = new NavigationViewItem
                             {
                                 Content = game.Game.Name,
                                 Tag = $"Game_{game.Game.Id}|{game.Game.Name}",
@@ -187,18 +179,23 @@ public class LibraryService
                                 // Если путь к исполняемому файлу отсутствует, используем стандартную иконку
                                 gameItem.Icon = new FontIcon { Glyph = "\uE7FC" };
                             }
-                            _navView.MenuItems.Add(gameItem);
                         }
                         else if (game.SideGame != null && isSideGame)
                         {
-                            var gameItem = new NavigationViewItem
+                            gameItem = new NavigationViewItem
                             {
                                 Content = game.SideGame.Name,
                                 Tag = $"SideGame_{game.SideGame.Id}|{game.SideGame.Name}",
                                 Icon = new FontIcon { Glyph = "\uE7FC" }, // Стандартная иконка для сторонних игр
                             };
-                            _navView.MenuItems.Add(gameItem);
                         }
+                        else
+                        {
+                            continue;
+                        }
+
+                        // Добавляем игру в MenuItems заголовка
+                        header.MenuItems.Add(gameItem);
                     }
                 }
             }
