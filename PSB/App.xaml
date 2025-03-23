@@ -19,6 +19,7 @@
             <converters:BoolToVisibilityConverter x:Key="BoolToVisibilityConverter"/>
             <converters:TimePlayedConverter x:Key="TimePlayedConverter"/>
             <converters:EmptyToVisibilityConverter x:Key="EmptyToVisibilityConverter" />
+            <converters:BytesToSizeConverter x:Key="BytesToSizeConverter" />
         </ResourceDictionary>
     </Application.Resources>
 </Application>

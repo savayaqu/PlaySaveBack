@@ -44,6 +44,7 @@ namespace PSB.ViewModels
         [ObservableProperty] public partial Boolean IsUploading { get; set; }
         [ObservableProperty] public partial string SaveDescription { get; set; } = "";
         [ObservableProperty] public partial string SaveVersion { get; set; } = "";
+        [ObservableProperty] public partial ObservableCollection<Save> Saves { get; set; } = new ObservableCollection<Save>();
         public SaveManager SaveManager => App.SaveManager;
 
         public event Action? GameLoaded;
@@ -102,9 +103,8 @@ namespace PSB.ViewModels
                 CreatedAt = DateTime.Now,
             };
 
-            SaveManager.AddSave(newSave);
-            SaveManager.Test += 1;
-            Debug.WriteLine("количество несинхр" + SaveManager.UnsyncedSavesCount);
+           // SaveManager.AddSave(newSave);
+            Saves.Add(newSave);
             SavesDataManager<IGame>.SaveSaves(Game, SaveManager.Saves.ToList());
         }
         [RelayCommand]
@@ -118,7 +118,7 @@ namespace PSB.ViewModels
             {
                 SaveVersion = "";
                 SaveDescription = "";
-
+                save.IsSynced = true;
                 SaveManager.MarkAsSynced(save);
                 GameLoaded?.Invoke();
             }
@@ -272,31 +272,18 @@ namespace PSB.ViewModels
                 // Отправляем запрос
                 var response = await httpClient.PostAsync("google-drive/upload", content);
 
-                // Логируем статус ответа
-                Debug.WriteLine($"Статус ответа: {response.StatusCode}");
-
-                // Логируем заголовки ответа
-                Debug.WriteLine("Заголовки ответа:");
-                foreach (var header in response.Headers)
-                {
-                    Debug.WriteLine($"{header.Key}: {string.Join(", ", header.Value)}");
-                }
-
                 // Читаем ответ как строку
                 var responseContent = await response.Content.ReadAsStringAsync();
-                Debug.WriteLine("Ответ от сервера (сырой): " + responseContent);
 
                 // Проверяем, что ответ не пустой
                 if (string.IsNullOrEmpty(responseContent))
                 {
-                    Debug.WriteLine("Ответ от сервера пустой.");
                     return false;
                 }
 
                 // Если статус ответа 401 Unauthorized
                 if (response.StatusCode == System.Net.HttpStatusCode.Unauthorized)
                 {
-                    Debug.WriteLine("Ошибка авторизации: Неверный или отсутствующий токен.");
                     return false;
                 }
 
@@ -403,6 +390,9 @@ namespace PSB.ViewModels
             if(save.IsSynced == false)
             {
                 SaveManager.Saves?.Remove(save);
+                var zipCreator = new ZipCreator();
+                zipCreator.DeleteFile(save.ZipPath);
+                SavesDataManager<IGame>.SaveSaves(Game, [.. SaveManager.Saves]);
                 return;
             }
             try

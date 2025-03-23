@@ -35,6 +35,7 @@ namespace PSB.Utils
         {
             save.IsSynced = true;
             OnPropertyChanged(nameof(UnsyncedSavesCount));
+            OnPropertyChanged(nameof(Saves));
         }
     }
 }

@@ -115,13 +115,13 @@
                                         <Grid Grid.Row="0" ColumnDefinitions="*,*,*,*" ColumnSpacing="12">
                                             <TextBlock Text="{x:Bind FileName}" VerticalAlignment="Center" HorizontalAlignment="Stretch"/>
                                             <TextBlock Text="{x:Bind Version}" Grid.Column="1" VerticalAlignment="Center" HorizontalAlignment="Stretch"/>
-                                            <TextBlock Text="{x:Bind Size}" Grid.Column="2" VerticalAlignment="Center" HorizontalAlignment="Stretch"/>
+                                            <TextBlock Text="{x:Bind Size, Converter={StaticResource BytesToSizeConverter}}" Grid.Column="2" VerticalAlignment="Center" HorizontalAlignment="Stretch"/>
                                             <TextBlock Text="{x:Bind CreatedAt}" Grid.Column="3" VerticalAlignment="Center" HorizontalAlignment="Stretch"/>
                                         </Grid>
 
                                         <!-- Кнопки действий (вторая строка) -->
                                         <StackPanel Grid.Row="1" Orientation="Horizontal" Spacing="6">
-                                            <Button Command="{x:Bind vm:GameViewModel.Instance.SyncSaveCommand}" CommandParameter="{x:Bind}" Visibility="{x:Bind IsSynced, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}, ConverterParameter=True}">
+                                            <Button Command="{x:Bind vm:GameViewModel.Instance.SyncSaveCommand}" CommandParameter="{x:Bind}" Visibility="{x:Bind IsSynced, Mode=TwoWay, Converter={StaticResource BoolToVisibilityConverter}, ConverterParameter=True}">
                                                 <StackPanel Orientation="Horizontal">
                                                     <FontIcon Glyph="&#xE895;" />
                                                     <TextBlock Text="Синхронизировать"/>

@@ -1,24 +1,12 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.IO.Compression;
 using System.IO;
+using System.IO.Compression;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Security.Cryptography;
-using CommunityToolkit.Mvvm.Input;
+using System.Threading.Tasks;
 
 namespace PSB.Helpers
 {
-    using System;
-    using System.Diagnostics;
-    using System.IO;
-    using System.IO.Compression;
-    using System.Linq;
-    using System.Security.Cryptography;
-    using System.Threading.Tasks;
-
     public class ZipCreator
     {
         public async Task<(string folderName, string zipFilePath, string hash, ulong sizeInBytes)> CreateZip(string folderPath, string gameName, string saveVersion)
@@ -99,6 +87,18 @@ namespace PSB.Helpers
             {
                 var hashBytes = sha256.ComputeHash(stream);
                 return BitConverter.ToString(hashBytes).Replace("-", "").ToLowerInvariant();
+            }
+        }
+        public void DeleteFile(string filePath)
+        {
+            if (File.Exists(filePath))
+            {
+                File.Delete(filePath);
+                Console.WriteLine($"Файл {filePath} успешно удалён.");
+            }
+            else
+            {
+                Console.WriteLine($"Файл {filePath} не найден.");
             }
         }
     }
