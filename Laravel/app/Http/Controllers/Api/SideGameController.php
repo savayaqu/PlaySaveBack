@@ -3,9 +3,16 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Http\Resources\GameResource;
+use App\Http\Resources\LibraryResource;
+use App\Http\Resources\SaveResource;
+use App\Http\Resources\SideGameResource;
+use App\Models\Game;
+use App\Models\Library;
 use App\Models\SideGame;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Support\Facades\Http;
 
 class SideGameController extends Controller
 {
@@ -23,37 +30,35 @@ class SideGameController extends Controller
      */
     public function getSideGame(SideGame $sideGame): JsonResponse
     {
-        return response()->json($sideGame);
+        $user = auth()->user();
+        $library = Library::query()->where('side_game_id', $sideGame->id)->where('user_id', $user->id)->first();
+        $saves = $user->saves()->where('side_game_id',$sideGame->id)->get();
+        return response()->json([
+            'side_game' => SideGameResource::make($sideGame),
+            'library' => $library ? LibraryResource::make($library) : null,
+            'saves' => $saves->isEmpty() ? null : SaveResource::collection($saves),
+        ]);
     }
 
     /**
-     * Добавить новую стороннюю игру.
+     * Добавить стороннюю игру и сразу в библиотеку.
      */
     public function addSideGame(Request $request): JsonResponse
     {
+        $user = auth()->user();
+
         $validatedData = $request->validate([
             'name' => 'required|string|max:255',
-            'user_id' => 'required|exists:users,id',
         ]);
 
-        $sideGame = SideGame::create($validatedData);
-
-        return response()->json($sideGame, 201);
-    }
-
-    /**
-     * Обновить существующую стороннюю игру.
-     */
-    public function updateSideGame(SideGame $sideGame, Request $request): JsonResponse
-    {
-        $validatedData = $request->validate([
-            'name' => 'sometimes|string|max:255',
-            'user_id' => 'sometimes|exists:users,id',
+        $sideGame = SideGame::create(['user_id' => $user->id,...$validatedData]);
+        $library = Library::query()->firstOrCreate([
+            'user_id' => $user->id,
+            'side_game_id' => $sideGame->id,
         ]);
+        $library->load('sideGame');
+        return response()->json(LibraryResource::make($library), 201);
 
-        $sideGame->update($validatedData);
-
-        return response()->json($sideGame);
     }
 
     /**

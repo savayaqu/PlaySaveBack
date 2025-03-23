@@ -1,14 +1,25 @@
-﻿using System.Collections.ObjectModel;
+﻿using System;
+using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.Net.Http;
 using System.Text.Json;
 using System.Threading.Tasks;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using Microsoft.UI.Xaml;
+using PSB.Api.Request;
 using PSB.Api.Response;
+using PSB.Helpers;
+using PSB.Interfaces;
 using PSB.Models;
 using PSB.Utils;
+using PSB.Utils.Game;
+using static System.Runtime.InteropServices.JavaScript.JSType;
+using Windows.Storage.Pickers;
 using static PSB.Utils.Fetch;
+using Windows.UI.WebUI;
+using System.IO;
+using Windows.Gaming.Input;
 
 
 namespace PSB.ViewModels
@@ -42,6 +53,49 @@ namespace PSB.ViewModels
         private void Logout()
         {
             _ = AuthData.ExitAndNavigate();
+        }
+
+        [RelayCommand]
+        public async Task AddSideGame()
+        {
+            var openPicker = new Windows.Storage.Pickers.FileOpenPicker();
+            var hWnd = WinRT.Interop.WindowNative.GetWindowHandle(App.MainWindow);
+            WinRT.Interop.InitializeWithWindow.Initialize(openPicker, hWnd);
+
+            openPicker.ViewMode = PickerViewMode.Thumbnail;
+            openPicker.FileTypeFilter.Add(".exe");
+
+            var file = await openPicker.PickSingleFileAsync();
+            if (file != null)
+            {
+                (var res, var library) = await FetchAsync<Library>(
+                   HttpMethod.Post, "sidegames",
+                   body: new CreateSideGame(file.DisplayName),
+                   serialize: true
+               );
+
+                // Проверка, что десериализация прошла успешно
+                if (res.IsSuccessStatusCode && library != null)
+                {
+                    PathDataManager<IGame>.SetFilePath(library.SideGame, file.Path);
+
+                    string? gameDirectory = Path.GetDirectoryName(file.Path);
+                    string? savesFolder = FindSaves.FindSavesFolder(gameDirectory);
+
+                    if (savesFolder != null)
+                    {
+                        PathDataManager<IGame>.SetSavesFolderPath(library.SideGame, savesFolder);
+                        Debug.WriteLine($"Папка Saves найдена: {savesFolder}");
+                    }
+                    else
+                    {
+                        Debug.WriteLine("Папка Saves не найдена.");
+                    }
+                    // Обновление меню
+                    Libraries.Add(library);
+                    LibraryDataManager<IGame>.SaveLibrary(library.SideGame, library);
+                }
+            }
         }
     }
 }

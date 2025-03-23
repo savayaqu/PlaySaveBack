@@ -23,6 +23,7 @@ using System.Net.Http.Json;
 using PSB.Helpers;
 using PSB.Interfaces;
 using PSB.Utils.Game;
+using System.Text.Json.Serialization;
 
 namespace PSB.ViewModels
 {
@@ -37,7 +38,7 @@ namespace PSB.ViewModels
         [ObservableProperty] public partial string LastPlayedText {  get; set; }
         [ObservableProperty] public partial string PlayedHoursText { get; set; }
         [ObservableProperty] public partial Boolean IsFavorite { get; set; }
-        [ObservableProperty] public partial Boolean InLibrary { get; set; } = false;
+        [ObservableProperty] public partial Boolean InLibrary { get; set; }
         [ObservableProperty] public partial string FilePath { get; set; }
         [ObservableProperty] public partial string FolderPath { get; set; }
         [ObservableProperty] public partial InfoBar SuccessInfoBar { get; set; }
@@ -52,7 +53,6 @@ namespace PSB.ViewModels
         public partial Boolean ExeExists { get; set; } = false;
 
         public string FavoriteIcon => IsFavorite ? "\uEB52" : "\uEB51";
-
         partial void OnIsFavoriteChanged(Boolean value)
         {
             OnPropertyChanged(nameof(FavoriteIcon));
@@ -506,7 +506,7 @@ namespace PSB.ViewModels
         }
 
         public async Task GetGameAsync(bool ignoreCache)
-        {            
+        {
             if (!ignoreCache)
             {
                 if (!InLibrary)
@@ -532,6 +532,7 @@ namespace PSB.ViewModels
                         Library = cachedLibrary;
                         UpdateLibraryDetails(Library);
                         GameLoaded?.Invoke();
+                        Debug.WriteLine("Данные загружены из кэша");
                         return;
                     }
                 }
@@ -545,12 +546,33 @@ namespace PSB.ViewModels
 
             if (res.IsSuccessStatusCode)
             {
-                Game = body!.Game;
-                FilePath = PathDataManager<IGame>.GetFilePath(Game)!;
+                Debug.WriteLine(JsonSerializer.Serialize(body));
+                if (body.Game != null)
+                {
+                    Game = body.Game;
+                }
+                else if (body.SideGame != null)
+                {
+                    Game = body.SideGame;
+                }
+
+                if (body.Library != null)
+                {
+                    Library = body.Library;
+                    UpdateLibraryDetails(Library);
+                    Debug.WriteLine("Обновление библиотеки");
+
+                }
+
+                Debug.WriteLine("gamename" + Game.Name);
+               
+
+                FilePath = PathDataManager<IGame>.GetFilePath(Game);
                 FolderPath = PathDataManager<IGame>.GetSavesFolderPath(Game)!;
                 ExeExists = !string.IsNullOrEmpty(FilePath);
-
+                Debug.WriteLine(JsonSerializer.Serialize(body.Library));
                 Library = body.Library;
+                Debug.WriteLine("Id bibla"+body.Library.Id);
                 UpdateLibraryDetails(Library);
 
                 if (body.Saves != null)
@@ -558,7 +580,6 @@ namespace PSB.ViewModels
                     Saves = new ObservableCollection<Save>(body.Saves);
                 }
 
-                // Сохраняем новые данные в кэш с использованием новых менеджеров
                 GameDataManager.SaveGame(Game);
                 LibraryDataManager<IGame>.SaveLibrary(Game, Library);
                 SavesDataManager<IGame>.SaveSaves(Game, body.Saves?.ToList() ?? new List<Save>());

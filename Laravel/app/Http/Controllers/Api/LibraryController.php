@@ -42,17 +42,6 @@ class LibraryController extends Controller
         return response()->json(LibraryResource::make($library), 201);
     }
 
-    public function addSideGameToLibrary(SideGame $sideGame): JsonResponse
-    {
-        $user = auth()->user();
-        $library = Library::query()->firstOrCreate([
-            'user_id' => $user->id,
-            'side_game_id' => $sideGame->id,
-        ]);
-        $library->load('sideGame');
-        return response()->json(LibraryResource::make($library), 201);
-    }
-
     public function toggleFavorite(Game $game): JsonResponse
     {
         $user = auth()->user();

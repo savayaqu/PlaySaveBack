@@ -15,7 +15,7 @@ namespace PSB.Converters
         public override DateTimeOffset Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
         {
             var dateString = reader.GetString();
-            return DateTimeOffset.ParseExact(dateString, Format, System.Globalization.CultureInfo.InvariantCulture);
+            return DateTimeOffset.ParseExact(dateString!, Format, System.Globalization.CultureInfo.InvariantCulture);
         }
 
         public override void Write(Utf8JsonWriter writer, DateTimeOffset value, JsonSerializerOptions options)

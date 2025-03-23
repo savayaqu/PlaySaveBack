@@ -29,7 +29,7 @@ namespace PSB.Utils
         {
             Debug.WriteLine("FETCH: Start");
             setIsFetch?.Invoke(true);
-            setError?.Invoke(null);
+            setError?.Invoke(null!);
 
             // Готовим запрос
             Uri fullUrl;
@@ -83,7 +83,7 @@ namespace PSB.Utils
                     {
                         Debug.WriteLine("FETCH: ERROR: Json: " + responseJsonErr);
                         var responseBodyErr = JsonSerializer.Deserialize<ErrorResponse>(responseJsonErr);
-                        setError?.Invoke(responseBodyErr?.Message);
+                        setError?.Invoke(responseBodyErr?.Message!);
                     }
                     catch (Exception ex)
                     {

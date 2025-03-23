@@ -29,7 +29,6 @@ namespace PSB.ViewModels
         [ObservableProperty] public partial string? GameName { get; set; }
 
         [ObservableProperty] public partial IGame Game { get; set; }
-        //TODO: Придумать что-нибудь с иконкой и картиной .exe
         public GameSettingsContentViewModel(IGame iGame)
         {
             Game = iGame;
@@ -93,7 +92,7 @@ namespace PSB.ViewModels
                 Debug.WriteLine("Game DisplayName " + file.DisplayName);
 
                 string? gameDirectory = Path.GetDirectoryName(file.Path);
-                string? savesFolder = FindSavesFolder(gameDirectory);
+                string? savesFolder = FindSaves.FindSavesFolder(gameDirectory);
 
                 if (savesFolder != null)
                 {
@@ -113,68 +112,6 @@ namespace PSB.ViewModels
                 App.LibraryService.UpdateLibraryMenu();
             }
         }
-
-
-
-        /// <summary>
-        /// Ищет папку Saves в указанной директории, на уровень выше и в подпапках.
-        /// </summary>
-        private string? FindSavesFolder(string? startDirectory)
-        {
-            if (string.IsNullOrEmpty(startDirectory))
-                return null;
-
-            string? currentDirectory = startDirectory;
-
-            for (int i = 0; i < 2; i++) // Проверяем текущий уровень и на уровень выше
-            {
-                string? savesFolder = FindSavesInDirectory(currentDirectory);
-                if (savesFolder != null)
-                    return savesFolder;
-
-                // Поднимаемся на уровень выше
-                currentDirectory = Directory.GetParent(currentDirectory)?.FullName;
-                if (currentDirectory == null)
-                    break;
-            }
-
-            return null;
-        }
-
-        /// <summary>
-        /// Проверяет наличие папки Saves в указанной директории, включая вложенные папки.
-        /// </summary>
-        private string? FindSavesInDirectory(string directory)
-        {
-            try
-            {
-                var directories = Directory.GetDirectories(directory);
-                foreach (var dir in directories)
-                {
-                    if (string.Equals(Path.GetFileName(dir), "saves", StringComparison.OrdinalIgnoreCase))
-                        return dir;
-
-                    // Рекурсивный поиск внутри вложенных папок
-                    string? found = FindSavesInDirectory(dir);
-                    if (found != null)
-                        return found;
-                }
-            }
-            catch (UnauthorizedAccessException)
-            {
-                Debug.WriteLine($"Нет доступа к: {directory}");
-            }
-            catch (Exception ex)
-            {
-                Debug.WriteLine($"Ошибка при поиске папки: {ex.Message}");
-            }
-
-            return null;
-        }
-
-
-
-
 
         [RelayCommand]
         private async Task OpenSaves()

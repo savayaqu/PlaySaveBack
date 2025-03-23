@@ -17,11 +17,11 @@ namespace PSB
         /// Initializes the singleton application object.  This is the first line of authored code
         /// executed, and as such is the logical equivalent of main() or WinMain().
         /// </summary>
-        public static DialogService DialogService { get; private set; }
-        public static MainWindow MainWindow { get; private set; }
-        public static NavigationService NavigationService { get; private set; }
-        public static LibraryService LibraryService { get; private set; }
-        public static AuthService AuthService { get; private set; }
+        public static DialogService? DialogService { get; private set; }
+        public static MainWindow? MainWindow { get; private set; }
+        public static NavigationService? NavigationService { get; private set; }
+        public static LibraryService? LibraryService { get; private set; }
+        public static AuthService? AuthService { get; private set; }
 
         public App()
         {

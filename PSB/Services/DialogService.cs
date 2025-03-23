@@ -8,10 +8,10 @@ namespace PSB.Services
 {
     public class DialogService
     {
-        private XamlRoot _xamlRoot;
+        private XamlRoot? _xamlRoot;
         private ContentDialog? _currentDialog; // Храним текущий диалог
 
-        public XamlRoot XamlRoot => _xamlRoot;
+        public XamlRoot? XamlRoot => _xamlRoot;
 
         public void SetXamlRoot(XamlRoot xamlRoot)
         {

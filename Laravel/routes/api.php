@@ -35,8 +35,7 @@ Route::middleware('auth:sanctum')->group(function () {
                 Route::delete('', 'removeFromLibrary');      // Удалить игру из библиотеки
                 Route::patch('update', 'updateLibraryGame'); // Изменить данные игры в библиотеке
             });
-            Route::prefix('sideGame/{sideGame}')->group(function () {
-                Route::post('', 'addSideGameToLibrary');             // Добавить стороннюю игру в библиотеку
+            Route::prefix('sidegame/{sideGame}')->group(function () {
                 Route::patch('', 'toggleSideGameFavorite');          // Добавить/убрать стороннюю игру в Избранное
                 Route::delete('', 'removeSideGameFromLibrary');      // Удалить стороннюю игру из библиотеки
                 Route::patch('update', 'updateSideGameLibrary'); // Изменить данные сторонней игры в библиотеке
@@ -52,7 +51,7 @@ Route::middleware('auth:sanctum')->group(function () {
         //Удаление сохранения
         Route::prefix('saves')->group(function () {
            Route::get('game/{game}/my', 'getMySavesGame'); // Просмотр моих сохранений к игре
-           Route::get('sideGame/{sideGame}/my', 'getMySavesGame'); // Просмотр моих сохранений к сторонней игре
+           Route::get('sidegame/{sideGame}/my', 'getMySavesGame'); // Просмотр моих сохранений к сторонней игре
         });
         Route::post('hash', 'getHash');
     });
@@ -63,7 +62,7 @@ Route::middleware('auth:sanctum')->group(function () {
         });
     });
     Route::controller(SideGameController::class)->group(function () {
-       Route::prefix('sideGames')->group(function () {
+       Route::prefix('sidegames')->group(function () {
            Route::get('', 'getSideGames');      // Просмотр всех игр
            Route::get('{sideGame}', 'getSideGame'); // Просмотр игры
            Route::post('', 'addSideGame'); // Добавить стороннюю игру

@@ -67,7 +67,7 @@ namespace PSB.Utils
                     else
                         _libraries = new ObservableCollection<Library>();
                 }
-                return _libraries;
+                return _libraries!;
             }
             set
             {
@@ -81,7 +81,7 @@ namespace PSB.Utils
         {
             Token = token;
             User = user;
-            await App.AuthService.UpdateAuthNavAsync();
+            _ = App.AuthService?.UpdateAuthNavAsync();
         }
 
         // Выход и очистка данных
@@ -92,7 +92,7 @@ namespace PSB.Utils
             User = null;
             Libraries.Clear();
             ApplicationData.Current.LocalSettings.Values.Clear();
-            await App.AuthService.UpdateAuthNavAsync();
+            _ = App.AuthService?.UpdateAuthNavAsync();
         }
 
         // Загрузка профиля

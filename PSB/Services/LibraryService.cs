@@ -186,8 +186,18 @@ public class LibraryService
                             {
                                 Content = game.SideGame.Name,
                                 Tag = $"SideGame_{game.SideGame.Id}|{game.SideGame.Name}",
-                                Icon = new FontIcon { Glyph = "\uE7FC" }, // Стандартная иконка для сторонних игр
                             };
+                            if (PathDataManager<IGame>.GetFilePath(game.SideGame) != null)
+                            {
+                                var exeIcon = IconFromExe.GetIconElement(PathDataManager<IGame>.GetFilePath(game.SideGame));
+                                if (exeIcon != null)
+                                    gameItem.Icon = exeIcon;
+                            }
+                            else
+                            {
+                                // Если путь к исполняемому файлу отсутствует, используем стандартную иконку
+                                gameItem.Icon = new FontIcon { Glyph = "\uE7FC" };
+                            }
                         }
                         else
                         {

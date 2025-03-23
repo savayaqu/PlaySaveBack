@@ -183,7 +183,21 @@ namespace PSB.Services
         private ulong ExtractGameId(string pageTag)
         {
             var parts = pageTag.Split('|');
-            return Convert.ToUInt64(parts[0].Replace("Game_", ""));
+            string gameIdPart = parts[0];
+
+            // Поддержка как для "Game_", так и для "SideGame_"
+            if (gameIdPart.StartsWith("Game_"))
+            {
+                return Convert.ToUInt64(gameIdPart.Replace("Game_", ""));
+            }
+            else if (gameIdPart.StartsWith("SideGame_"))
+            {
+                return Convert.ToUInt64(gameIdPart.Replace("SideGame_", ""));
+            }
+            else
+            {
+                throw new ArgumentException("Неподдерживаемый формат pageTag.");
+            }
         }
 
         private string ExtractGameName(string pageTag)

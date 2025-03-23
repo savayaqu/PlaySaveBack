@@ -67,6 +67,14 @@
             </NavigationViewItem>
             <NavigationViewItem Content="Настройки" Tag="SettingsPage" Icon="Setting"/>
         </NavigationView.MenuItems>
+        <NavigationView.PaneFooter>
+            <Button Margin="10,0,0,0" Command="{x:Bind ProfileViewModel.AddSideGameCommand, Mode=OneWay}" >
+                <StackPanel Orientation="Horizontal" Spacing="6">
+                    <FontIcon Glyph="&#xE710;" />
+                    <TextBlock Text="Добавить стороннюю игру"/>
+                </StackPanel>
+            </Button>
+        </NavigationView.PaneFooter>
         <Frame x:Name="ContentFrame" />
     </NavigationView>
 </Window>
