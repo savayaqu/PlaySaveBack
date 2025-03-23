@@ -14,7 +14,6 @@ namespace PSB
     {
         public static MainWindow? Instance { get; private set; }
         public ProfileViewModel ProfileViewModel { get; set; }
-        public SaveManager SaveManager =>  App.SaveManager;
 
         private readonly NavigationService _navigationService;
         //private readonly LibraryService _libraryService;

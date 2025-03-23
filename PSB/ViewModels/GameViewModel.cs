@@ -45,8 +45,6 @@ namespace PSB.ViewModels
         [ObservableProperty] public partial string SaveDescription { get; set; } = "";
         [ObservableProperty] public partial string SaveVersion { get; set; } = "";
         [ObservableProperty] public partial ObservableCollection<Save> Saves { get; set; } = new ObservableCollection<Save>();
-        public SaveManager SaveManager => App.SaveManager;
-
         public event Action? GameLoaded;
 
         [ObservableProperty]
@@ -105,7 +103,7 @@ namespace PSB.ViewModels
 
            // SaveManager.AddSave(newSave);
             Saves.Add(newSave);
-            SavesDataManager<IGame>.SaveSaves(Game, SaveManager.Saves.ToList());
+            SavesDataManager<IGame>.SaveSaves(Game, Saves.ToList());
         }
         [RelayCommand]
         private async Task SyncSave(Save save)
@@ -119,8 +117,7 @@ namespace PSB.ViewModels
                 SaveVersion = "";
                 SaveDescription = "";
                 save.IsSynced = true;
-                SaveManager.MarkAsSynced(save);
-                GameLoaded?.Invoke();
+                Saves = new ObservableCollection<Save>(Saves);
             }
         }
         [RelayCommand]
@@ -180,9 +177,9 @@ namespace PSB.ViewModels
                     // Сохраняем обновленные данные с использованием новых менеджеров
                     GameDataManager.SaveGame(Game);
                     LibraryDataManager<IGame>.SaveLibrary(Game, Library);
-                    if (SaveManager.Saves != null)
+                    if (Saves != null)
                     {
-                        SavesDataManager<IGame>.SaveSaves(Game, SaveManager.Saves.ToList());
+                        SavesDataManager<IGame>.SaveSaves(Game, Saves.ToList());
                     }
 
                     GameLoaded?.Invoke();
@@ -305,7 +302,7 @@ namespace PSB.ViewModels
                     }
 
                     // Находим текущее сохранение в коллекции Saves
-                    var existingSave = SaveManager.Saves.FirstOrDefault(s => s.FileId == updatedSave.FileId);
+                    var existingSave = Saves.FirstOrDefault(s => s.FileId == updatedSave.FileId);
                     if (existingSave != null)
                     {
                         // Обновляем данные текущего сохранения
@@ -318,7 +315,7 @@ namespace PSB.ViewModels
                         existingSave.IsSynced = true;
 
                         // Уведомляем интерфейс об изменениях
-                        OnPropertyChanged(nameof(SaveManager.Saves));
+                        OnPropertyChanged(nameof(Saves));
                         GameLoaded?.Invoke();
                     }
 
@@ -354,7 +351,7 @@ namespace PSB.ViewModels
                 if (uploadSuccess)
                 {
                     _ = GetGameAsync(true);
-                    OnPropertyChanged(nameof(SaveManager.Saves)); // Дополнительно уведомляем об изменении
+                    OnPropertyChanged(nameof(Saves)); // Дополнительно уведомляем об изменении
 
                     // Показываем уведомление об успехе
                     SuccessInfoBar.Title = "Успешно";
@@ -389,10 +386,10 @@ namespace PSB.ViewModels
         {
             if(save.IsSynced == false)
             {
-                SaveManager.Saves?.Remove(save);
+                Saves?.Remove(save);
                 var zipCreator = new ZipCreator();
                 zipCreator.DeleteFile(save.ZipPath);
-                SavesDataManager<IGame>.SaveSaves(Game, [.. SaveManager.Saves]);
+                SavesDataManager<IGame>.SaveSaves(Game, [.. Saves]);
                 return;
             }
             try
@@ -407,7 +404,7 @@ namespace PSB.ViewModels
                 if (res.IsSuccessStatusCode)
                 {
                     // Удаляем файл из локального списка
-                    SaveManager.Saves?.Remove(save);
+                    Saves?.Remove(save);
 
                     // Показываем уведомление об успехе
                     SuccessInfoBar.Title = "Успешно";
@@ -458,9 +455,9 @@ namespace PSB.ViewModels
                 // Обновляем кэш с использованием новых менеджеров
                 GameDataManager.SaveGame(Game);
                 LibraryDataManager<IGame>.SaveLibrary(Game, Library);
-                if (SaveManager.Saves != null)
+                if (Saves != null)
                 {
-                    SavesDataManager<IGame>.SaveSaves(Game, SaveManager.Saves.ToList());
+                    SavesDataManager<IGame>.SaveSaves(Game, Saves.ToList());
                 }
 
                 // Вызываем обновление интерфейса
@@ -486,26 +483,26 @@ namespace PSB.ViewModels
             Debug.WriteLine(bodyJson);
 
             // Сохраняем локальные несинхронизированные сохранения
-            var localSaves = SaveManager.Saves?.Where(s => !s.IsSynced).ToList() ?? new List<Save>();
+            var localSaves = Saves?.Where(s => !s.IsSynced).ToList() ?? new List<Save>();
 
             // Очистка коллекции
-            SaveManager.Saves.Clear();
+            Saves.Clear();
 
             // Добавление сохранений с сервера
             foreach (var item in body.Save)
             {
                 item.IsSynced = true;
-                SaveManager.Saves.Add(item);
+                Saves.Add(item);
             }
 
             // Добавляем обратно локальные сохранения
             foreach (var localSave in localSaves)
             {
-                SaveManager.Saves.Add(localSave);
+                Saves.Add(localSave);
             }
 
             // Сохраняем сохранения с использованием нового менеджера
-            SavesDataManager<IGame>.SaveSaves(Game, [.. SaveManager.Saves]);
+            SavesDataManager<IGame>.SaveSaves(Game, [.. Saves]);
         }
 
         public async Task GetGameAsync(bool ignoreCache)
@@ -525,7 +522,7 @@ namespace PSB.ViewModels
                         Game = cachedGame;
                         if (cachedSaves != null)
                         {
-                            SaveManager.Saves = new ObservableCollection<Save>(cachedSaves);
+                            Saves = new ObservableCollection<Save>(cachedSaves);
                         }
                         FilePath = PathDataManager<IGame>.GetFilePath(Game)!;
                         FolderPath = PathDataManager<IGame>.GetSavesFolderPath(Game)!;
@@ -558,7 +555,7 @@ namespace PSB.ViewModels
 
                 if (body.Saves != null)
                 {
-                    SaveManager.Saves = new ObservableCollection<Save>(body.Saves);
+                    Saves = new ObservableCollection<Save>(body.Saves);
                 }
 
                 // Сохраняем новые данные в кэш с использованием новых менеджеров

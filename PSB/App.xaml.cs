@@ -22,13 +22,11 @@ namespace PSB
         public static NavigationService NavigationService { get; private set; }
         public static LibraryService LibraryService { get; private set; }
         public static AuthService AuthService { get; private set; }
-        public static SaveManager SaveManager { get; private set; }
 
         public App()
         {
             this.InitializeComponent();
             DialogService = new DialogService();
-            SaveManager = new SaveManager();
         }
 
         /// <summary>
