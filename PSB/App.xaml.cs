@@ -1,22 +1,16 @@
 ﻿using Microsoft.UI.Xaml;
+using Microsoft.Windows.AppLifecycle;
 using PSB.Services;
 using PSB.Utils;
-using Windows.Devices.Bluetooth.Advertisement;
-
-// To learn more about WinUI, the WinUI project structure,
-// and more about our project templates, see: http://aka.ms/winui-project-info.
+using Windows.ApplicationModel.Activation;
+using System.Threading.Tasks;
+using System;
+using System.Diagnostics; // Для ProtocolActivatedEventArgs
 
 namespace PSB
 {
-    /// <summary>
-    /// Provides application-specific behavior to supplement the default Application class.
-    /// </summary>
     public partial class App : Application
     {
-        /// <summary>
-        /// Initializes the singleton application object.  This is the first line of authored code
-        /// executed, and as such is the logical equivalent of main() or WinMain().
-        /// </summary>
         public static DialogService? DialogService { get; private set; }
         public static MainWindow? MainWindow { get; private set; }
         public static NavigationService? NavigationService { get; private set; }
@@ -25,30 +19,79 @@ namespace PSB
 
         public App()
         {
-            this.InitializeComponent();
+            InitializeComponent();
             DialogService = new DialogService();
         }
 
-        /// <summary>
-        /// Invoked when the application is launched.
-        /// </summary>
-        /// <param name="args">Details about the launch request and process.</param>
-        protected override void OnLaunched(Microsoft.UI.Xaml.LaunchActivatedEventArgs args)
+        protected override async void OnLaunched(Microsoft.UI.Xaml.LaunchActivatedEventArgs args)
+        {
+            // Настраиваем single-instance и обработку deep links
+            var instance = Microsoft.Windows.AppLifecycle.AppInstance.FindOrRegisterForKey("main");
+            if (!instance.IsCurrent)
+            {
+                // Если приложение уже запущено, перенаправляем активацию и закрываемся
+                await instance.RedirectActivationToAsync(AppInstance.GetCurrent().GetActivatedEventArgs());
+                Environment.Exit(0);
+                return;
+            }
+
+            // Подписываемся на события активации (включая deep links)
+            instance.Activated += OnAppActivated;
+
+            // Инициализируем главное окно
+            InitializeMainWindow();
+        }
+
+        private async void OnAppActivated(object? sender, AppActivationArguments args)
+        {
+            if (args.Kind == ExtendedActivationKind.Protocol)
+            {
+                var protocolArgs = (ProtocolActivatedEventArgs)args.Data;
+                await ProcessDeepLink(protocolArgs.Uri);
+            }
+        }
+
+        public static async Task ProcessDeepLink(Uri uri)
+        {
+            if (MainWindow != null)
+            {
+                // Вариант 1: Без await (если не нужно ждать завершения)
+                MainWindow.DispatcherQueue.TryEnqueue(() =>
+                {
+                    if (uri.Scheme == "playsaveback" && uri.Host == "google-oauth")
+                    {
+                        var query = System.Web.HttpUtility.ParseQueryString(uri.Query);
+                        if (query["success"] == "1")
+                        {
+                            Debug.WriteLine("подкл");
+                            // Здесь можно вызывать синхронные методы
+                            _ = MainWindow.AccountViewModel.LoadCloudServices();
+                        }
+                    }
+                });
+            }
+        }
+
+        private static void InitializeMainWindow()
         {
             MainWindow = new MainWindow();
             MainWindow.ExtendsContentIntoTitleBar = true;
 
-            // Инициализируем NavigationService первым
-            NavigationService = new NavigationService(MainWindow.ContentFrameControl, MainWindow.NavigationViewControl, MainWindow.HeaderTextBlock);
+            NavigationService = new NavigationService(
+                MainWindow.ContentFrameControl,
+                MainWindow.NavigationViewControl,
+                MainWindow.HeaderTextBlock);
 
-            // Теперь передаем NavigationService в LibraryService
-            LibraryService = new LibraryService(MainWindow.NavigationViewControl, MainWindow.ProfileViewModel, NavigationService);
+            LibraryService = new LibraryService(
+                MainWindow.NavigationViewControl,
+                MainWindow.ProfileViewModel,
+                NavigationService);
 
-            // Инициализируем AuthService
-            AuthService = new AuthService(MainWindow.ProfileViewModel, MainWindow.AuthNavControl);
+            AuthService = new AuthService(
+                MainWindow.ProfileViewModel,
+                MainWindow.AuthNavControl);
+
             MainWindow.Activate();
         }
-
-
     }
 }

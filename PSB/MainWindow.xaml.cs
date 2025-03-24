@@ -25,6 +25,7 @@ namespace PSB
     {
         public static MainWindow? Instance { get; private set; }
         public ProfileViewModel ProfileViewModel { get; set; }
+        public AccountViewModel AccountViewModel { get; set; }
 
         private readonly NavigationService _navigationService;
         //private readonly LibraryService _libraryService;
@@ -42,6 +43,7 @@ namespace PSB
             // Очистка локалки
             //ApplicationData.Current.LocalSettings.Values.Clear();
             ProfileViewModel = new ProfileViewModel();
+            AccountViewModel = new AccountViewModel();
             // Инициализируем сервисы
             _authService = new AuthService(ProfileViewModel, AuthNav);
             _navigationService = new NavigationService(ContentFrame, NavView, HeaderText);

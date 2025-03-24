@@ -31,15 +31,21 @@ class GoogleDriveService
         $accessToken = Crypt::decryptString($this->userCloudService->access_token);
         $refreshToken = Crypt::decryptString($this->userCloudService->refresh_token);
 
+        $expiresIn = max(0, $this->userCloudService->expires_at->diffInSeconds(now()));
+
         $this->client->setAccessToken([
             'access_token' => $accessToken,
             'refresh_token' => $refreshToken,
-            'expires_in' => $this->userCloudService->expires_at->diffInSeconds(now()),
-            'created' => now()->timestamp - ($this->userCloudService->expires_at->timestamp - $this->userCloudService->expires_at->diffInSeconds(now())),
+            'expires_in' => $expiresIn,
+            'created' => now()->timestamp - ($this->userCloudService->expires_at->timestamp - $expiresIn),
         ]);
 
         if ($this->client->isAccessTokenExpired()) {
-            $this->refreshToken();
+            if (!empty($refreshToken)) {
+                $this->refreshToken();
+            } else {
+                throw new \Exception('Google OAuth token expired and no refresh token is available.');
+            }
         }
 
         $this->driveService = new Drive($this->client);
@@ -47,15 +53,27 @@ class GoogleDriveService
 
     private function refreshToken()
     {
-        $newToken = $this->client->fetchAccessTokenWithRefreshToken(Crypt::decryptString($this->userCloudService->refresh_token));
+        $refreshToken = Crypt::decryptString($this->userCloudService->refresh_token);
+
+        if (empty($refreshToken)) {
+            throw new \Exception('No refresh token available. User needs to reauthorize.');
+        }
+
+        $newToken = $this->client->fetchAccessTokenWithRefreshToken($refreshToken);
+
+        // Обновляем `refresh_token`, только если Google его выдал
+        if (!empty($newToken['refresh_token'])) {
+            $this->userCloudService->refresh_token = Crypt::encryptString($newToken['refresh_token']);
+        }
+
         $this->userCloudService->update([
             'access_token' => Crypt::encryptString($newToken['access_token']),
-            'refresh_token' => Crypt::encryptString($newToken['refresh_token'] ?? $this->userCloudService->refresh_token),
             'expires_at' => now()->addSeconds($newToken['expires_in']),
         ]);
 
         $this->client->setAccessToken($newToken);
     }
+
 
     public function getOrCreateFolder($folderName, $parentFolderId = null)
     {

@@ -9,6 +9,7 @@ use App\Http\Resources\SaveResource;
 use App\Http\Resources\SideGameResource;
 use App\Models\Game;
 use App\Models\Library;
+use App\Models\Save;
 use App\Models\SideGame;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
@@ -67,7 +68,8 @@ class SideGameController extends Controller
     public function removeSideGame(SideGame $sideGame): JsonResponse
     {
         $sideGame->delete();
-
+        // Удалить все сохранения к этой игре
+        Save::query()->where('side_game_id', $sideGame->id)->delete();
         return response()->json(null, 204);
     }
 }

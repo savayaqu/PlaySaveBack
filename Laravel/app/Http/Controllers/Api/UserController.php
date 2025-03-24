@@ -6,8 +6,10 @@ use App\Enums\UserVisibility;
 use App\Exceptions\ForbiddenException;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Api\User\UpdateProfileRequest;
+use App\Http\Resources\CloudServiceResource;
 use App\Http\Resources\LibraryResource;
 use App\Http\Resources\UserResource;
+use App\Models\CloudService;
 use App\Models\User;
 use Illuminate\Http\JsonResponse;
 
@@ -57,5 +59,10 @@ class UserController extends Controller
             'user' => UserResource::make($user),
             'library' => LibraryResource::collection($libraries)->response()->getData(true),
         ]);
+    }
+    public function getCloudServices(): JsonResponse
+    {
+        $services = CloudService::all();
+        return response()->json(CloudServiceResource::collection($services));
     }
 }

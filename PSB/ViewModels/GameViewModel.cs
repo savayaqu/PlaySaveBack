@@ -72,6 +72,7 @@ namespace PSB.ViewModels
             };
             //TODO: динамически не меняется сохранение, время, запуск.
 
+
             _ = GetGameAsync(false).ContinueWith(_ =>
             {
                 GameLoaded?.Invoke();
@@ -102,8 +103,6 @@ namespace PSB.ViewModels
                 ZipPath = zipPath,
                 CreatedAt = DateTime.Now,
             };
-
-           // SaveManager.AddSave(newSave);
             Saves.Add(newSave);
             SavesDataManager<IGame>.SaveSaves(Game, Saves.ToList());
         }
@@ -227,10 +226,7 @@ namespace PSB.ViewModels
             {
                 libraryItem.IsFavorite = IsFavorite;
             }
-            if (App.LibraryService != null)
-            {
-                App.LibraryService.UpdateLibraryMenu();
-            }
+            App.LibraryService!.UpdateLibraryMenu();
         }
         public async Task<bool> UploadFile(string filePath)
         {

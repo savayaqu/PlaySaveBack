@@ -1,11 +1,12 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.Net.Http;
 using System.Threading.Tasks;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using PSB.Api.Response;
-using PSB.ContentDialogs;
 using PSB.Models;
 using PSB.Utils;
 using PSB.Views.Settings.Account;
@@ -17,8 +18,14 @@ namespace PSB.ViewModels
 {
     public partial class AccountViewModel: ObservableObject
     {
-        [ObservableProperty] public partial User? User { get; set; } = App.MainWindow.ProfileViewModel.User;
-        public AccountViewModel() {}
+        [ObservableProperty] public partial User? User { get; set; } = AuthData.User;
+        [ObservableProperty] public partial ObservableCollection<CloudService> CloudServices { get; set; } = new();
+        public static AccountViewModel? Instance = App.MainWindow!.AccountViewModel;
+
+        public AccountViewModel() 
+        {
+            _ = LoadCloudServices();
+        }
 
         [RelayCommand]
         public async Task ConnectionGoogleDrive()
@@ -35,6 +42,27 @@ namespace PSB.ViewModels
                     await Launcher.LaunchUriAsync(new Uri(body.Url));
                 }
             }
+        }
+        [RelayCommand]
+        public async Task ConnectService(CloudService cloudService)
+        {
+            Debug.WriteLine("нажата");
+            if(cloudService.Name == "Google Drive")
+            {
+                await ConnectionGoogleDrive();
+            }
+        }
+        public async Task LoadCloudServices()
+        {
+            (var res, var body) = await FetchAsync<List<CloudService>>(
+                   HttpMethod.Get, "profile/services",
+                   setError: e => Debug.WriteLine($"Error: {e}")
+               );
+            if (res.IsSuccessStatusCode && body != null)
+            {
+                CloudServices = new ObservableCollection<CloudService>(body);
+            }
+
         }
         [RelayCommand]
         public async Task UpdateEmail()

@@ -22,7 +22,7 @@ namespace PSB.ViewModels
 {
     public partial class GameSettingsContentViewModel : ObservableObject
     {
-        public ProfileViewModel ProfileViewModel { get; set; } = MainWindow.Instance?.ProfileViewModel!;
+        public ProfileViewModel ProfileViewModel { get; set; } = MainWindow.Instance!.ProfileViewModel!;
         public GameViewModel GameViewModel { get; set; }
         [ObservableProperty] public partial string? SelectedFile { get; set; }
         [ObservableProperty] public partial string? SelectedSavesFolder { get; set; }
@@ -123,27 +123,36 @@ namespace PSB.ViewModels
         [RelayCommand]
         private async Task RemoveFromLibrary()
         {
-            var res = await FetchAsync(
-                HttpMethod.Delete, $"library/game/{Game.Id}",
-                setError: e => Debug.WriteLine($"Error: {e}")
-            );
-
-            if (res.IsSuccessStatusCode)
+            if(Game.Type == "game")
             {
-                //TODO: очистка всего для игры
-                //GameData.RemoveGameData(Game);
+                var res = await FetchAsync(
+                HttpMethod.Delete, $"library/game/{Game.Id}",
+                setError: e => Debug.WriteLine($"Error: {e}"));
 
-                // Удаляем игру из библиотеки
-                var libraryItem = ProfileViewModel.Libraries.FirstOrDefault(l => l.Game.Id == Game.Id);
-                if (libraryItem != null)
-                    ProfileViewModel.Libraries.Remove(libraryItem);
+                if (res.IsSuccessStatusCode)
+                {
+                    // Находим элемент библиотеки, проверяя на null как сам элемент, так и его свойство Game
+                    var libraryItem = ProfileViewModel.Libraries.FirstOrDefault(l => l?.Game?.Id == Game.Id);
 
-                Debug.WriteLine("Попытка закрыть диалог...");
-                App.DialogService!.HideDialog();
-                GameViewModel.InLibrary = false;
+                    if (libraryItem != null)
+                    {
+                        ProfileViewModel.Libraries.Remove(libraryItem);
+                        Debug.WriteLine("Попытка закрыть диалог...");
+                        App.DialogService!.HideDialog();
+                        GameViewModel.InLibrary = false;
+                    }
+                    else
+                    {
+                        Debug.WriteLine("Элемент библиотеки не найден.");
+                    }
+                }
             }
+            if (Game.Type == "sidegame")
+            {
+                return;
+            }
+            
         }
-
 
 
         [RelayCommand]

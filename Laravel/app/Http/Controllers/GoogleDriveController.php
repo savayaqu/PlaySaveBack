@@ -68,8 +68,7 @@ class GoogleDriveController extends Controller
                 'expires_at' => now()->addSeconds($token['expires_in']),
             ]
         );
-
-        return response(null, 204);
+        return redirect('auth/success');
     }
 
     public function uploadFile(UploadSaveRequest $request)

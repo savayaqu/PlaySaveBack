@@ -15,7 +15,7 @@ return new class extends Migration
             $table->id();
             $table->foreignId('user_id')->constrained('users');
             $table->foreignId('game_id')->nullable()->constrained('games');
-            $table->foreignId('side_game_id')->nullable()->constrained('side_games');
+            $table->foreignId('side_game_id')->nullable()->constrained('side_games')->cascadeOnDelete();
             $table->unique(['user_id', 'game_id']);
             $table->unique(['user_id', 'side_game_id']);
             $table->dateTime('last_played_at')->nullable();

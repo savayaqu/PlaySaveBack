@@ -11,8 +11,8 @@ namespace PSB.Views.Settings
     /// </summary>
     public sealed partial class AccountPage : Page
     {
-        public AccountViewModel AccountViewModel { get; set; } = new AccountViewModel();
-        public ProfileViewModel ProfileViewModel => App.MainWindow.ProfileViewModel;
+        public AccountViewModel AccountViewModel => App.MainWindow!.AccountViewModel;
+        public ProfileViewModel ProfileViewModel => App.MainWindow!.ProfileViewModel;
         public AccountPage()
         {
             this.InitializeComponent();
