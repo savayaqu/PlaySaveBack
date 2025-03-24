@@ -91,7 +91,7 @@ class GoogleDriveController extends Controller
         // Получаем название игры для создания папки
         $game = Game::query()->find($gameId); // Если game_id передан, используем его
         if ($sideGameId) {
-            $game = SideGame::query()->where('side_game_id', $sideGameId)->first(); // Если side_game_id передан, ищем игру по нему
+            $game = SideGame::query()->find($sideGameId); // Если side_game_id передан, ищем игру по нему
         }
 
         // Создаем структуру папок
