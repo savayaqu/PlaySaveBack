@@ -77,23 +77,24 @@ namespace PSB.ViewModels
                 // Проверка, что десериализация прошла успешно
                 if (res.IsSuccessStatusCode && library != null)
                 {
-                    PathDataManager<IGame>.SetFilePath(library.SideGame, file.Path);
+                    PathDataManager<IGame>.SetFilePath(library.SideGame!, file.Path);
 
                     string? gameDirectory = Path.GetDirectoryName(file.Path);
                     string? savesFolder = FindSaves.FindSavesFolder(gameDirectory);
 
                     if (savesFolder != null)
                     {
-                        PathDataManager<IGame>.SetSavesFolderPath(library.SideGame, savesFolder);
+                        PathDataManager<IGame>.SetSavesFolderPath(library.SideGame!, savesFolder);
                         Debug.WriteLine($"Папка Saves найдена: {savesFolder}");
                     }
                     else
                     {
                         Debug.WriteLine("Папка Saves не найдена.");
                     }
+                    GameDataManager.SaveGame(library.SideGame!);
                     // Обновление меню
                     Libraries.Add(library);
-                    LibraryDataManager<IGame>.SaveLibrary(library.SideGame, library);
+                    LibraryDataManager<IGame>.SaveLibrary(library.SideGame!, library);
                 }
             }
         }

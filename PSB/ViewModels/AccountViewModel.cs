@@ -40,13 +40,13 @@ namespace PSB.ViewModels
         public async Task UpdateEmail()
         {
             var dialog = new UpdateEmailContentDialog();
-            await App.DialogService.ShowDialogAsync(dialog);
+            await App.DialogService!.ShowDialogAsync(dialog);
         }
         [RelayCommand]
         public async Task UpdatePassword()
         {
             var dialog = new UpdatePasswordContentDialog();
-            await App.DialogService.ShowDialogAsync(dialog);
+            await App.DialogService!.ShowDialogAsync(dialog);
         }
     }
 }

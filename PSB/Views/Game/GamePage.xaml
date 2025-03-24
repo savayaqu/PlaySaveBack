@@ -15,15 +15,8 @@
     <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
         <StackPanel>
             <Grid>
-                <!-- Картинка -->
-                <Grid Height="420">
-                    <Image 
-        Source="{x:Bind ((models:Game)GameViewModel.Game).Header, Mode=OneWay}" 
-        Stretch="UniformToFill" 
-        HorizontalAlignment="Stretch" 
-        VerticalAlignment="Stretch" 
-        Margin="0,-32,0,0"/>
-                </Grid>
+                <!-- Картинка или название -->
+                <Grid x:Name="GameContentGrid" Height="420"/>
                 <!-- Блок с информацией -->
                 <StackPanel VerticalAlignment="Bottom" Background="#CC000000">
                     <Grid>

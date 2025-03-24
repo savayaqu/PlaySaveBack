@@ -507,46 +507,41 @@ namespace PSB.ViewModels
 
         public async Task GetGameAsync(bool ignoreCache)
         {
-            if (!ignoreCache)
+            try
             {
-                if (!InLibrary)
+                if (!ignoreCache && !InLibrary)
                 {
-                    // Проверяем, есть ли данные в кэше
+                    // Загрузка из кэша
                     var cachedGame = GameDataManager.LoadGame(Type, GameId);
                     var cachedLibrary = LibraryDataManager<IGame>.LoadLibrary(Type, GameId);
                     var cachedSaves = SavesDataManager<IGame>.LoadSaves(Type, GameId);
 
                     if (cachedGame != null)
                     {
-                        // Данные загружены из кэша
                         Game = cachedGame;
-                        if (cachedSaves != null)
-                        {
-                            Saves = new ObservableCollection<Save>(cachedSaves);
-                        }
-                        FilePath = PathDataManager<IGame>.GetFilePath(Game)!;
-                        FolderPath = PathDataManager<IGame>.GetSavesFolderPath(Game)!;
+                        Saves = new ObservableCollection<Save>(cachedSaves ?? new List<Save>());
+                        Library = cachedLibrary;
+
+                        FilePath = PathDataManager<IGame>.GetFilePath(Game) ?? string.Empty;
+                        FolderPath = PathDataManager<IGame>.GetSavesFolderPath(Game) ?? string.Empty;
                         ExeExists = !string.IsNullOrEmpty(FilePath);
 
-                        // Обновляем библиотеку, если она есть в кэше
-                        Library = cachedLibrary;
                         UpdateLibraryDetails(Library);
                         GameLoaded?.Invoke();
                         Debug.WriteLine("Данные загружены из кэша");
                         return;
                     }
                 }
-            }
 
-            // Загружаем с сервера, если нет данных в кэше или нужно обновить
-            (var res, var body) = await FetchAsync<GameResponse>(
-                HttpMethod.Get, $"{Type}s/{GameId}",
-                setError: e => Debug.WriteLine($"Error: {e}")
-            );
+                // Загрузка с сервера
+                (var res, var body) = await FetchAsync<GameResponse>(
+                    HttpMethod.Get, $"{Type}s/{GameId}",
+                    setError: e => Debug.WriteLine($"Error: {e}")
+                );
 
-            if (res.IsSuccessStatusCode)
-            {
-                Debug.WriteLine(JsonSerializer.Serialize(body));
+                if (!res.IsSuccessStatusCode) return;
+
+                // Обработка Game/SideGame
                 if (body.Game != null)
                 {
                     Game = body.Game;
@@ -555,38 +550,43 @@ namespace PSB.ViewModels
                 {
                     Game = body.SideGame;
                 }
-
-                if (body.Library != null)
+                else
                 {
-                    Library = body.Library;
-                    UpdateLibraryDetails(Library);
-                    Debug.WriteLine("Обновление библиотеки");
-
+                    Debug.WriteLine("Ошибка: и Game, и SideGame равны null");
+                    return;
                 }
 
-                Debug.WriteLine("gamename" + Game.Name);
-               
-
-                FilePath = PathDataManager<IGame>.GetFilePath(Game);
-                FolderPath = PathDataManager<IGame>.GetSavesFolderPath(Game)!;
-                ExeExists = !string.IsNullOrEmpty(FilePath);
-                Debug.WriteLine(JsonSerializer.Serialize(body.Library));
+                // Обработка Library
                 Library = body.Library;
-                Debug.WriteLine("Id bibla"+body.Library.Id);
                 UpdateLibraryDetails(Library);
 
-                if (body.Saves != null)
+                // Получение путей
+                FilePath = PathDataManager<IGame>.GetFilePath(Game) ?? string.Empty;
+                FolderPath = PathDataManager<IGame>.GetSavesFolderPath(Game) ?? string.Empty;
+                ExeExists = !string.IsNullOrEmpty(FilePath);
+
+                // Обработка сохранений
+                Saves = new ObservableCollection<Save>(body.Saves ?? new List<Save>());
+
+                // Сохранение в кэш
+                if (Game != null)
                 {
-                    Saves = new ObservableCollection<Save>(body.Saves);
+                    GameDataManager.SaveGame(Game);
+                    if (Library != null)
+                    {
+                        LibraryDataManager<IGame>.SaveLibrary(Game, Library);
+                    }
+                    SavesDataManager<IGame>.SaveSaves(Game, Saves.ToList());
+                    Debug.WriteLine($"Данные для игры '{GameId}' сохранены в кэше.");
                 }
 
-                GameDataManager.SaveGame(Game);
-                LibraryDataManager<IGame>.SaveLibrary(Game, Library);
-                SavesDataManager<IGame>.SaveSaves(Game, body.Saves?.ToList() ?? new List<Save>());
-                Debug.WriteLine($"Данные для игры '{GameId}' сохранены в кэше.");
+                GameLoaded?.Invoke();
             }
-
-            GameLoaded?.Invoke();
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"Критическая ошибка в GetGameAsync: {ex.Message}\n{ex.StackTrace}");
+                // Дополнительная обработка ошибки
+            }
         }
         private void UpdateLibraryDetails(Library? library)
         {

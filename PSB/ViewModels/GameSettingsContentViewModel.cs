@@ -138,7 +138,7 @@ namespace PSB.ViewModels
                     ProfileViewModel.Libraries.Remove(libraryItem);
 
                 Debug.WriteLine("Попытка закрыть диалог...");
-                App.DialogService.HideDialog();
+                App.DialogService!.HideDialog();
                 GameViewModel.InLibrary = false;
             }
         }

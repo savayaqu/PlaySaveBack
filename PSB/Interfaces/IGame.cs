@@ -9,8 +9,8 @@ using PSB.Models;
 namespace PSB.Interfaces
 {
     [JsonPolymorphic(TypeDiscriminatorPropertyName = "Type")]
-    [JsonDerivedType(typeof(Game), typeDiscriminator: "Game")]
-    [JsonDerivedType(typeof(SideGame), typeDiscriminator: "SideGame")]
+    [JsonDerivedType(typeof(Game), typeDiscriminator: "game")]
+    [JsonDerivedType(typeof(SideGame), typeDiscriminator: "sidegame")]
     public interface IGame
     {
         [JsonPropertyName("id")]

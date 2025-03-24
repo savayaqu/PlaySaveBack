@@ -77,7 +77,7 @@ namespace PSB.Utils
         }
 
         // Сохранение токена и пользователя
-        public static async Task SaveAndNavigate(string? token, User? user)
+        public static void SaveAndNavigate(string? token, User? user)
         {
             Token = token;
             User = user;
