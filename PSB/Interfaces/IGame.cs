@@ -22,4 +22,5 @@ namespace PSB.Interfaces
         [JsonPropertyName("type")]
         string Type { get; set; }
     }
+
 }

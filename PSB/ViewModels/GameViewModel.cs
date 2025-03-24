@@ -81,7 +81,9 @@ namespace PSB.ViewModels
         [RelayCommand]
         private async Task CreateSave()
         {
-            if (FolderPath == null) return;
+            if (FolderPath == null) 
+                return;
+            Debug.WriteLine("Folder Path " + FolderPath);
 
             var zipCreator = new ZipCreator();
             var (folderName, zipPath, hash, size) = await zipCreator.CreateZip(FolderPath, Game.Name, SaveVersion);
@@ -202,7 +204,7 @@ namespace PSB.ViewModels
                 Debug.WriteLine("XamlRoot is not set. Call SetXamlRoot first.");
                 return;
             }
-            var dialog = new GameSettingsContentDialog(Game);
+            var dialog = new GameSettingsContentDialog(Game, this);
             await App.DialogService.ShowDialogAsync(dialog);
         }
 
@@ -247,12 +249,12 @@ namespace PSB.ViewModels
 
                 // Создаем MultipartFormDataContent
                 var content = new MultipartFormDataContent
-        {
-            { new ByteArrayContent(fileBytes), "file", Path.GetFileName(filePath) },
-            { new StringContent(SaveVersion), "version" },
-            { new StringContent(GameId.ToString()), "game_id" },
-            { new StringContent(SaveDescription), "description" }
-        };
+                {
+                    { new ByteArrayContent(fileBytes), "file", Path.GetFileName(filePath) },
+                    { new StringContent(SaveVersion), "version" },
+                    { new StringContent(GameId.ToString()), Game is SideGame ? "side_game_id" : "game_id" },
+                    { new StringContent(SaveDescription), "description" }
+                };
 
                 // Создаем HttpClient
                 using var httpClient = new HttpClient();

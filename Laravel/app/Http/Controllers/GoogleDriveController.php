@@ -8,6 +8,7 @@ use App\Http\Resources\SaveResource;
 use App\Models\CloudService;
 use App\Models\Game;
 use App\Models\Save;
+use App\Models\SideGame;
 use App\Models\UserCloudService;
 use App\Services\GoogleDriveService;
 use Carbon\Carbon;
@@ -91,7 +92,7 @@ class GoogleDriveController extends Controller
         // Получаем название игры для создания папки
         $game = Game::query()->find($gameId); // Если game_id передан, используем его
         if ($sideGameId) {
-            $game = Game::query()->where('side_game_id', $sideGameId)->first(); // Если side_game_id передан, ищем игру по нему
+            $game = SideGame::query()->where('side_game_id', $sideGameId)->first(); // Если side_game_id передан, ищем игру по нему
         }
 
         // Создаем структуру папок

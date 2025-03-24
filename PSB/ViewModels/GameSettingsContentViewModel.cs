@@ -23,15 +23,16 @@ namespace PSB.ViewModels
     public partial class GameSettingsContentViewModel : ObservableObject
     {
         public ProfileViewModel ProfileViewModel { get; set; } = MainWindow.Instance?.ProfileViewModel!;
-        public GameViewModel GameViewModel { get; set; } = GameViewModel.Instance!;
+        public GameViewModel GameViewModel { get; set; }
         [ObservableProperty] public partial string? SelectedFile { get; set; }
         [ObservableProperty] public partial string? SelectedSavesFolder { get; set; }
         [ObservableProperty] public partial string? GameName { get; set; }
 
         [ObservableProperty] public partial IGame Game { get; set; }
-        public GameSettingsContentViewModel(IGame iGame)
+        public GameSettingsContentViewModel(IGame iGame, GameViewModel gameViewModel)
         {
             Game = iGame;
+            GameViewModel = gameViewModel;
             GameName = Game.Name;
             SelectedFile = PathDataManager<IGame>.GetFilePath(Game);
             SelectedSavesFolder = PathDataManager<IGame>.GetSavesFolderPath(Game);
@@ -98,6 +99,7 @@ namespace PSB.ViewModels
                 {
                     PathDataManager<IGame>.SetSavesFolderPath(Game, savesFolder);
                     SelectedSavesFolder = savesFolder;
+                    GameViewModel.FolderPath = SelectedSavesFolder;
                     Debug.WriteLine($"Папка Saves найдена: {savesFolder}");
                 }
                 else
@@ -107,9 +109,8 @@ namespace PSB.ViewModels
 
                 GameViewModel.ExeExists = true;
                 GameViewModel.FilePath = SelectedFile;
-
                 // Вызываем обновление меню
-                App.LibraryService.UpdateLibraryMenu();
+                App.LibraryService!.UpdateLibraryMenu();
             }
         }
 

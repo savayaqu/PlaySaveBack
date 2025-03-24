@@ -15,10 +15,10 @@ namespace PSB.ContentDialogs
     {
         GameSettingsContentViewModel GameSettingsContentViewModel { get; set; }
         GameViewModel GameViewModel { get; set; }
-        public GameSettingsContentDialog(IGame game)
+        public GameSettingsContentDialog(IGame game, GameViewModel gameViewModel)
         {
             this.InitializeComponent();
-            GameSettingsContentViewModel = new GameSettingsContentViewModel(game);
+            GameSettingsContentViewModel = new GameSettingsContentViewModel(game, gameViewModel);
         }
 
         private void ContentDialog_Closing(ContentDialog sender, ContentDialogClosingEventArgs args)
