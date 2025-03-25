@@ -51,9 +51,8 @@ Route::middleware('auth:sanctum')->group(function () {
         //Удаление сохранения
         Route::prefix('saves')->group(function () {
            Route::get('game/{game}/my', 'getMySavesGame'); // Просмотр моих сохранений к игре
-           Route::get('sidegame/{sideGame}/my', 'getMySavesGame'); // Просмотр моих сохранений к сторонней игре
+           Route::get('sidegame/{sideGame}/my', 'getMySavesSideGame'); // Просмотр моих сохранений к сторонней игре
         });
-        Route::post('hash', 'getHash');
     });
     Route::controller(GameController::class)->group(function () {
         Route::prefix('games')->group(function () {
