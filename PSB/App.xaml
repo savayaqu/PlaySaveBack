@@ -20,6 +20,7 @@
             <converters:TimePlayedConverter x:Key="TimePlayedConverter"/>
             <converters:EmptyToVisibilityConverter x:Key="EmptyToVisibilityConverter" />
             <converters:BytesToSizeConverter x:Key="BytesToSizeConverter" />
+            <converters:CamelCaseTextConverter x:Key="CamelCaseTextConverter"/>
         </ResourceDictionary>
     </Application.Resources>
 </Application>

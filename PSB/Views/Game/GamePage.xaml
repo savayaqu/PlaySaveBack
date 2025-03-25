@@ -17,8 +17,8 @@
             <Grid>
                 <!-- Картинка или название -->
                 <Grid x:Name="GameContentGrid" Height="420"/>
-                <!-- Блок с информацией -->
-                <StackPanel VerticalAlignment="Bottom" Background="#CC000000">
+                <!-- Блок с информацией  Background="#CC000000" -->
+                <StackPanel VerticalAlignment="Bottom" Background="{StaticResource AcrylicBackgroundFillColorDefaultBrush}">
                     <Grid>
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="*" />

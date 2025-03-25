@@ -8,6 +8,7 @@ using PSB.Models;
 using PSB.ViewModels;
 using Windows.ApplicationModel.Contacts;
 using Windows.Gaming.Input;
+using Windows.UI;
 
 
 namespace PSB.Views
@@ -46,10 +47,10 @@ namespace PSB.Views
                 App.MainWindow!.HeaderTextBlock.Text = GameViewModel.Game.Name;
                 App.NavigationService!.SyncNavigationViewSelection(App.NavigationService.GetCurrentPage());
 
-                // Очищаем предыдущий контент
+                // РћС‡РёС‰Р°РµРј РїСЂРµРґС‹РґСѓС‰РёР№ РєРѕРЅС‚РµРЅС‚
                 GameContentGrid.Children.Clear();
 
-                // Создаем новый контент в зависимости от типа
+                // РЎРѕР·РґР°РµРј РЅРѕРІС‹Р№ РєРѕРЅС‚РµРЅС‚ РІ Р·Р°РІРёСЃРёРјРѕСЃС‚Рё РѕС‚ С‚РёРїР°
                 if (GameViewModel.Game is Game game)
                 {
                     CreateGameContent(game);
@@ -63,32 +64,44 @@ namespace PSB.Views
 
         private void CreateGameContent(Game game)
         {
-            // Создаем Image для обычной игры
+            // РћСЃРЅРѕРІРЅРѕРµ РёР·РѕР±СЂР°Р¶РµРЅРёРµ РёРіСЂС‹ (С„РѕРЅ)
             var image = new Image
             {
                 Source = new BitmapImage(new Uri(game.Header!)),
                 Stretch = Stretch.UniformToFill,
                 HorizontalAlignment = HorizontalAlignment.Stretch,
-                VerticalAlignment = VerticalAlignment.Stretch,
-                Margin = new Thickness(0, -32, 0, 0)
+                VerticalAlignment = VerticalAlignment.Stretch
+            };
+
+            // Р›РѕРіРѕС‚РёРї РёРіСЂС‹ (СЃРјРµС‰РµРЅ РІР»РµРІРѕ Рё РЅРµРјРЅРѕРіРѕ РІРЅРёР·)
+            var logo = new Image
+            {
+                Source = new BitmapImage(new Uri(game.LogoImg!)),
+                Stretch = Stretch.Uniform, 
+                HorizontalAlignment = HorizontalAlignment.Left,
+                VerticalAlignment = VerticalAlignment.Center,
+                Margin = new Thickness(20, 80, 0, 0), 
+                Width = 300, 
             };
 
             GameContentGrid.Children.Add(image);
+            GameContentGrid.Children.Add(logo);
         }
 
         private void CreateSideGameContent(SideGame sideGame)
         {
-            // Создаем TextBlock для SideGame
+            // РЎРѕР·РґР°РµРј TextBlock РґР»СЏ SideGame
             var textBlock = new TextBlock
             {
                 Text = sideGame.Name,
-                HorizontalAlignment = HorizontalAlignment.Center,
-                VerticalAlignment = VerticalAlignment.Center,
-                FontSize = 24,
+                Padding = new Thickness(24, 0, 0, 100),
+                HorizontalAlignment = HorizontalAlignment.Left,
+                VerticalAlignment = VerticalAlignment.Bottom,
+                Style = (Style)Application.Current.Resources["DisplayTextBlockStyle"],
                 TextWrapping = TextWrapping.Wrap,
                 TextAlignment = TextAlignment.Center
             };
-
+            GameContentGrid.Background = (Brush)Application.Current.Resources["AcrylicBackgroundFillColorDefaultBrush"];
             GameContentGrid.Children.Add(textBlock);
         }
     }

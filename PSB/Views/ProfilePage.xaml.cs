@@ -40,9 +40,13 @@ namespace PSB.Views
                 if (library.Game != null)
                 {
                     string gameTag = $"Game_{library.Game.Id}|{library.Game.Name}";
-                    App.NavigationService.Navigate(gameTag);
+                    App.NavigationService!.Navigate(gameTag);
                 }
-               
+                if (library.SideGame != null)
+                {
+                    string gameTag = $"SideGame_{library.SideGame.Id}|{library.SideGame.Name}";
+                    App.NavigationService!.Navigate(gameTag);
+                }
             }
         }
     }

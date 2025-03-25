@@ -16,6 +16,7 @@ namespace PSB.Models
         [JsonPropertyName("header")] public string? Header { get; set; }        
         [JsonPropertyName("library_img")] public string? LibraryImg{ get; set; }
         [JsonPropertyName("catalog_img")] public string? CatalogImg{ get; set; }
+        [JsonPropertyName("logo_img")] public string? LogoImg{ get; set; }
 
     }
 }
