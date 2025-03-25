@@ -77,11 +77,11 @@ namespace PSB.Views
             var logo = new Image
             {
                 Source = new BitmapImage(new Uri(game.LogoImg!)),
-                Stretch = Stretch.Uniform, 
+                Stretch = Stretch.Uniform,
                 HorizontalAlignment = HorizontalAlignment.Left,
                 VerticalAlignment = VerticalAlignment.Center,
-                Margin = new Thickness(20, 80, 0, 0), 
-                Width = 300, 
+                Margin = new Thickness(20, 80, 0, 0),
+                Width = 300,
             };
 
             GameContentGrid.Children.Add(image);

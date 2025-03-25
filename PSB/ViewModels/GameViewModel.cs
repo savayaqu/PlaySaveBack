@@ -163,6 +163,7 @@ namespace PSB.ViewModels
                 // Обновляем локальные данные
                 Library.TimePlayed = (Library.TimePlayed ?? 0) + secondsPlayed;
                 Library.LastPlayedAt = endTime;
+                OnPropertyChanged(nameof(Library));
 
                 try
                 {
