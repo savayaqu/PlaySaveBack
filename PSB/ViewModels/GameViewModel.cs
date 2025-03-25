@@ -653,10 +653,16 @@ namespace PSB.ViewModels
                 FilePath = PathDataManager<IGame>.GetFilePath(Game) ?? string.Empty;
                 FolderPath = PathDataManager<IGame>.GetSavesFolderPath(Game) ?? string.Empty;
                 ExeExists = !string.IsNullOrEmpty(FilePath);
-
                 // Обработка сохранений
-                Saves = new ObservableCollection<Save>(body.Saves ?? new List<Save>());
-
+                if(body.Saves != null)
+                {
+                    foreach (var save in body.Saves)
+                    {
+                        save.IsSynced = true;
+                    }
+                    Saves = new ObservableCollection<Save>(body.Saves ?? new List<Save>());
+                }
+                
                 // Сохранение в кэш
                 if (Game != null)
                 {
