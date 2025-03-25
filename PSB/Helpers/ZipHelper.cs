@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics;
 using System.IO;
 using System.IO.Compression;
 using System.Linq;
@@ -7,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace PSB.Helpers
 {
-    public class ZipCreator
+    public class ZipHelper
     {
         public async Task<(string folderName, string zipFilePath, string hash, ulong sizeInBytes)> CreateZip(string folderPath, string gameName, string saveVersion)
         {
@@ -99,6 +100,77 @@ namespace PSB.Helpers
             else
             {
                 Console.WriteLine($"Файл {filePath} не найден.");
+            }
+        }
+        public async Task<string> CreateBackup(string folderPath, string gameName, string saveVersion)
+        {
+
+            // Папка temp
+            string zipFilePath = Path.Combine(Path.GetTempPath(), $"PlaySaveBack/{gameName}/{saveVersion}");
+            
+            // Создаём ZIP-архив
+            await ZipFolder(folderPath, zipFilePath);
+
+            return zipFilePath;
+        }
+        // В классе ZipCreator добавляем новый метод
+        public async Task RestoreFromZip(string zipFilePath, string targetFolderPath)
+        {
+            if (!File.Exists(zipFilePath))
+            {
+                throw new FileNotFoundException("ZIP файл не найден", zipFilePath);
+            }
+
+            try
+            {
+                // 1. Создаем временную папку для безопасного восстановления
+                string tempRestorePath = Path.Combine(Path.GetTempPath(), "temp_restore_" + Guid.NewGuid());
+                Directory.CreateDirectory(tempRestorePath);
+
+                // 2. Распаковываем во временную папку
+                ZipFile.ExtractToDirectory(zipFilePath, tempRestorePath);
+
+                // 3. Очищаем целевую папку (если существует)
+                if (Directory.Exists(targetFolderPath))
+                {
+                    Directory.Delete(targetFolderPath, true);
+                }
+                Directory.CreateDirectory(targetFolderPath);
+
+                // 4. Копируем файлы из временной папки в целевую
+                foreach (var dirPath in Directory.GetDirectories(tempRestorePath, "*", SearchOption.AllDirectories))
+                {
+                    Directory.CreateDirectory(dirPath.Replace(tempRestorePath, targetFolderPath));
+                }
+
+                foreach (var filePath in Directory.GetFiles(tempRestorePath, "*.*", SearchOption.AllDirectories))
+                {
+                    File.Copy(filePath, filePath.Replace(tempRestorePath, targetFolderPath), true);
+                }
+
+                // 5. Очищаем временные файлы
+                Directory.Delete(tempRestorePath, true);
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"Ошибка при восстановлении из ZIP: {ex.Message}");
+                throw; // Перебрасываем исключение для обработки выше
+            }
+        }
+        // Метод для проверки целостности ZIP-архива
+        public async Task<bool> ZipFileValid(string filePath)
+        {
+            try
+            {
+                using (var archive = ZipFile.OpenRead(filePath))
+                {
+                    var entries = archive.Entries;
+                    return entries.Count > 0; // Простая проверка
+                }
+            }
+            catch
+            {
+                return false;
             }
         }
     }

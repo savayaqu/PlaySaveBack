@@ -5,7 +5,8 @@ using PSB.Utils;
 using Windows.ApplicationModel.Activation;
 using System.Threading.Tasks;
 using System;
-using System.Diagnostics; // Для ProtocolActivatedEventArgs
+using System.Diagnostics;
+using PSB.Helpers; // Для ProtocolActivatedEventArgs
 
 namespace PSB
 {
@@ -16,11 +17,13 @@ namespace PSB
         public static NavigationService? NavigationService { get; private set; }
         public static LibraryService? LibraryService { get; private set; }
         public static AuthService? AuthService { get; private set; }
+        public static ZipHelper? ZipHelper { get; private set; }
 
         public App()
         {
             InitializeComponent();
             DialogService = new DialogService();
+            ZipHelper = new ZipHelper();
         }
 
         protected override async void OnLaunched(Microsoft.UI.Xaml.LaunchActivatedEventArgs args)

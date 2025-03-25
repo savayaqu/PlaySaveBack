@@ -6,13 +6,11 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     Background="{ThemeResource ApplicationPageBackgroundThemeBrush}"
-    Title="{x:Bind GameSettingsContentViewModel.GameName, Mode=OneWay}"
-    PrimaryButtonText="Сохранить"
-    SecondaryButtonText="Отмена"
-    DefaultButton="Primary"
-    Closing="ContentDialog_Closing">
-
+    Title="{x:Bind GameSettingsContentViewModel.GameName, Mode=OneWay}">
     <StackPanel Spacing="10">
+        <Button BorderThickness="0" Background="Transparent" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,-40,0,0" Click="Button_Click">
+            <FontIcon HorizontalAlignment="Center" VerticalAlignment="Center" Glyph="&#xE711;" />
+        </Button>
         <TextBlock Text="Файл" FontWeight="Bold"/>
         <Grid ColumnDefinitions="*,Auto" ColumnSpacing="6">
             <TextBox Grid.Column="0" IsReadOnly="True" Text="{x:Bind GameSettingsContentViewModel.SelectedFile, Mode=OneWay}"/>

@@ -58,8 +58,6 @@ namespace PSB.Services
                     if (_frame.Content is GamePage currentGamePage && currentGamePage.GameViewModel?.GameId == gameId)
                     {
                         Debug.WriteLine("GamePage уже загружена для этой игры. Обновляем выделение в меню.");
-                        SyncNavigationViewSelection(currentGamePage);
-
                         _headerText.Text = gameName;
                         return;
                     }

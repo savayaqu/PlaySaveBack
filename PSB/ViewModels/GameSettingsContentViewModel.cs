@@ -69,6 +69,8 @@ namespace PSB.ViewModels
                 PathDataManager<IGame>.SetSavesFolderPath(Game, folder.Path);
                 StorageApplicationPermissions.FutureAccessList.AddOrReplace("PickedFolderToken", folder);
                 SelectedSavesFolder = folder.Path;
+                GameViewModel.FolderPath = SelectedSavesFolder;
+                PathDataManager<IGame>.SetSavesFolderPath(Game, SelectedSavesFolder);
             }
         }
 

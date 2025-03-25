@@ -1,3 +1,4 @@
+using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using PSB.Interfaces;
 using PSB.Models;
@@ -21,14 +22,9 @@ namespace PSB.ContentDialogs
             GameSettingsContentViewModel = new GameSettingsContentViewModel(game, gameViewModel);
         }
 
-        private void ContentDialog_Closing(ContentDialog sender, ContentDialogClosingEventArgs args)
+        public void Button_Click(object sender, RoutedEventArgs e)
         {
-
-        }
-
-        private void Button_Click(object sender, Microsoft.UI.Xaml.RoutedEventArgs e)
-        {
-
+            this.Hide();
         }
     }
 }

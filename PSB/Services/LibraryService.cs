@@ -8,6 +8,7 @@ using PSB.Utils.Game;
 using PSB.ViewModels;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 
 public class LibraryService
 {

@@ -44,9 +44,6 @@ namespace PSB.Views
         {
             if (GameViewModel?.Game != null)
             {
-                App.MainWindow!.HeaderTextBlock.Text = GameViewModel.Game.Name;
-                App.NavigationService!.SyncNavigationViewSelection(App.NavigationService.GetCurrentPage());
-
                 // Очищаем предыдущий контент
                 GameContentGrid.Children.Clear();
 
@@ -59,6 +56,8 @@ namespace PSB.Views
                 {
                     CreateSideGameContent(sideGame);
                 }
+                App.MainWindow!.HeaderTextBlock.Text = GameViewModel.Game.Name;
+                App.NavigationService!.SyncNavigationViewSelection(App.NavigationService.GetCurrentPage());
             }
         }
 

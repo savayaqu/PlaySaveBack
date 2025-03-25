@@ -31,5 +31,7 @@ namespace PSB.Models
         [JsonPropertyName("updated_at")]
         [JsonConverter(typeof(CustomDateTimeConverter))] 
         public DateTime UpdatedAt { get; set; }
+        public string? Backup { get; set; } 
+        public DateTime? LastRestored {  get; set; }
     }
 }
