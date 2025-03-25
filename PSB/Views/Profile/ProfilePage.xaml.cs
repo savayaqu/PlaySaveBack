@@ -31,7 +31,7 @@ namespace PSB.Views
         public ProfilePage()
         {
             this.InitializeComponent();
-            ProfileViewModel = new ProfileViewModel();
+            ProfileViewModel = App.MainWindow!.ProfileViewModel;
         }
         private void OnGameTapped(object sender, TappedRoutedEventArgs e)
         {

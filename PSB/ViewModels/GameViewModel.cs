@@ -85,6 +85,13 @@ namespace PSB.ViewModels
         [RelayCommand]
         private async Task CreateSave()
         {
+            bool versionExist = Saves?.Any(s => s.Version == SaveVersion) ?? false;
+            //TODO: доработать, запретить нажимать кнопку, если версия сходится
+            if (versionExist)
+            {
+                SaveVersion = "go to na xyu";
+                return;
+            }
             if (FolderPath == null) 
                 return;
             Debug.WriteLine("Folder Path " + FolderPath);
@@ -121,6 +128,8 @@ namespace PSB.ViewModels
                 SaveDescription = "";
                 save.IsSynced = true;
                 Saves = new ObservableCollection<Save>(Saves);
+                SavesDataManager<IGame>.SaveSaves(Game, Saves.ToList());
+                OnPropertyChanged(nameof(Saves));
             }
         }
         [RelayCommand]
@@ -170,6 +179,7 @@ namespace PSB.ViewModels
                     File.Delete(zipFilePath);
             }
         }
+        //TODO: пофиксить, оч долго грузит
         private async Task DownloadFileWithProgressAsync(string url, string filePath)
         {
             using (var httpClient = new HttpClient { Timeout = Timeout.InfiniteTimeSpan })
@@ -653,15 +663,7 @@ namespace PSB.ViewModels
                 FilePath = PathDataManager<IGame>.GetFilePath(Game) ?? string.Empty;
                 FolderPath = PathDataManager<IGame>.GetSavesFolderPath(Game) ?? string.Empty;
                 ExeExists = !string.IsNullOrEmpty(FilePath);
-                // Обработка сохранений
-                if(body.Saves != null)
-                {
-                    foreach (var save in body.Saves)
-                    {
-                        save.IsSynced = true;
-                    }
-                    Saves = new ObservableCollection<Save>(body.Saves ?? new List<Save>());
-                }
+                
                 
                 // Сохранение в кэш
                 if (Game != null)
@@ -671,7 +673,16 @@ namespace PSB.ViewModels
                     {
                         LibraryDataManager<IGame>.SaveLibrary(Game, Library);
                     }
-                    SavesDataManager<IGame>.SaveSaves(Game, Saves.ToList());
+                    // Обработка сохранений
+                    if (body.Saves != null)
+                    {
+                        foreach (var save in body.Saves)
+                        {
+                            save.IsSynced = true;
+                        }
+                        Saves = new ObservableCollection<Save>(body.Saves ?? new List<Save>());
+                        SavesDataManager<IGame>.SaveSaves(Game, Saves.ToList());
+                    }
                     Debug.WriteLine($"Данные для игры '{GameId}' сохранены в кэше.");
                 }
 

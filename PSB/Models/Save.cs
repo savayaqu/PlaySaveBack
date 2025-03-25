@@ -21,17 +21,16 @@ namespace PSB.Models
         [JsonPropertyName("game_id")] public ulong? GameId{ get; set; }
         [JsonPropertyName("side_game_id")] public ulong? SideGameId{ get; set; }
         [JsonPropertyName("user_cloud_service_id")] public ulong UserCloudServiceId { get; set; }
-        public Boolean IsSynced { get; set; }
-        public string? ZipPath { get; set; }
-
         [JsonPropertyName("created_at")]
         [JsonConverter(typeof(CustomDateTimeConverter))]
         public DateTime CreatedAt { get; set; }
 
         [JsonPropertyName("updated_at")]
-        [JsonConverter(typeof(CustomDateTimeConverter))] 
+        [JsonConverter(typeof(CustomDateTimeConverter))]
         public DateTime UpdatedAt { get; set; }
-        public string? Backup { get; set; } 
+        public Boolean IsSynced { get; set; }
+        public string? ZipPath { get; set; }
+        public string? Backup { get; set; }
         public DateTime? LastRestored {  get; set; }
     }
 }

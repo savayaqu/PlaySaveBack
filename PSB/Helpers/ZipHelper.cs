@@ -76,12 +76,12 @@ namespace PSB.Helpers
             return zipFilePath;
         }
 
-        private string GetRelativePath(string fullPath, string basePath)
+        public string GetRelativePath(string fullPath, string basePath)
         {
             return Path.GetRelativePath(basePath, fullPath);
         }
 
-        private string CalculateFileHash(string filePath)
+        public string CalculateFileHash(string filePath)
         {
             using (var stream = File.OpenRead(filePath))
             using (var sha256 = SHA256.Create())

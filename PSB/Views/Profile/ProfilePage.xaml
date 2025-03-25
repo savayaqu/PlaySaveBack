@@ -104,9 +104,12 @@
                 <StackPanel Grid.Column="1"
                 Orientation="Horizontal"
                 Spacing="8">
-                    <Button Command="{x:Bind ProfileViewModel.LoadLibraryCommand}" 
-                Content="Библиотека" 
-                Height="40" Width="110"/>
+                    <Button Command="{x:Bind ProfileViewModel.UpdateProfileCommand}" Height="40">
+                        <StackPanel Orientation="Horizontal" Spacing="6">
+                            <FontIcon Glyph="&#xE70F;" />
+                            <TextBlock Text="Редактировать профиль"/>
+                        </StackPanel>
+                    </Button>
                     <Button Command="{x:Bind ProfileViewModel.LogoutCommand}" 
                 Content="Выйти" 
                 Height="40" 

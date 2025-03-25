@@ -64,6 +64,9 @@
     <Folder Include="Views\Game\" />
   </ItemGroup>
   <ItemGroup>
+    <Page Update="Views\Profile\UpdateProfileContentDialog.xaml">
+      <SubType>Designer</SubType>
+    </Page>
     <Page Update="Views\SavePage.xaml">
       <Generator>MSBuild:Compile</Generator>
     </Page>

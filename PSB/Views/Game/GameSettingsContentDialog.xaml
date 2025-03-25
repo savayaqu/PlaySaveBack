@@ -25,9 +25,6 @@
             <TextBox Grid.Column="0" IsReadOnly="True" Text="{x:Bind GameSettingsContentViewModel.SelectedSavesFolder, Mode=OneWay}"/>
             <Button Grid.Column="1" Content="Выбрать" Command="{x:Bind GameSettingsContentViewModel.ChooseFolderSavesCommand}"/>
         </Grid>
-        <TextBlock Text="Поведение сохранений" FontWeight="Bold"/>
-        <TextBlock Text="Создавать новые сохранения (до 5 максимум) после изменения сохранений или перезаписывать. Сохранение ручное или автоматическое."/>
-
         <TextBlock Text="Опасная зона" FontWeight="Bold" Foreground="{StaticResource AccentAcrylicBackgroundFillColorDefaultBrush}"/>
         <StackPanel Orientation="Horizontal">
             <Button Content="Удалить из библиотеки" Background="{StaticResource AccentAcrylicBackgroundFillColorDefaultBrush}" Command="{x:Bind GameSettingsContentViewModel.RemoveFromLibraryCommand}"/>

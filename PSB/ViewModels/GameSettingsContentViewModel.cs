@@ -151,7 +151,28 @@ namespace PSB.ViewModels
             }
             if (Game.Type == "sidegame")
             {
-                return;
+                var res = await FetchAsync(
+                HttpMethod.Delete, $"library/sidegame/{Game.Id}",
+                setError: e => Debug.WriteLine($"Error: {e}"));
+
+                if (res.IsSuccessStatusCode)
+                {
+                    // Находим элемент библиотеки, проверяя на null как сам элемент, так и его свойство Game
+                    var libraryItem = ProfileViewModel.Libraries.FirstOrDefault(l => l?.SideGame?.Id == Game.Id);
+
+                    if (libraryItem != null)
+                    {
+                        ProfileViewModel.Libraries.Remove(libraryItem);
+                        Debug.WriteLine("Попытка закрыть диалог...");
+                        App.DialogService!.HideDialog();
+                        GameViewModel.InLibrary = false;
+                    }
+                    else
+                    {
+                        Debug.WriteLine("Элемент библиотеки не найден.");
+                    }
+                    App.NavigationService!.Navigate("ProfilePage");
+                }
             }
             
         }

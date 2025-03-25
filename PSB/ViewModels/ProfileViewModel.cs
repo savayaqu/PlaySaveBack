@@ -1,25 +1,21 @@
 ﻿using System;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
+using System.IO;
 using System.Net.Http;
-using System.Text.Json;
 using System.Threading.Tasks;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using Microsoft.UI.Xaml;
 using PSB.Api.Request;
-using PSB.Api.Response;
 using PSB.Helpers;
 using PSB.Interfaces;
 using PSB.Models;
 using PSB.Utils;
 using PSB.Utils.Game;
-using static System.Runtime.InteropServices.JavaScript.JSType;
+using PSB.Views.Profile;
+using PSB.Views.Settings.Account;
 using Windows.Storage.Pickers;
 using static PSB.Utils.Fetch;
-using Windows.UI.WebUI;
-using System.IO;
-using Windows.Gaming.Input;
 
 
 namespace PSB.ViewModels
@@ -40,6 +36,12 @@ namespace PSB.ViewModels
         public async Task LoadProfileAsync()
         {
             await AuthData.LoadProfileAsync();
+        }
+        [RelayCommand]
+        public async Task UpdateProfile()
+        {
+            var dialog = new UpdateProfileContentDialog();
+            await App.DialogService!.ShowDialogAsync(dialog);
         }
 
         [RelayCommand]
