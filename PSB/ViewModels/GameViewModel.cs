@@ -182,8 +182,7 @@ namespace PSB.ViewModels
                     {
                         SavesDataManager<IGame>.SaveSaves(Game, Saves.ToList());
                     }
-
-                    GameLoaded?.Invoke();
+                    UpdateLibraryDetails(Library);
                 }
                 catch (HttpRequestException ex)
                 {
