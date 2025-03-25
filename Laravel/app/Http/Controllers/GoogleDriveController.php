@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Exceptions\ConflictException;
 use App\Http\Requests\Api\Save\OverwriteSaveRequest;
 use App\Http\Requests\Api\Save\UploadSaveRequest;
 use App\Http\Resources\SaveResource;
@@ -20,6 +21,8 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\Log;
+use phpseclib3\Exception\TimeoutException;
+use Symfony\Component\HttpKernel\Exception\ConflictHttpException;
 
 class GoogleDriveController extends Controller
 {
@@ -74,6 +77,20 @@ class GoogleDriveController extends Controller
     public function uploadFile(UploadSaveRequest $request)
     {
         $user = auth()->user();
+        // Определяем, какой ID использовать: side_game_id или game_id
+        $gameId = $request->game_id;
+        $sideGameId = $request->side_game_id;
+
+        // Получаем название игры для создания папки
+        $game = Game::query()->find($gameId); // Если game_id передан, используем его
+        if ($sideGameId) {
+            $game = SideGame::query()->find($sideGameId); // Если side_game_id передан, ищем игру по нему
+        }
+        $existSave = $user->saves()->where('game_id', $game->id)->orWhere('side_game_id', $game->id)->where('version', $request->version)->exists();
+        if($existSave) {
+            throw new ConflictException();
+        }
+
         $fileRequest = $request->file('file');
         $filePath = $fileRequest->getPathname();
         $fileName = $fileRequest->getClientOriginalName();
@@ -84,15 +101,6 @@ class GoogleDriveController extends Controller
 
         $googleDriveService = new GoogleDriveService($service);
 
-        // Определяем, какой ID использовать: side_game_id или game_id
-        $gameId = $request->game_id;
-        $sideGameId = $request->side_game_id;
-
-        // Получаем название игры для создания папки
-        $game = Game::query()->find($gameId); // Если game_id передан, используем его
-        if ($sideGameId) {
-            $game = SideGame::query()->find($sideGameId); // Если side_game_id передан, ищем игру по нему
-        }
 
         // Создаем структуру папок
         $rootFolderId = $googleDriveService->getOrCreateFolder('PlaySaveBack');
