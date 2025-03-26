@@ -116,9 +116,10 @@ namespace PSB.ViewModels
                 // Обработка ответа...
                 if(res.IsSuccessStatusCode)
                 {
-                    ProfileViewModel.User = body;
+                    AuthData.User = body;
+                    ProfileViewModel.User = AuthData.User;
                     OnPropertyChanged(nameof(ProfileViewModel));
-                    AuthData.User = ProfileViewModel.User;
+                    App.DialogService!.HideDialog();
                 }
             }
             catch (Exception ex)

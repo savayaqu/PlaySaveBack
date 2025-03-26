@@ -12,6 +12,8 @@ use App\Http\Resources\UserResource;
 use App\Models\CloudService;
 use App\Models\User;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Storage;
 
 class UserController extends Controller
 {
@@ -26,8 +28,22 @@ class UserController extends Controller
         if (!$user instanceof User) {
             throw new \RuntimeException('Authenticated user is not an instance of User model.');
         }
+
         $data = $request->validated();
+        $storage = Storage::disk('public');
+
+        // Обработка аватара
         if ($request->hasFile('avatar_file')) {
+            // Удаляем старый аватар, если он существует
+            if ($user->avatar) {
+                try {
+                    $storage->delete($user->avatar);
+                } catch (\Exception $e) {
+                    Log::error("Failed to delete old avatar: " . $e->getMessage());
+                }
+            }
+
+            // Сохраняем новый аватар
             $path = $request->file('avatar_file')->storeAs(
                 $user->login,
                 'avatar.' . $request->file('avatar_file')->getClientOriginalExtension(),
@@ -35,7 +51,19 @@ class UserController extends Controller
             );
             $data['avatar'] = $path;
         }
+
+        // Обработка хедера
         if ($request->hasFile('header_file')) {
+            // Удаляем старый хедер, если он существует
+            if ($user->header) {
+                try {
+                    $storage->delete($user->header);
+                } catch (\Exception $e) {
+                    Log::error("Failed to delete old header: " . $e->getMessage());
+                }
+            }
+
+            // Сохраняем новый хедер
             $path = $request->file('header_file')->storeAs(
                 $user->login,
                 'header.' . $request->file('header_file')->getClientOriginalExtension(),
@@ -43,6 +71,7 @@ class UserController extends Controller
             );
             $data['header'] = $path;
         }
+
         $user->update($data);
         return response()->json(UserResource::make($user));
     }
