@@ -114,12 +114,11 @@ namespace PSB.ViewModels
             if (save.IsSynced == true) return;
             SaveVersion = save.Version;
             SaveDescription = save.Description;
-            bool uploadSuccess = await UploadFile(save.ZipPath);
+            bool uploadSuccess = await UploadFile(save);
             if (uploadSuccess)
             {
                 SaveVersion = "";
                 SaveDescription = "";
-                save.IsSynced = true;
                 // Если стоит галочка в настройках об удалении с пк после синхронизации - удаление с пк
                 if (SettingsData.DeleteLocalSaveAfterSync == true)
                 {
@@ -310,9 +309,9 @@ namespace PSB.ViewModels
             }
             App.LibraryService!.UpdateLibraryMenu();
         }
-        public async Task<bool> UploadFile(string filePath)
+        public async Task<bool> UploadFile(Save save)
         {
-            if (!File.Exists(filePath))
+            if (!File.Exists(save.ZipPath))
             {
                 Debug.WriteLine("Файл не найден.");
                 return false;
@@ -323,12 +322,12 @@ namespace PSB.ViewModels
                 IsUploading = true;
 
                 // Читаем файл в массив байтов
-                var fileBytes = await File.ReadAllBytesAsync(filePath);
+                var fileBytes = await File.ReadAllBytesAsync(save.ZipPath);
 
                 // Создаем MultipartFormDataContent
                 var content = new MultipartFormDataContent
                 {
-                    { new ByteArrayContent(fileBytes), "file", Path.GetFileName(filePath) },
+                    { new ByteArrayContent(fileBytes), "file", Path.GetFileName(save.ZipPath) },
                     { new StringContent(SaveVersion), "version" },
                     { new StringContent(GameId.ToString()), Game is SideGame ? "side_game_id" : "game_id" },
                     { new StringContent(SaveDescription), "description" }
@@ -343,27 +342,20 @@ namespace PSB.ViewModels
                     Debug.WriteLine($"Ошибка при загрузке файла: {res.StatusCode}");
                     return false;
                 }
-
-                Save updatedSave = body;
-                // Находим текущее сохранение в коллекции Saves
-                var existingSave = Saves.FirstOrDefault(s => s.FileId == updatedSave.FileId);
-                if (existingSave != null)
+                if(body != null)
                 {
-                    // Обновляем данные текущего сохранения
-                    existingSave.FileName = updatedSave.FileName;
-                    existingSave.Version = updatedSave.Version;
-                    existingSave.Size = updatedSave.Size;
-                    existingSave.Description = updatedSave.Description;
-                    existingSave.LastSyncAt = updatedSave.LastSyncAt;
-                    existingSave.Hash = updatedSave.Hash;
-                    existingSave.IsSynced = true;
+                    var index = Saves.IndexOf(save);
+                    if (index != -1)
+                    {
+                        Debug.WriteLine("сохранение найдено");
+                        body.IsSynced = true;
+                        Saves[index] = body;
+                        SavesDataManager<IGame>.SaveSaves(Game, [.. Saves]);
+                    }
 
-                    // Уведомляем интерфейс об изменениях
-                    OnPropertyChanged(nameof(Saves));
-                    GameLoaded?.Invoke();
-                    return true;
                 }
                 return true;
+
             }
             catch (Exception ex)
             {
@@ -373,49 +365,6 @@ namespace PSB.ViewModels
             finally
             {
                 IsUploading = false;
-            }
-        }
-
-        [RelayCommand]
-        public async Task UploadSave()
-        {
-            string zipFilePath = string.Empty;
-            try
-            {
-                // Шаг 2: Отправляем ZIP-файл на сервер
-                bool uploadSuccess = await UploadFile(zipFilePath);
-
-                if (uploadSuccess)
-                {
-                    _ = GetGameAsync(true);
-                    OnPropertyChanged(nameof(Saves)); // Дополнительно уведомляем об изменении
-
-                    // Показываем уведомление об успехе
-                    SuccessInfoBar.Title = "Успешно";
-                    SuccessInfoBar.Message = "Сохранения успешно загружены на сервер.";
-                    SuccessInfoBar.Severity = InfoBarSeverity.Success;
-                    SuccessInfoBar.IsOpen = true;
-                    SaveDescription = "";
-                    SaveVersion = "";
-                }
-                else
-                {
-                    // Показываем уведомление об ошибке
-                    SuccessInfoBar.Title = "Ошибка";
-                    SuccessInfoBar.Message = "Не удалось загрузить сохранения на сервер.";
-                    SuccessInfoBar.Severity = InfoBarSeverity.Error;
-                    SuccessInfoBar.IsOpen = true;
-                }
-            }
-            catch (Exception ex)
-            {
-                Debug.WriteLine($"Ошибка: {ex.Message}");
-
-                // Показываем уведомление об ошибке
-                SuccessInfoBar.Title = "Ошибка";
-                SuccessInfoBar.Message = $"Произошла ошибка: {ex.Message}";
-                SuccessInfoBar.Severity = InfoBarSeverity.Error;
-                SuccessInfoBar.IsOpen = true;
             }
         }
         [RelayCommand]
