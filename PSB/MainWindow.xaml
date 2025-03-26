@@ -59,18 +59,18 @@ Spacing="12">
 
                             <!-- Аватарка -->
                             <Image 
-    VerticalAlignment="Center" 
-    Stretch="Fill" 
-    Height="95" 
-    Width="95" 
-    Source="{x:Bind ProfileViewModel.User.Avatar, Mode=OneWay}"/>
+	VerticalAlignment="Center" 
+	Stretch="Fill" 
+	Height="95" 
+	Width="95" 
+	Source="{x:Bind ProfileViewModel.User.Avatar, Mode=OneWay}"/>
 
                             <!-- Никнейм -->
                             <TextBlock 
-    Text="{x:Bind ProfileViewModel.User.Nickname}" 
-    FontWeight="SemiBold" 
-    FontSize="28" 
-    VerticalAlignment="Center"/>
+	Text="{x:Bind ProfileViewModel.User.Nickname}" 
+	FontWeight="SemiBold" 
+	FontSize="28" 
+	VerticalAlignment="Center"/>
                         </StackPanel>
                     </Grid>
                 </NavigationViewItem.Content>

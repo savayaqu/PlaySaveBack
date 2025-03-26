@@ -39,8 +39,6 @@ namespace PSB.ViewModels
             {
                 (var res, var body) = await FetchAsync<AuthResponse>(
                     HttpMethod.Post, "login",
-                    isFetch => IsFetch = isFetch,
-                    error => Error = error,
                     new CredentialsRequest(Identifier, Password),
                     serialize: true
                 );

@@ -33,10 +33,7 @@ namespace PSB.ViewModels
             Debug.WriteLine("ConnectionGoogleDrive command executed."); // Отладочное сообщение
             if (User != null)
             {
-                (var res, var body) = await FetchAsync<ConnectionServiceResponse>(
-                    HttpMethod.Get, "google-drive/auth-url",
-                    setError: e => Debug.WriteLine($"Error: {e}")
-                );
+                (var res, var body) = await FetchAsync<ConnectionServiceResponse>(HttpMethod.Get, "google-drive/auth-url");
                 if (res.IsSuccessStatusCode && body != null)
                 {
                     await Launcher.LaunchUriAsync(new Uri(body.Url));
@@ -54,10 +51,7 @@ namespace PSB.ViewModels
         }
         public async Task LoadCloudServices()
         {
-            (var res, var body) = await FetchAsync<List<CloudService>>(
-                   HttpMethod.Get, "profile/services",
-                   setError: e => Debug.WriteLine($"Error: {e}")
-               );
+            (var res, var body) = await FetchAsync<List<CloudService>>(HttpMethod.Get, "profile/services");
             if (res.IsSuccessStatusCode && body != null)
             {
                 CloudServices = new ObservableCollection<CloudService>(body);

@@ -138,6 +138,13 @@ namespace PSB.ViewModels
         [RelayCommand]
         public async Task RestoreSave(Save save)
         {
+            if(save.IsSynced == false)
+            {
+                string folderPath = PathDataManager<IGame>.GetSavesFolderPath(Game);
+                await App.ZipHelper!.RestoreFromZip(save.ZipPath, folderPath);
+                Debug.WriteLine("Сохранения восстановлены");
+                return;
+            }
             string zipFilePath = Path.Combine(Path.GetTempPath(), "game_saves_restore", "saves_backup.zip");
 
             try
@@ -147,7 +154,12 @@ namespace PSB.ViewModels
                 // 1. Загрузка с повторными попытками
                 Debug.WriteLine("Начинаем загрузку архива...");
                 Debug.WriteLine("FileId сохранения " + save.FileId);
-                return;
+                if(save.FileId == null)
+                {
+                    Debug.WriteLine("save.FileId is null" + save.FileId);
+                    return;
+                }
+
                 var res = await FetchAsync(HttpMethod.Get, $"google-drive/download/{save.FileId}");
                 if (res != null && res.IsSuccessStatusCode)
                 {
@@ -243,8 +255,6 @@ namespace PSB.ViewModels
                         var res = await FetchAsync(
                             HttpMethod.Patch,
                             $"library/{Type}/{GameId}/update",
-                            isFetch => Debug.WriteLine("isFetch " + isFetch),
-                            error => Debug.WriteLine("error " + error),
                             new UpdateLibraryGameRequest(Library.TimePlayed, endTime.ToString("yyyy-MM-dd HH:mm:ss")),
                             serialize: true
                         );
@@ -284,10 +294,7 @@ namespace PSB.ViewModels
         [RelayCommand]
         public async Task ToggleFavorite()
         {
-            var res = await FetchAsync(
-                HttpMethod.Patch, $"library/{Type}/{GameId}",
-                setError: e => Debug.WriteLine($"Error: {e}")
-            );
+            var res = await FetchAsync(HttpMethod.Patch, $"library/{Type}/{GameId}");
 
             if (!res.IsSuccessStatusCode)
                 return;
@@ -327,79 +334,36 @@ namespace PSB.ViewModels
                     { new StringContent(SaveDescription), "description" }
                 };
 
-                // Создаем HttpClient
-                using var httpClient = new HttpClient();
+               (var res, var body) = await FetchAsync<Save>(HttpMethod.Post, "google-drive/upload", body: content);
 
-                // Устанавливаем базовый URL
-                httpClient.BaseAddress = new Uri("https://savayaqu.duckdns.org/playsaveback/api/");
-
-                // Добавляем Bearer Token в заголовки
-                if (!string.IsNullOrEmpty(AuthData.Token))
-                {
-                    httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", AuthData.Token);
-                }
-
-                // Отправляем запрос
-                var response = await httpClient.PostAsync("google-drive/upload", content);
-
-                // Читаем ответ как строку
-                var responseContent = await response.Content.ReadAsStringAsync();
-
-                // Проверяем, что ответ не пустой
-                if (string.IsNullOrEmpty(responseContent))
-                {
-                    return false;
-                }
-
-                // Если статус ответа 401 Unauthorized
-                if (response.StatusCode == System.Net.HttpStatusCode.Unauthorized)
-                {
-                    return false;
-                }
 
                 // Если статус ответа не успешный
-                if (!response.IsSuccessStatusCode)
+                if (!res.IsSuccessStatusCode)
                 {
-                    Debug.WriteLine($"Ошибка при загрузке файла: {response.StatusCode}");
+                    Debug.WriteLine($"Ошибка при загрузке файла: {res.StatusCode}");
                     return false;
                 }
 
-                // Десериализуем ответ в объект Save
-                try
+                Save updatedSave = body;
+                // Находим текущее сохранение в коллекции Saves
+                var existingSave = Saves.FirstOrDefault(s => s.FileId == updatedSave.FileId);
+                if (existingSave != null)
                 {
-                    var updatedSave = JsonSerializer.Deserialize<Save>(responseContent);
-                    if (updatedSave == null)
-                    {
-                        Debug.WriteLine("Не удалось десериализовать ответ от сервера.");
-                        return false;
-                    }
+                    // Обновляем данные текущего сохранения
+                    existingSave.FileName = updatedSave.FileName;
+                    existingSave.Version = updatedSave.Version;
+                    existingSave.Size = updatedSave.Size;
+                    existingSave.Description = updatedSave.Description;
+                    existingSave.LastSyncAt = updatedSave.LastSyncAt;
+                    existingSave.Hash = updatedSave.Hash;
+                    existingSave.IsSynced = true;
 
-                    // Находим текущее сохранение в коллекции Saves
-                    var existingSave = Saves.FirstOrDefault(s => s.FileId == updatedSave.FileId);
-                    if (existingSave != null)
-                    {
-                        // Обновляем данные текущего сохранения
-                        existingSave.FileName = updatedSave.FileName;
-                        existingSave.Version = updatedSave.Version;
-                        existingSave.Size = updatedSave.Size;
-                        existingSave.Description = updatedSave.Description;
-                        existingSave.LastSyncAt = updatedSave.LastSyncAt;
-                        existingSave.Hash = updatedSave.Hash;
-                        existingSave.IsSynced = true;
-
-                        // Уведомляем интерфейс об изменениях
-                        OnPropertyChanged(nameof(Saves));
-                        GameLoaded?.Invoke();
-                    }
-
-                    Debug.WriteLine("Сохранение успешно синхронизировано и обновлено.");
+                    // Уведомляем интерфейс об изменениях
+                    OnPropertyChanged(nameof(Saves));
+                    GameLoaded?.Invoke();
                     return true;
                 }
-                catch (JsonException jsonEx)
-                {
-                    Debug.WriteLine($"Ошибка десериализации JSON: {jsonEx.Message}");
-                    return false;
-                }
+                return true;
             }
             catch (Exception ex)
             {
@@ -469,11 +433,7 @@ namespace PSB.ViewModels
             try
             {
                 // Отправляем запрос на удаление файла
-                var res = await FetchAsync(
-                    HttpMethod.Delete,
-                    $"google-drive/delete/{save.FileId}",
-                    setError: e => Debug.WriteLine($"Error: {e}")
-                );
+                var res = await FetchAsync(HttpMethod.Delete,$"google-drive/delete/{save.FileId}");
 
                 if (res.IsSuccessStatusCode)
                 {
@@ -483,43 +443,22 @@ namespace PSB.ViewModels
                     {
                         App.ZipHelper!.DeleteFile(save.ZipPath);
                     }
-                    // Показываем уведомление об успехе
-                    SuccessInfoBar.Title = "Успешно";
-                    SuccessInfoBar.Message = "Сохранение успешно удалено.";
-                    SuccessInfoBar.Severity = InfoBarSeverity.Success;
-                    SuccessInfoBar.IsOpen = true;
-
                     Debug.WriteLine($"Сохранение {save.FileName} удалено.");
                 }
                 else
                 {
-                    // Показываем уведомление об ошибке
-                    SuccessInfoBar.Title = "Ошибка";
-                    SuccessInfoBar.Message = "Не удалось удалить сохранение.";
-                    SuccessInfoBar.Severity = InfoBarSeverity.Error;
-                    SuccessInfoBar.IsOpen = true;
-
                     Debug.WriteLine($"Ошибка при удалении сохранения: {res.StatusCode}");
                 }
             }
             catch (Exception ex)
             {
                 Debug.WriteLine($"Ошибка: {ex.Message}");
-
-                // Показываем уведомление об ошибке
-                SuccessInfoBar.Title = "Ошибка";
-                SuccessInfoBar.Message = $"Произошла ошибка: {ex.Message}";
-                SuccessInfoBar.Severity = InfoBarSeverity.Error;
-                SuccessInfoBar.IsOpen = true;
             }
         }
         [RelayCommand]
         public async Task AddToLibrary()
         {
-            (var res, var body) = await FetchAsync<Library>(
-                HttpMethod.Post, $"library/{Type}/{GameId}",
-                setError: e => Debug.WriteLine($"Error: {e}")
-            );
+            (var res, var body) = await FetchAsync<Library>(HttpMethod.Post, $"library/{Type}/{GameId}");
             if (!res.IsSuccessStatusCode)
                 return;
 
@@ -544,10 +483,7 @@ namespace PSB.ViewModels
         [RelayCommand]
         public async Task GetMySaves()
         {
-            (var res, var body) = await FetchAsync<MySavesGameResponse>(
-                HttpMethod.Get, $"saves/{Type}/{GameId}/my",
-                setError: e => Debug.WriteLine($"Error: {e}")
-            );
+            (var res, var body) = await FetchAsync<MySavesGameResponse>(HttpMethod.Get, $"saves/{Type}/{GameId}/my");
 
             if (!res.IsSuccessStatusCode || body == null)
                 return;
@@ -611,10 +547,7 @@ namespace PSB.ViewModels
                 }
 
                 // Загрузка с сервера
-                (var res, var body) = await FetchAsync<GameResponse>(
-                    HttpMethod.Get, $"{Type}s/{GameId}",
-                    setError: e => Debug.WriteLine($"Error: {e}")
-                );
+                (var res, var body) = await FetchAsync<GameResponse>(HttpMethod.Get, $"{Type}s/{GameId}");
 
                 if (!res.IsSuccessStatusCode) return;
 

@@ -81,9 +81,9 @@ namespace PSB.Utils
         }
 
         // Выход и очистка данных
-        public static async Task ExitAndNavigate(Action<bool>? setIsFetch = null)
+        public static async Task ExitAndNavigate()
         {
-            await FetchAsync(HttpMethod.Get, "logout", setIsFetch);
+            await FetchAsync(HttpMethod.Get, "logout");
             Token = null;
             User = null;
             Libraries.Clear();
@@ -94,10 +94,7 @@ namespace PSB.Utils
         // Загрузка профиля
         public static async Task LoadProfileAsync()
         {
-            (var res, var body) = await FetchAsync<User>(
-                HttpMethod.Get, "profile",
-                setError: e => Debug.WriteLine($"Ошибка при получении профиля: {e}")
-            );
+            (var res, var body) = await FetchAsync<User>(HttpMethod.Get, "profile");
 
             if (res.IsSuccessStatusCode && body != null)
             {
@@ -108,10 +105,7 @@ namespace PSB.Utils
         // Загрузка библиотеки
         public static async Task LoadLibraryAsync()
         {
-            (var res, var body) = await FetchAsync<PaginatedResponse<Library>>(
-                HttpMethod.Get, "library?limit=0",
-                setError: e => Debug.WriteLine($"Ошибка при получении библиотеки: {e}")
-            );
+            (var res, var body) = await FetchAsync<PaginatedResponse<Library>>(HttpMethod.Get, "library?limit=0");
 
             if (res.IsSuccessStatusCode && body != null)
             {

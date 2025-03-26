@@ -29,10 +29,7 @@ namespace PSB.ViewModels
         [RelayCommand]
         public async Task LoadGamesAsync(int? page = 1)
         {
-            (var res, var body) = await FetchAsync<PaginatedResponse<Game>>(
-                HttpMethod.Get, $"games?page={page}&name={Name}",
-                setError: e => Debug.WriteLine($"Error: {e}")
-            );
+            (var res, var body) = await FetchAsync<PaginatedResponse<Game>>(HttpMethod.Get, $"games?page={page}&name={Name}");
             if (!res.IsSuccessStatusCode || body == null)
                 return;
 

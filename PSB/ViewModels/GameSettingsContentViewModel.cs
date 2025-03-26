@@ -123,9 +123,7 @@ namespace PSB.ViewModels
         {
             if (Game.Type == "game")
             {
-                var res = await FetchAsync(
-                HttpMethod.Delete, $"library/game/{Game.Id}",
-                setError: e => Debug.WriteLine($"Error: {e}"));
+                var res = await FetchAsync(HttpMethod.Delete, $"library/game/{Game.Id}");
 
                 if (res.IsSuccessStatusCode)
                 {
@@ -147,9 +145,7 @@ namespace PSB.ViewModels
             }
             if (Game.Type == "sidegame")
             {
-                var res = await FetchAsync(
-                HttpMethod.Delete, $"library/sidegame/{Game.Id}",
-                setError: e => Debug.WriteLine($"Error: {e}"));
+                var res = await FetchAsync(HttpMethod.Delete, $"library/sidegame/{Game.Id}");
 
                 if (res.IsSuccessStatusCode)
                 {
