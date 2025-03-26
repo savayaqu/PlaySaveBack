@@ -34,6 +34,14 @@ namespace PSB.Helpers
 
         private async Task<string> ZipFolder(string folderPath, string zipFilePath)
         {
+            // Проверяем, существует ли исходная папка
+            if (!Directory.Exists(folderPath))
+            {
+                throw new DirectoryNotFoundException(
+                    $"Исходная папка не найдена: {folderPath}. " +
+                    "Проверьте путь и повторите попытку.");
+            }
+
             // Проверяем, существует ли папка для ZIP-архива
             string zipDirectory = Path.GetDirectoryName(zipFilePath);
             if (!Directory.Exists(zipDirectory))
