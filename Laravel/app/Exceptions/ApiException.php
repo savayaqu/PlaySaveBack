@@ -14,8 +14,9 @@ class ApiException extends HttpResponseException
         ];
         if(count($errors))
             $body['errors'] = $errors;
-        if($data)
-            array_push($body, ...$data);
+        if($data && is_array($data)) {
+            $body = array_merge($body, $data);
+        }
         parent::__construct(response()->json($body, $code));
     }
 }
