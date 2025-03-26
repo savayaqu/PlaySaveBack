@@ -7,7 +7,7 @@ namespace PSB.Models
     {
         [JsonPropertyOrder(0)]
         [JsonPropertyName("type")]
-        public string Type { get; set; } = "sidegame"; 
+        public string Type { get; set; } = "sidegame";
         [JsonPropertyName("id")] public required ulong Id { get; set; }
         [JsonPropertyName("name")] public required string Name { get; set; }
 

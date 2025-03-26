@@ -1,11 +1,10 @@
 ﻿using System;
 using System.Diagnostics;
 using HtmlAgilityPack;
+using Microsoft.UI.Text;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Documents;
-using Microsoft.UI.Xaml.Media;
 using Microsoft.UI.Xaml.Media.Imaging;
-using Microsoft.UI.Text;
 
 namespace PSB.Converters
 {
@@ -146,6 +145,6 @@ namespace PSB.Converters
             paragraph.Inlines.Add(italic);
         }
 
-        
+
     }
 }

@@ -1,12 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq;
-using System.Net;
+﻿using System.Net;
 using System.Net.Http;
-using System.Text;
 using System.Text.Json;
-using System.Threading;
 using System.Threading.Tasks;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
@@ -15,15 +9,14 @@ using PSB.Api.Request;
 using PSB.Api.Response;
 using PSB.Models;
 using PSB.Utils;
-using PSB.Views.Settings.Account;
 using static PSB.Utils.Fetch;
 namespace PSB.ViewModels
 {
 
-    public partial class UpdateEmailViewModel: ObservableObject
+    public partial class UpdateEmailViewModel : ObservableObject
     {
         //TODO: валидацию отображать
-        
+
         [ObservableProperty] public partial User? User { get; set; } = AuthData.User;
         [ObservableProperty] public partial ContentDialog? ContentDialog { get; set; }
         [ObservableProperty] public partial string? ErrorEmail { get; set; } = null;

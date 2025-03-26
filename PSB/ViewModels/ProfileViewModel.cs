@@ -13,7 +13,6 @@ using PSB.Models;
 using PSB.Utils;
 using PSB.Utils.Game;
 using PSB.Views.Profile;
-using PSB.Views.Settings.Account;
 using Windows.Storage.Pickers;
 using static PSB.Utils.Fetch;
 

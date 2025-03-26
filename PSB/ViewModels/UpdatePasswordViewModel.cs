@@ -1,9 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq;
+﻿using System.Diagnostics;
 using System.Net.Http;
-using System.Text;
 using System.Threading.Tasks;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
@@ -13,7 +9,7 @@ using PSB.Utils;
 using static PSB.Utils.Fetch;
 namespace PSB.ViewModels
 {
-    public partial class UpdatePasswordViewModel: ObservableObject
+    public partial class UpdatePasswordViewModel : ObservableObject
     {
         //TODO: валидацию отображать
         [ObservableProperty] public partial User? User { get; set; } = AuthData.User;

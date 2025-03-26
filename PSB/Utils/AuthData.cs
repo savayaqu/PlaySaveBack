@@ -1,18 +1,14 @@
 ﻿using System;
-using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Diagnostics;
-using System.Linq;
-using System.Text;
+using System.Net.Http;
 using System.Text.Json;
 using System.Threading.Tasks;
-using Windows.Storage;
-using User = PSB.Models.User;
-using static PSB.Utils.Fetch;
-using System.Net.Http;
-using Microsoft.UI.Xaml.Controls;
 using PSB.Api.Response;
 using PSB.Models;
-using System.Collections.ObjectModel;
+using Windows.Storage;
+using static PSB.Utils.Fetch;
+using User = PSB.Models.User;
 
 namespace PSB.Utils
 {

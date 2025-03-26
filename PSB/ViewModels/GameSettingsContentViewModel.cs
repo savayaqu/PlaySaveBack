@@ -1,18 +1,14 @@
 ﻿using System;
 using System.Diagnostics;
-using System.Drawing;
 using System.IO;
 using System.Linq;
 using System.Net.Http;
 using System.Threading.Tasks;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using Microsoft.UI.Xaml.Media.Imaging;
 using PSB.Helpers;
 using PSB.Interfaces;
-using PSB.Models;
 using PSB.Utils.Game;
-using Windows.Gaming.Input;
 using Windows.Storage;
 using Windows.Storage.AccessCache;
 using Windows.Storage.Pickers;
@@ -125,7 +121,7 @@ namespace PSB.ViewModels
         [RelayCommand]
         private async Task RemoveFromLibrary()
         {
-            if(Game.Type == "game")
+            if (Game.Type == "game")
             {
                 var res = await FetchAsync(
                 HttpMethod.Delete, $"library/game/{Game.Id}",
@@ -174,7 +170,7 @@ namespace PSB.ViewModels
                     App.NavigationService!.Navigate("ProfilePage");
                 }
             }
-            
+
         }
 
 

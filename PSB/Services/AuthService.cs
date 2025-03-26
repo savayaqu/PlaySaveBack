@@ -1,10 +1,9 @@
 ﻿using System;
 using System.Diagnostics;
 using System.Threading.Tasks;
-using PSB.ViewModels;
-using PSB.Models;
 using Microsoft.UI.Xaml.Controls;
 using PSB.Utils;
+using PSB.ViewModels;
 
 namespace PSB.Services
 {

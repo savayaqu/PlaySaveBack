@@ -5,6 +5,7 @@ using System.IO.Compression;
 using System.Linq;
 using System.Security.Cryptography;
 using System.Threading.Tasks;
+using PSB.Utils;
 
 namespace PSB.Helpers
 {
@@ -12,14 +13,14 @@ namespace PSB.Helpers
     {
         public async Task<(string folderName, string zipFilePath, string hash, ulong sizeInBytes)> CreateZip(string folderPath, string gameName, string saveVersion)
         {
-            // Получаем путь к рабочему столу
-            string desktopPath = Environment.GetFolderPath(Environment.SpecialFolder.Desktop);
+            // Получаем путь к месту сохранения
+            string UserPath = SettingsData.PathToLocalSaves;
 
             // Получаем имя папки
             string folderName = new DirectoryInfo(folderPath).Name;
 
-            // Создаём путь для ZIP-архива на рабочем столе
-            string zipFilePath = Path.Combine($"{desktopPath}/PlaySaveBack/{gameName}/{saveVersion}", $"{folderName}.zip");
+            // Создаём путь для ZIP-архива 
+            string zipFilePath = Path.Combine($"{UserPath}/PlaySaveBack/Saves/{gameName}/{saveVersion}", $"{folderName}.zip");
 
             // Создаём ZIP-архив
             await ZipFolder(folderPath, zipFilePath);
@@ -106,8 +107,8 @@ namespace PSB.Helpers
         {
 
             // Папка temp
-            string zipFilePath = Path.Combine(Path.GetTempPath(), $"PlaySaveBack/{gameName}/{saveVersion}");
-            
+            string zipFilePath = Path.Combine(Path.GetTempPath(), $"PlaySaveBack/Backups/{gameName}/{saveVersion}");
+
             // Создаём ZIP-архив
             await ZipFolder(folderPath, zipFilePath);
 

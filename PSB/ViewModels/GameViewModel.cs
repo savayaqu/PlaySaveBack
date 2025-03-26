@@ -1,31 +1,24 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using System.Net.Http;
+using System.Net.Http.Headers;
+using System.Text.Json;
 using System.Threading.Tasks;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using Microsoft.UI.Xaml.Controls;
 using PSB.Api.Request;
 using PSB.Api.Response;
 using PSB.ContentDialogs;
+using PSB.Interfaces;
 using PSB.Models;
 using PSB.Utils;
-using System.IO;
-using System.IO.Compression;
-using static PSB.Utils.Fetch;
-using System.Net.Http.Headers;
-using Microsoft.UI.Xaml.Controls;
-using System.Text.Json;
-using System.Text;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.Net.Http.Json;
-using PSB.Helpers;
-using PSB.Interfaces;
 using PSB.Utils.Game;
-using System.Text.Json.Serialization;
-using System.Runtime.Intrinsics.Arm;
-using System.Threading;
+using static PSB.Utils.Fetch;
 
 namespace PSB.ViewModels
 {
@@ -34,11 +27,11 @@ namespace PSB.ViewModels
     {
         public ProfileViewModel ProfileViewModel { get; set; } = MainWindow.Instance?.ProfileViewModel!;
         public static GameViewModel? Instance { get; private set; }
-        [ObservableProperty] public partial ulong GameId {  get; set; }
-        [ObservableProperty] public partial string Type{  get; set; }
+        [ObservableProperty] public partial ulong GameId { get; set; }
+        [ObservableProperty] public partial string Type { get; set; }
         [ObservableProperty] public partial IGame Game { get; set; }
         [ObservableProperty] public partial Library Library { get; set; }
-        [ObservableProperty] public partial string LastPlayedText {  get; set; }
+        [ObservableProperty] public partial string LastPlayedText { get; set; }
         [ObservableProperty] public partial string PlayedHoursText { get; set; }
         [ObservableProperty] public partial Boolean IsFavorite { get; set; } = false;
         [ObservableProperty] public partial Boolean InLibrary { get; set; }
@@ -92,7 +85,7 @@ namespace PSB.ViewModels
                 SaveVersion = "go to na xyu";
                 return;
             }
-            if (FolderPath == null) 
+            if (FolderPath == null)
                 return;
             Debug.WriteLine("Folder Path " + FolderPath);
 
@@ -118,7 +111,7 @@ namespace PSB.ViewModels
         [RelayCommand]
         private async Task SyncSave(Save save)
         {
-            if(save.IsSynced == true) return;
+            if (save.IsSynced == true) return;
             SaveVersion = save.Version;
             SaveDescription = save.Description;
             bool uploadSuccess = await UploadFile(save.ZipPath);
@@ -127,6 +120,11 @@ namespace PSB.ViewModels
                 SaveVersion = "";
                 SaveDescription = "";
                 save.IsSynced = true;
+                // Если стоит галочка в настройках об удалении с пк после синхронизации - удаление с пк
+                if (SettingsData.DeleteLocalSaveAfterSync == true)
+                {
+                    App.ZipHelper!.DeleteFile(save.ZipPath);
+                }
                 Saves = new ObservableCollection<Save>(Saves);
                 SavesDataManager<IGame>.SaveSaves(Game, Saves.ToList());
                 OnPropertyChanged(nameof(Saves));
@@ -148,10 +146,17 @@ namespace PSB.ViewModels
 
                 // 1. Загрузка с повторными попытками
                 Debug.WriteLine("Начинаем загрузку архива...");
-                await DownloadFileWithProgressAsync(
-                    $"https://savayaqu.duckdns.org/playsaveback/api/google-drive/download/{save.FileId}",
-                    zipFilePath
-                );
+                Debug.WriteLine("FileId сохранения " + save.FileId);
+                return;
+                var res = await FetchAsync(HttpMethod.Get, $"google-drive/download/{save.FileId}");
+                if (res != null && res.IsSuccessStatusCode)
+                {
+                    // Асинхронно сохраняем содержимое
+                    await using (var fileStream = File.Create(zipFilePath))
+                    {
+                        await res.Content.CopyToAsync(fileStream);
+                    }
+                }
 
                 // 2. Проверка архива
                 if (!await App.ZipHelper!.ZipFileValid(zipFilePath))
@@ -177,38 +182,6 @@ namespace PSB.ViewModels
             {
                 if (File.Exists(zipFilePath))
                     File.Delete(zipFilePath);
-            }
-        }
-        //TODO: пофиксить, оч долго грузит
-        private async Task DownloadFileWithProgressAsync(string url, string filePath)
-        {
-            using (var httpClient = new HttpClient { Timeout = Timeout.InfiniteTimeSpan })
-            {
-                httpClient.DefaultRequestHeaders.Add("Authorization", $"Bearer {AuthData.Token}");
-
-                using (var response = await httpClient.GetAsync(url, HttpCompletionOption.ResponseHeadersRead))
-                {
-                    response.EnsureSuccessStatusCode();
-
-                    using (var fileStream = new FileStream(filePath, FileMode.Create))
-                    {
-                        var totalBytes = response.Content.Headers.ContentLength ?? -1;
-                        var bytesDownloaded = 0L;
-                        var buffer = new byte[8192];
-
-                        using (var contentStream = await response.Content.ReadAsStreamAsync())
-                        {
-                            int bytesRead;
-                            while ((bytesRead = await contentStream.ReadAsync(buffer)) > 0)
-                            {
-                                await fileStream.WriteAsync(buffer.AsMemory(0, bytesRead));
-                                bytesDownloaded += bytesRead;
-
-                                Debug.WriteLine($"Прогресс: {bytesDownloaded}/{totalBytes} bytes");
-                            }
-                        }
-                    }
-                }
             }
         }
         [RelayCommand(CanExecute = nameof(ExeExists))]
@@ -484,9 +457,11 @@ namespace PSB.ViewModels
         [RelayCommand]
         public async Task DeleteSave(Save save)
         {
-            if(save.IsSynced == false)
+            if (save.IsSynced == false)
             {
+                // Удаление из коллекции
                 Saves?.Remove(save);
+                // Удаление с пк
                 App.ZipHelper!.DeleteFile(save.ZipPath);
                 SavesDataManager<IGame>.SaveSaves(Game, [.. Saves]);
                 return;
@@ -502,9 +477,12 @@ namespace PSB.ViewModels
 
                 if (res.IsSuccessStatusCode)
                 {
-                    // Удаляем файл из локального списка
+                    // Удаляем файл из локального списка и с пк
                     Saves?.Remove(save);
-
+                    if (save.ZipPath != null)
+                    {
+                        App.ZipHelper!.DeleteFile(save.ZipPath);
+                    }
                     // Показываем уведомление об успехе
                     SuccessInfoBar.Title = "Успешно";
                     SuccessInfoBar.Message = "Сохранение успешно удалено.";
@@ -663,8 +641,8 @@ namespace PSB.ViewModels
                 FilePath = PathDataManager<IGame>.GetFilePath(Game) ?? string.Empty;
                 FolderPath = PathDataManager<IGame>.GetSavesFolderPath(Game) ?? string.Empty;
                 ExeExists = !string.IsNullOrEmpty(FilePath);
-                
-                
+
+
                 // Сохранение в кэш
                 if (Game != null)
                 {

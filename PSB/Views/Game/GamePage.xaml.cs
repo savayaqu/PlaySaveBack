@@ -6,9 +6,6 @@ using Microsoft.UI.Xaml.Media.Imaging;
 using Microsoft.UI.Xaml.Navigation;
 using PSB.Models;
 using PSB.ViewModels;
-using Windows.ApplicationModel.Contacts;
-using Windows.Gaming.Input;
-using Windows.UI;
 
 
 namespace PSB.Views

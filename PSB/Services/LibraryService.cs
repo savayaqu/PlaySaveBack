@@ -1,14 +1,12 @@
-﻿using Microsoft.UI.Xaml.Controls;
-using Microsoft.UI.Xaml.Media.Imaging;
+﻿using System.Collections.Generic;
+using System.Linq;
+using Microsoft.UI.Xaml.Controls;
 using PSB.Helpers;
 using PSB.Interfaces;
 using PSB.Models;
 using PSB.Services;
 using PSB.Utils.Game;
 using PSB.ViewModels;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 
 public class LibraryService
 {

@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.ObjectModel;
+﻿using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.Net.Http;
 using System.Text.Json;
@@ -8,15 +7,14 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using PSB.Api.Response;
 using PSB.Models;
-using PSB.Utils;
 using static PSB.Utils.Fetch;
 
 namespace PSB.ViewModels
 {
     public partial class CatalogViewModel : ObservableObject
     {
-        
-        public CatalogViewModel() 
+
+        public CatalogViewModel()
         {
             _ = LoadGamesAsync();
         }

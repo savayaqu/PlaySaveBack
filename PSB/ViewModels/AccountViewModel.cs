@@ -16,13 +16,13 @@ using User = PSB.Models.User;
 
 namespace PSB.ViewModels
 {
-    public partial class AccountViewModel: ObservableObject
+    public partial class AccountViewModel : ObservableObject
     {
         [ObservableProperty] public partial User? User { get; set; } = AuthData.User;
         [ObservableProperty] public partial ObservableCollection<CloudService> CloudServices { get; set; } = new();
         public static AccountViewModel? Instance = App.MainWindow!.AccountViewModel;
 
-        public AccountViewModel() 
+        public AccountViewModel()
         {
             _ = LoadCloudServices();
         }
@@ -38,7 +38,7 @@ namespace PSB.ViewModels
                     setError: e => Debug.WriteLine($"Error: {e}")
                 );
                 if (res.IsSuccessStatusCode && body != null)
-                {   
+                {
                     await Launcher.LaunchUriAsync(new Uri(body.Url));
                 }
             }
@@ -47,7 +47,7 @@ namespace PSB.ViewModels
         public async Task ConnectService(CloudService cloudService)
         {
             Debug.WriteLine("нажата");
-            if(cloudService.Name == "Google Drive")
+            if (cloudService.Name == "Google Drive")
             {
                 await ConnectionGoogleDrive();
             }

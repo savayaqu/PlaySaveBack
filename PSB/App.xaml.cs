@@ -1,12 +1,11 @@
-﻿using Microsoft.UI.Xaml;
-using Microsoft.Windows.AppLifecycle;
-using PSB.Services;
-using PSB.Utils;
-using Windows.ApplicationModel.Activation;
-using System.Threading.Tasks;
-using System;
+﻿using System;
 using System.Diagnostics;
+using System.Threading.Tasks;
+using Microsoft.UI.Xaml;
+using Microsoft.Windows.AppLifecycle;
 using PSB.Helpers; // Для ProtocolActivatedEventArgs
+using PSB.Services;
+using Windows.ApplicationModel.Activation;
 
 namespace PSB
 {

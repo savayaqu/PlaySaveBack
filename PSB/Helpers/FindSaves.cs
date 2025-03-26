@@ -1,10 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace PSB.Helpers
 {
@@ -18,7 +14,7 @@ namespace PSB.Helpers
 
             string? currentDirectory = startDirectory;
 
-            for (int i = 0; i < 2; i++) // Проверяем текущий уровень и на уровень выше
+            for (int i = 0; i < 1; i++) // Проверяем текущий уровень и на уровень выше
             {
                 string? savesFolder = FindSavesInDirectory(currentDirectory);
                 if (savesFolder != null)

@@ -1,11 +1,8 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
-using System.Linq;
 using System.Net.Http;
 using System.Net.Http.Headers;
-using System.Text;
 using System.Threading.Tasks;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
@@ -14,7 +11,6 @@ using PSB.Models;
 using PSB.Utils;
 using Windows.Storage;
 using Windows.Storage.Pickers;
-using Windows.Storage.Streams;
 using static PSB.Utils.Fetch;
 
 namespace PSB.ViewModels
@@ -114,7 +110,7 @@ namespace PSB.ViewModels
 
                 (var res, var body) = await FetchAsync<User>(HttpMethod.Post, "profile", body: formData);
                 // Обработка ответа...
-                if(res.IsSuccessStatusCode)
+                if (res.IsSuccessStatusCode)
                 {
                     AuthData.User = body;
                     ProfileViewModel.User = AuthData.User;

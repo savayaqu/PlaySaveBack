@@ -1,9 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Diagnostics;
-using System.Linq;
 using System.Net.Http;
-using System.Text;
 using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
@@ -15,7 +12,7 @@ namespace PSB.Utils
 {
     public static class Fetch
     {
-        private readonly static HttpClient _httpClient = new() { Timeout = TimeSpan.FromSeconds(5) };
+        private readonly static HttpClient _httpClient = new() { Timeout = TimeSpan.FromSeconds(20) };
 
         public static async Task<HttpResponseMessage> FetchAsync(
             HttpMethod method,
@@ -111,14 +108,14 @@ namespace PSB.Utils
         }
 
         public static async Task<(HttpResponseMessage, T?)> FetchAsync<T>(
-            HttpMethod method,
-            dynamic path,
-            Action<bool>? setIsFetch = null,
-            Action<string>? setError = null,
-            dynamic? body = null,
-            bool serialize = false,
-            CancellationToken cancellationToken = default
-        )
+    HttpMethod method,
+    dynamic path,
+    Action<bool>? setIsFetch = null,
+    Action<string>? setError = null,
+    dynamic? body = null,
+    bool serialize = false,
+    CancellationToken cancellationToken = default
+)
         {
             HttpResponseMessage response = await FetchAsync(method, path, setIsFetch, setError, body, serialize, cancellationToken);
 
@@ -130,11 +127,25 @@ namespace PSB.Utils
                 var responseJson = await response.Content.ReadAsStringAsync(cancellationToken);
                 Debug.WriteLine("FETCH: responseJson: " + responseJson);
 
+                // Проверяем, что ответ не пустой
+                if (string.IsNullOrWhiteSpace(responseJson))
+                {
+                    Debug.WriteLine("FETCH: Empty response received");
+                    return (response, default(T));
+                }
+
                 var options = new JsonSerializerOptions
                 {
-                    PropertyNameCaseInsensitive = true, // Игнорируем регистр имён свойств
-                    Converters = { new NullableDateTimeConverter() } // Добавляем конвертер
+                    PropertyNameCaseInsensitive = true,
+                    Converters = { new NullableDateTimeConverter() }
                 };
+
+                // Дополнительная проверка на валидность JSON
+                if (!IsValidJson(responseJson))
+                {
+                    Debug.WriteLine("FETCH: Invalid JSON received");
+                    return (response, default(T));
+                }
 
                 var responseBody = JsonSerializer.Deserialize<T>(responseJson, options);
                 Debug.WriteLine("FETCH: responseBody: " + responseBody);
@@ -144,9 +155,23 @@ namespace PSB.Utils
             {
                 Debug.WriteLine($"Error during deserialization: {ex.Message}");
                 Debug.WriteLine($"Stack Trace: {ex.StackTrace}");
-                throw;
+                setError?.Invoke("Ошибка обработки ответа сервера");
+                return (response, default(T));
             }
+        }
 
+        // Проверка, что строка является валидным JSON
+        private static bool IsValidJson(string json)
+        {
+            try
+            {
+                JsonDocument.Parse(json);
+                return true;
+            }
+            catch
+            {
+                return false;
+            }
         }
     }
 }

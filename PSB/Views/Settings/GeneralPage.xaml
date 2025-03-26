@@ -14,15 +14,25 @@
         <StackPanel Spacing="6">
             <TextBlock Text="Путь до истории сохранений" Style="{StaticResource BodyTextBlockStyle}"/>
             <Grid ColumnSpacing="6" Grid.ColumnDefinitions="*,Auto,Auto">
-                <TextBox IsReadOnly="True" Text="C:\Users\Savayaqu\PlaySaveBack" Grid.Column="0"/>
-                <Button Content="Изменить" Grid.Column="1"/>
-                <Button Content="Открыть" Grid.Column="2"/>
+                <TextBox IsReadOnly="True" Text="{x:Bind GeneralViewModel.PathToSave, Mode=OneWay}" Grid.Column="0"/>
+                <Button Command="{x:Bind GeneralViewModel.ChooseSavesFolderCommand}" Grid.Column="1">
+                    <StackPanel Orientation="Horizontal" Spacing="6">
+                        <FontIcon Glyph="&#xE70F;" />
+                        <TextBlock Text="Изменить"/>
+                    </StackPanel>
+                </Button>
+                <Button Command="{x:Bind GeneralViewModel.OpenSavesFolderCommand}" Grid.Column="2">
+                    <StackPanel Orientation="Horizontal" Spacing="6">
+                        <FontIcon Glyph="&#xE838;" />
+                        <TextBlock Text="Открыть"/>
+                    </StackPanel>
+                </Button>
             </Grid>
             <TextBlock Text="Все ваши сохранения, созданные этим приложением будут распологаться здесь"/>
         </StackPanel>
         <TextBlock Text="Поведение" Style="{StaticResource BodyTextBlockStyle}"/>
         <StackPanel Orientation="Horizontal" HorizontalAlignment="Left" VerticalAlignment="Center">
-            <CheckBox Content="Удалять локальные сохранения после синхронизации"/>
+            <CheckBox Command="{x:Bind GeneralViewModel.ToggleDeleteLocalSaveAfterSyncCommand}"  IsChecked="{x:Bind GeneralViewModel.DeleteSaveAfterSync}"  Content="Удалять локальные сохранения после синхронизации"/>
         </StackPanel>
     </StackPanel>
 </Page>

@@ -1,8 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Microsoft.UI.Xaml.Data;
 
 namespace PSB.Converters
@@ -13,7 +9,7 @@ namespace PSB.Converters
         {
             if (value is uint seconds)
             {
-                if(seconds <= 0)
+                if (seconds <= 0)
                 {
                     return "0 секунд";
                 }
