@@ -13,10 +13,8 @@
 
     <StackPanel Orientation="Vertical" Padding="16" Spacing="12">
         <TextBlock Text="Аккаунт" Style="{StaticResource TitleTextBlockStyle}"/>
-        <ComboBox ItemsSource="{Binding VisibilityOptions}"
-                  SelectedItem="{Binding SelectedVisibility, Mode=TwoWay}"
-                  Width="150"
-                  Header="Видимость профиля"/>
+        <TextBlock Text="Видимость профиля"/>
+        <ComboBox></ComboBox>
         <TextBlock Style="{StaticResource CaptionTextBlockStyle}" Text="Выберите, кто может видеть ваш профиль и библиотеку"/>
 
 
@@ -37,6 +35,14 @@
             </Button>
         </StackPanel>
         <TextBlock Style="{StaticResource BodyStrongTextBlockStyle}" Text="Облачные сервисы"/>
+        <!--<StackPanel Orientation="Horizontal" Spacing="12">
+            <Button Command="{x:Bind AccountViewModel.ConnectionGoogleDriveCommand, Mode=OneTime}">
+                <StackPanel Orientation="Horizontal" VerticalAlignment="Center" Spacing="8">
+                    <FontIcon Glyph="&#xE753;" />
+                    <TextBlock Text="Подключить Google Drive"/>
+                </StackPanel>
+            </Button>
+        </StackPanel>-->
         <!-- Список облачных сервисов -->
         <ListView ItemsSource="{x:Bind AccountViewModel.CloudServices, Mode=OneWay}"
           SelectionMode="None">
