@@ -2,11 +2,15 @@
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
+using System.Linq;
 using System.Net.Http;
 using System.Threading.Tasks;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using Microsoft.UI.Xaml;
+using PSB.Api.Request;
 using PSB.Api.Response;
+using PSB.Enums;
 using PSB.Models;
 using PSB.Utils;
 using PSB.Views.Settings.Account;
@@ -22,11 +26,32 @@ namespace PSB.ViewModels
         [ObservableProperty] public partial ObservableCollection<CloudService> CloudServices { get; set; } = new();
         public static AccountViewModel? Instance = App.MainWindow!.AccountViewModel;
 
+        [ObservableProperty]
+        [NotifyPropertyChangedFor(nameof(User))]
+        public partial UserVisibility SelectedVisibility { get; set; } = (UserVisibility)AuthData.User!.Visibility;
+        public static Array VisibilityOptions => Enum.GetValues(typeof(UserVisibility));
         public AccountViewModel()
         {
             _ = LoadCloudServices();
+            // Подписываемся на изменение SelectedVisibility
+            PropertyChanged += async (sender, args) =>
+            {
+                if (args.PropertyName == nameof(SelectedVisibility))
+                {
+                    await UpdateProfileVisibility((int)SelectedVisibility);
+                }
+            };
         }
-
+        [RelayCommand]
+        public async Task UpdateProfileVisibility(int value)
+        {
+            (var res, var body) = await FetchAsync<User>(HttpMethod.Post, "profile", new UpdateAccountRequest.UpdateVisibility(value), true);
+            if( res.IsSuccessStatusCode)
+            {
+                AuthData.User = body;
+                User = body;
+            }
+        }
         [RelayCommand]
         public async Task ConnectionGoogleDrive()
         {

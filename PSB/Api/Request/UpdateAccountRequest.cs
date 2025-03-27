@@ -14,5 +14,9 @@ namespace PSB.Api.Request
         {
             [JsonPropertyName("email")] public string Email { get; set; } = email;
         }
+        public class UpdateVisibility(int visibility)
+        {
+            [JsonPropertyName("visibility")] public int Visibility { get; set; } = visibility;
+        }
     }
 }
