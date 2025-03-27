@@ -101,14 +101,31 @@ namespace PSB.Helpers
         }
         public void DeleteFile(string filePath)
         {
-            if (File.Exists(filePath))
-            {
-                File.Delete(filePath);
-                Console.WriteLine($"Файл {filePath} успешно удалён.");
-            }
-            else
+            if (!File.Exists(filePath))
             {
                 Console.WriteLine($"Файл {filePath} не найден.");
+                return;
+            }
+            try
+            {
+                // Получаем информацию о родительской папке
+                string parentDirectory = Path.GetDirectoryName(filePath)!;
+                // Удаляем файл
+                File.Delete(filePath);
+                Console.WriteLine($"Файл {filePath} успешно удалён.");
+
+                // Проверяем, пуста ли папка после удаления
+                if (Directory.Exists(parentDirectory) &&
+                    !Directory.EnumerateFileSystemEntries(parentDirectory).Any())
+                {
+                    // Удаляем пустую папку
+                    Directory.Delete(parentDirectory);
+                    Console.WriteLine($"Папка {parentDirectory} удалена, так как она пуста.");
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Ошибка при удалении: {ex.Message}");
             }
         }
         public async Task<string> CreateBackup(string folderPath, string gameName, string saveVersion)
