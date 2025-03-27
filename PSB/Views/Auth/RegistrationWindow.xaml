@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Window
+    x:Class="PSB.Views.Auth.RegistrationWindow"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    mc:Ignorable="d"
+    Title="Регистрация">
+
+    <ScrollViewer Padding="24" VerticalScrollBarVisibility="Auto" Background="{ThemeResource SystemControlAcrylicWindowBrush}">
+        <StackPanel Spacing="16" VerticalAlignment="Center">
+            <!-- Заголовок -->
+            <TextBlock Text="Создать аккаунт"
+                       Style="{StaticResource TitleTextBlockStyle}"
+                       HorizontalAlignment="Center"/>
+
+            <!-- Форма регистрации -->
+            <StackPanel Spacing="12">
+                <!-- Поле логина -->
+                <TextBox Header="Логин"
+                         PlaceholderText="Придумайте логин"
+                         Text="{x:Bind RegistrationViewModel.Login, Mode=TwoWay}"/>
+
+                <TextBlock Text="{x:Bind RegistrationViewModel.LoginError, Mode=OneWay}"
+                               Foreground="{StaticResource AccentFillColorSelectedTextBackgroundBrush}"
+                           Style="{StaticResource CaptionTextBlockStyle}"/>
+
+                <!-- Поле email -->
+                <TextBox Header="Email"
+                         PlaceholderText="Введите ваш email"
+                         InputScope="EmailSmtpAddress"
+                         Text="{x:Bind RegistrationViewModel.Email, Mode=TwoWay}"/>
+
+                <TextBlock Text="{x:Bind RegistrationViewModel.EmailError, Mode=OneWay}"
+                               Foreground="{StaticResource AccentFillColorSelectedTextBackgroundBrush}"
+                           Style="{StaticResource CaptionTextBlockStyle}"/>
+
+                <!-- Поле пароля -->
+                <PasswordBox Header="Пароль"
+                             PlaceholderText="Придумайте пароль"
+                             Password="{x:Bind RegistrationViewModel.Password, Mode=TwoWay}"/>
+
+                <TextBlock Text="{x:Bind RegistrationViewModel.PasswordError, Mode=OneWay}"
+                               Foreground="{StaticResource AccentFillColorSelectedTextBackgroundBrush}"
+                           Style="{StaticResource CaptionTextBlockStyle}"/>
+
+                <!-- Подтверждение пароля -->
+                <PasswordBox Header="Подтверждение пароля"
+                             PlaceholderText="Повторите пароль"
+                             Password="{x:Bind RegistrationViewModel.PasswordConfirmation, Mode=TwoWay}"/>
+
+                <TextBlock Text="{x:Bind RegistrationViewModel.PasswordConfirmationError, Mode=OneWay}"
+                               Foreground="{StaticResource AccentFillColorSelectedTextBackgroundBrush}"
+                           Style="{StaticResource CaptionTextBlockStyle}"/>
+            </StackPanel>
+
+            <!-- Кнопка регистрации -->
+            <Button Command="{x:Bind RegistrationViewModel.RegistrationCommand}"
+                    Content="Зарегистрироваться"
+                    HorizontalAlignment="Stretch"/>
+
+            <!-- Разделитель -->
+            <Grid Margin="0,16" HorizontalAlignment="Stretch">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition/>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition/>
+                </Grid.ColumnDefinitions>
+                <Rectangle Fill="{ThemeResource SystemControlBackgroundBaseLowBrush}" Height="1" VerticalAlignment="Center"/>
+                <TextBlock Text="Уже есть аккаунт?" 
+                           Grid.Column="1" 
+                           Margin="8,0"
+                           Style="{StaticResource CaptionTextBlockStyle}"/>
+                <Rectangle Fill="{ThemeResource SystemControlBackgroundBaseLowBrush}" Height="1" Grid.Column="2" VerticalAlignment="Center"/>
+            </Grid>
+
+            <!-- Кнопка входа -->
+            <Button Content="Войти"
+                    HorizontalAlignment="Stretch"
+                    Command="{x:Bind RegistrationViewModel.GoToLoginCommand}"/>
+
+            <!-- Условия использования -->
+            <TextBlock Text="Нажимая «Зарегистрироваться», вы соглашаетесь с нашими Условиями использования и Политикой конфиденциальности."
+                       Style="{StaticResource CaptionTextBlockStyle}"
+                       HorizontalAlignment="Center"
+                       TextAlignment="Center"
+                       TextWrapping="WrapWholeWords"
+                       Margin="0,8,0,0"/>
+        </StackPanel>
+    </ScrollViewer>
+</Window>

@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Window
+    x:Class="PSB.Views.Auth.LoginWindow"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:local="using:PSB.Views.Auth"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:vm="using:PSB.ViewModels"
+    mc:Ignorable="d"
+    Title="Авторизация">
+
+    <Grid Background="{ThemeResource SystemControlAcrylicWindowBrush}">
+        <ScrollViewer Padding="24" VerticalScrollBarVisibility="Auto">
+            <StackPanel Spacing="16" VerticalAlignment="Center">
+                <!-- Заголовок -->
+                <TextBlock Text="Вход в аккаунт"
+                           Style="{StaticResource TitleTextBlockStyle}"
+                           HorizontalAlignment="Center"/>
+
+                <!-- Форма входа -->
+                <StackPanel Spacing="6">
+                    <!-- Поле логина -->
+                    <TextBox Header="Логин или email"
+                             Text="{x:Bind LoginViewModel.Identifier, Mode=TwoWay}"
+                             PlaceholderText="Введите ваш логин или email"/>
+
+                    <TextBlock Text="{x:Bind LoginViewModel.IdentifierError, Mode=OneWay}"
+                               Foreground="{StaticResource AccentFillColorSelectedTextBackgroundBrush}"
+                               Style="{StaticResource CaptionTextBlockStyle}"/>
+
+                    <!-- Поле пароля -->
+                    <PasswordBox Header="Пароль"
+                                 Password="{x:Bind LoginViewModel.Password, Mode=TwoWay}"
+                                 PlaceholderText="Введите ваш пароль"/>
+
+                    <TextBlock Text="{x:Bind LoginViewModel.PasswordError, Mode=OneWay}"
+                               Foreground="{StaticResource AccentFillColorSelectedTextBackgroundBrush}"
+                               Style="{StaticResource CaptionTextBlockStyle}"/>
+
+                    <!-- Кнопка "Забыли пароль?" -->
+                    <HyperlinkButton Content="Забыли пароль?" HorizontalAlignment="Right"/>
+                </StackPanel>
+                <TextBlock Text="{x:Bind LoginViewModel.Error, Mode=OneWay}"
+                           Foreground="{StaticResource AccentFillColorSelectedTextBackgroundBrush}"
+                           TextAlignment="Center"
+                           Style="{StaticResource BodyStrongTextBlockStyle}"/>
+                <!-- Кнопка входа -->
+                <Button Command="{x:Bind LoginViewModel.LoginCommand}"
+                        Content="Войти"
+                        HorizontalAlignment="Stretch"/>
+
+                <!-- Разделитель -->
+                <Grid Margin="0,16" HorizontalAlignment="Stretch">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition/>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition/>
+                    </Grid.ColumnDefinitions>
+                    <Rectangle Fill="{ThemeResource SystemControlBackgroundBaseLowBrush}" Height="1" VerticalAlignment="Center"/>
+                    <TextBlock Text="ИЛИ" 
+                               Grid.Column="1" 
+                               Margin="8,0"
+                               Style="{StaticResource CaptionTextBlockStyle}"/>
+                    <Rectangle Fill="{ThemeResource SystemControlBackgroundBaseLowBrush}" Height="1" Grid.Column="2" VerticalAlignment="Center"/>
+                </Grid>
+
+                <!-- Кнопка регистрации -->
+                <Button Content="Создать аккаунт"
+                        HorizontalAlignment="Stretch"
+                        Command="{x:Bind LoginViewModel.GoToRegistationCommand}"/>
+
+                <!-- Дополнительная информация -->
+                <TextBlock Text="Продолжая, вы соглашаетесь с нашими Условиями использования"
+                           Style="{StaticResource CaptionTextBlockStyle}"
+                           HorizontalAlignment="Center"
+                           TextAlignment="Center"
+                           TextWrapping="WrapWholeWords"/>
+            </StackPanel>
+        </ScrollViewer>
+    </Grid>
+</Window>

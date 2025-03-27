@@ -72,14 +72,6 @@ namespace PSB.Utils
             }
         }
 
-        // Сохранение токена и пользователя
-        public static void SaveAndNavigate(string? token, User? user)
-        {
-            Token = token;
-            User = user;
-            _ = App.AuthService?.UpdateAuthNavAsync();
-        }
-
         // Выход и очистка данных
         public static async Task ExitAndNavigate()
         {
@@ -87,8 +79,7 @@ namespace PSB.Utils
             Token = null;
             User = null;
             Libraries.Clear();
-            ApplicationData.Current.LocalSettings.Values.Clear();
-            _ = App.AuthService?.UpdateAuthNavAsync();
+            //ApplicationData.Current.LocalSettings.Values.Clear();
         }
 
         // Загрузка профиля
@@ -115,6 +106,15 @@ namespace PSB.Utils
                     Libraries.Add(item);
                 }
             }
+        }
+
+        // Сохранение токена, пользователя, закрытие окна авторизации и инициализация основного
+        public static void SaveAndOpenMainWindow(string? token, User? user)
+        {
+            Token = token;
+            User = user;
+            // Инициализируем MainWindow
+            App.SwitchToMainFromLogin();
         }
     }
 }

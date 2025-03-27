@@ -41,7 +41,7 @@
             </Grid>
         </NavigationView.Header>
         <NavigationView.MenuItems>
-            <NavigationViewItem Margin="0, 10, 0, 10" Height="100" x:Name="AuthNav">
+            <NavigationViewItem Margin="0, 10, 0, 10" Height="100" Tag="ProfilePage">
                 <NavigationViewItem.Content>
                     <Grid VerticalAlignment="Stretch" HorizontalAlignment="Stretch" Grid.Row="0">
                         <!-- Фоновое изображение (растянуто на весь Grid) -->

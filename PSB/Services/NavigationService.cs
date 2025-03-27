@@ -20,7 +20,6 @@ namespace PSB.Services
             { "CatalogPage", typeof(CatalogPage) },
             { "SettingsPage", typeof(SettingsPage) },
             { "ProfilePage", typeof(ProfilePage) },
-            { "LoginPage", typeof(LoginPage) },
             { "SavePage", typeof(SavePage) },
         };
         public Page GetCurrentPage()

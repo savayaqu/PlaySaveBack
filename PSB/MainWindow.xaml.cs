@@ -13,13 +13,9 @@ namespace PSB
         public AccountViewModel AccountViewModel { get; set; }
 
         private readonly NavigationService _navigationService;
-        //private readonly LibraryService _libraryService;
-        private readonly AuthService _authService;
-
         public Frame ContentFrameControl => ContentFrame;
         public NavigationView NavigationViewControl => NavView;
         public TextBlock HeaderTextBlock => HeaderText;
-        public NavigationViewItem AuthNavControl => AuthNav;
         public GeneralViewModel GeneralViewModel { get; set; }
         public MainWindow()
         {
@@ -30,12 +26,10 @@ namespace PSB
             ProfileViewModel = new ProfileViewModel();
             AccountViewModel = new AccountViewModel();
             GeneralViewModel = new GeneralViewModel();
+
             // Инициализируем сервисы
-            _authService = new AuthService(ProfileViewModel, AuthNav);
             _navigationService = new NavigationService(ContentFrame, NavView, HeaderText);
 
-            // Обновляем авторизацию при старте
-            _ = _authService.UpdateAuthNavAsync();
             ContentFrame.Navigated += ContentFrame_Navigated;
 
         }

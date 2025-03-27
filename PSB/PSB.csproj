@@ -15,10 +15,12 @@
   </PropertyGroup>
   <ItemGroup>
     <None Remove="ContentDialogs\GameSettingsContentDialog.xaml" />
+    <None Remove="Styles\ButtonStyles.xaml" />
+    <None Remove="Views\Auth\LoginWindow.xaml" />
+    <None Remove="Views\Auth\RegistrationWindow.xaml" />
     <None Remove="Views\CatalogPage.xaml" />
     <None Remove="Views\GamePage.xaml" />
     <None Remove="Views\HomePage.xaml" />
-    <None Remove="Views\LoginPage.xaml" />
     <None Remove="Views\ProfilePage.xaml" />
     <None Remove="Views\SavePage.xaml" />
     <None Remove="Views\SettingsPage.xaml" />
@@ -62,6 +64,22 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Views\Game\" />
+    <Folder Include="Views\Main\" />
+  </ItemGroup>
+  <ItemGroup>
+    <Page Update="Views\Auth\RegistrationWindow.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+  </ItemGroup>
+  <ItemGroup>
+    <Page Update="Styles\ButtonStyles.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+  </ItemGroup>
+  <ItemGroup>
+    <Page Update="Views\Auth\LoginWindow.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
   </ItemGroup>
   <ItemGroup>
     <Page Update="Views\Profile\UpdateProfileContentDialog.xaml">
@@ -113,11 +131,6 @@
   </ItemGroup>
   <ItemGroup>
     <Page Update="Views\HomePage.xaml">
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-  </ItemGroup>
-  <ItemGroup>
-    <Page Update="Views\LoginPage.xaml">
       <Generator>MSBuild:Compile</Generator>
     </Page>
   </ItemGroup>

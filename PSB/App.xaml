@@ -9,6 +9,8 @@
             <ResourceDictionary.MergedDictionaries>
                 <XamlControlsResources xmlns="using:Microsoft.UI.Xaml.Controls" />
                 <!-- Другие ресурсы -->
+                <ResourceDictionary Source="Styles/ButtonStyles.xaml"/>
+
             </ResourceDictionary.MergedDictionaries>
             <!--Можно задать ширину и высоту contentdialog так-->
             
@@ -21,6 +23,7 @@
             <converters:EmptyToVisibilityConverter x:Key="EmptyToVisibilityConverter" />
             <converters:BytesToSizeConverter x:Key="BytesToSizeConverter" />
             <converters:CamelCaseTextConverter x:Key="CamelCaseTextConverter"/>
+            <converters:StringToVisibilityConverter x:Key="StringToVisibilityConverter"/>
         </ResourceDictionary>
     </Application.Resources>
 </Application>

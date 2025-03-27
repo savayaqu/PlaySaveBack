@@ -3,19 +3,21 @@ using System.Diagnostics;
 using System.Threading.Tasks;
 using Microsoft.UI.Xaml;
 using Microsoft.Windows.AppLifecycle;
-using PSB.Helpers; // Для ProtocolActivatedEventArgs
+using PSB.Helpers;
 using PSB.Services;
+using PSB.Utils;
+using PSB.Views.Auth;
 using Windows.ApplicationModel.Activation;
-
 namespace PSB
 {
     public partial class App : Application
     {
         public static DialogService? DialogService { get; private set; }
         public static MainWindow? MainWindow { get; private set; }
+        public static LoginWindow? LoginWindow { get; private set; }
+        public static RegistrationWindow? RegistrationWindow { get; private set; }
         public static NavigationService? NavigationService { get; private set; }
         public static LibraryService? LibraryService { get; private set; }
-        public static AuthService? AuthService { get; private set; }
         public static ZipHelper? ZipHelper { get; private set; }
 
         public App()
@@ -39,9 +41,16 @@ namespace PSB
 
             // Подписываемся на события активации (включая deep links)
             instance.Activated += OnAppActivated;
-
-            // Инициализируем главное окно
-            InitializeMainWindow();
+            if(AuthData.User != null)
+            {
+                // Инициализируем главное окно
+                InitializeMainWindow();
+            }
+            else
+            {
+                InitializeLoginWindow();
+            }
+            
         }
 
         private async void OnAppActivated(object? sender, AppActivationArguments args)
@@ -53,7 +62,7 @@ namespace PSB
             }
         }
 
-        public static async Task ProcessDeepLink(Uri uri)
+        private static async Task ProcessDeepLink(Uri uri)
         {
             if (MainWindow != null)
             {
@@ -65,8 +74,6 @@ namespace PSB
                         var query = System.Web.HttpUtility.ParseQueryString(uri.Query);
                         if (query["success"] == "1")
                         {
-                            Debug.WriteLine("подкл");
-                            // Здесь можно вызывать синхронные методы
                             _ = MainWindow.AccountViewModel.LoadCloudServices();
                         }
                     }
@@ -89,11 +96,56 @@ namespace PSB
                 MainWindow.ProfileViewModel,
                 NavigationService);
 
-            AuthService = new AuthService(
-                MainWindow.ProfileViewModel,
-                MainWindow.AuthNavControl);
-
             MainWindow.Activate();
+        }
+        private static void InitializeLoginWindow()
+        {
+            LoginWindow = new LoginWindow();
+            LoginWindow.ExtendsContentIntoTitleBar = true;
+            LoginWindow.Activate();
+        }
+        private static void InitializeRegistrationWindow()
+        {
+            RegistrationWindow = new RegistrationWindow();
+            RegistrationWindow.ExtendsContentIntoTitleBar = true;
+            RegistrationWindow.Activate();
+        }
+
+        public static void SwitchToMainFromLogin()
+        {
+            InitializeMainWindow();
+            if (LoginWindow != null)
+            {
+                LoginWindow.Close();
+                LoginWindow = null;
+            }
+        }
+        public static void SwitchToLoginFromMain()
+        {
+            InitializeLoginWindow();
+            if (MainWindow != null)
+            {
+                MainWindow.Close();
+                MainWindow = null;
+            }
+        }
+        public static void SwitchToRegistrationFromLogin()
+        {
+            InitializeRegistrationWindow();
+            if (LoginWindow != null)
+            {
+                LoginWindow.Close();
+                LoginWindow = null;
+            }
+        }
+        public static void SwitchToLoginFromRegistration()
+        {
+            InitializeLoginWindow();
+            if (RegistrationWindow != null)
+            {
+                RegistrationWindow.Close();
+                RegistrationWindow = null;
+            }
         }
     }
 }

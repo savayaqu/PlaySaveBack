@@ -10,6 +10,7 @@ using System.Text.Json;
 using System.Threading.Tasks;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using PSB.Api.Request;
 using PSB.Api.Response;
@@ -37,7 +38,6 @@ namespace PSB.ViewModels
         [ObservableProperty] public partial Boolean InLibrary { get; set; }
         [ObservableProperty] public partial string FilePath { get; set; }
         [ObservableProperty] public partial string FolderPath { get; set; }
-        [ObservableProperty] public partial InfoBar SuccessInfoBar { get; set; }
         [ObservableProperty] public partial Boolean IsUploading { get; set; }
         [ObservableProperty] public partial string SaveDescription { get; set; } = "";
         [ObservableProperty] public partial string SaveVersion { get; set; } = "";
@@ -59,15 +59,6 @@ namespace PSB.ViewModels
             Instance = this;
             GameId = gameId;
             Type = type.ToLower();
-            SuccessInfoBar = new InfoBar
-            {
-                Title = "",
-                Message = "",
-                Severity = InfoBarSeverity.Informational,
-                IsOpen = false
-            };
-            //TODO: динамически не меняется сохранение, время, запуск.
-
 
             _ = GetGameAsync(false).ContinueWith(_ =>
             {

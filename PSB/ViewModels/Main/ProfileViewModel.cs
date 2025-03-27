@@ -27,8 +27,8 @@ namespace PSB.ViewModels
 
         public ProfileViewModel()
         {
-            //_ = LoadProfileAsync();
-            //_ = LoadLibraryAsync();
+            _ = LoadProfileAsync();
+            _ = LoadLibraryAsync();
         }
 
         [RelayCommand]

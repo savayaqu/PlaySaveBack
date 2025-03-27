@@ -21,7 +21,6 @@ namespace PSB.Views
         {
             this.InitializeComponent();
         }
-
         protected override void OnNavigatedTo(NavigationEventArgs e)
         {
             base.OnNavigatedTo(e);
@@ -99,6 +98,14 @@ namespace PSB.Views
             };
             GameContentGrid.Background = (Brush)Application.Current.Resources["AcrylicBackgroundFillColorDefaultBrush"];
             GameContentGrid.Children.Add(textBlock);
+        }
+
+        private void TextBox_Loaded(object sender, RoutedEventArgs e)
+        {
+            if (sender is TextBox textBox)
+            {
+                textBox.Focus(FocusState.Programmatic);
+            }
         }
     }
 }
