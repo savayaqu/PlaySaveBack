@@ -30,6 +30,7 @@ class UpdateProfileRequest extends ApiRequest
                 'required_without:avatar_file',
             ],
             'avatar_file' => 'sometimes|nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048|required_without:avatar',
+            'visibility' => 'integer|min:1|max:3'
         ];
     }
 
