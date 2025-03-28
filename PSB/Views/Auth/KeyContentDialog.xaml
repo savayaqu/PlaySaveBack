@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ContentDialog
+    x:Class="PSB.Views.Auth.KeyContentDialog"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:local="using:PSB.Views.Auth"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    mc:Ignorable="d"
+    Background="{ThemeResource ApplicationPageBackgroundThemeBrush}"
+    Title="Ваш KEY для восстановления"
+    CloseButtonText="Закрыть"
+    PrimaryButtonText="Подтвердить"
+    DefaultButton="Primary">
+
+    <StackPanel Spacing="16">
+        <Button BorderThickness="0" Background="Transparent" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,-40,0,0" Click="Close_Click">
+            <FontIcon HorizontalAlignment="Center" VerticalAlignment="Center" Glyph="&#xE711;" />
+        </Button>
+        <TextBlock Text="Это ваш PIN для восстановления. Сохраните его в надежном месте. Он понадобится для восстановления доступа к вашему аккаунту."
+                   TextWrapping="Wrap"/>
+
+        <Border Background="{ThemeResource SystemControlBackgroundAltHighBrush}"
+                Padding="16" CornerRadius="4">
+            <TextBlock x:Name="TextBlockKey"
+                       FontFamily="Courier New"
+                       FontSize="24"
+                       CharacterSpacing="1000"
+                       IsTextSelectionEnabled="True"
+                       HorizontalAlignment="Center"
+                       SelectionHighlightColor="{StaticResource AccentAAFillColorDefaultBrush}"/>
+        </Border>
+
+        <CheckBox Content="Я сохранил свой PIN для восстановления" x:Name="CheckBox" Checked="CheckBox_Checked" Unchecked="CheckBox_Unchecked"/>
+    </StackPanel>
+</ContentDialog>

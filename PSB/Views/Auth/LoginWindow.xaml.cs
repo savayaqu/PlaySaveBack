@@ -1,8 +1,8 @@
-using Microsoft.UI.Xaml;
 using Microsoft.UI;
-using Windows.Graphics;
 using Microsoft.UI.Windowing;
+using Microsoft.UI.Xaml;
 using PSB.ViewModels;
+using Windows.Graphics;
 
 
 namespace PSB.Views.Auth
@@ -14,7 +14,7 @@ namespace PSB.Views.Auth
         {
             LoginViewModel = new LoginViewModel();
             this.InitializeComponent();
-
+            //RecoverPanel.Visibility = Visibility.Collapsed;
             // Получаем AppWindow
             var hwnd = WinRT.Interop.WindowNative.GetWindowHandle(this);
             var windowId = Win32Interop.GetWindowIdFromWindow(hwnd);

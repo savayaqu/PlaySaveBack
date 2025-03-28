@@ -7,11 +7,14 @@ use App\Exceptions\UnauthorizedException;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Api\Auth\SignInRequest;
 use App\Http\Requests\Api\Auth\SignUpRequest;
+use App\Http\Requests\Api\RestoreFromKeyRequest;
+use App\Http\Requests\Api\User\UpdateProfileRequest;
 use App\Http\Resources\UserResource;
 use App\Models\User;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
 use Random\RandomException;
 
@@ -52,7 +55,19 @@ class AuthController extends Controller
             'token' => $token,
         ]);
     }
-
+    public function restoreFromKey(RestoreFromKeyRequest $request): JsonResponse
+    {
+        $user = User::query()->where('login', $request->login)->firstOrFail();
+        if (!Hash::check($request->key, $user->key)) {
+            throw new ApiException('Invalid credentials', 401);
+        }
+        $user->update(['password' => $request->new_password]);
+        if($request->logout == true)
+        {
+            $user->tokens()->delete();
+        }
+        return response()->json(UserResource::make($user), 200);
+    }
     public function logout(Request $request): JsonResponse
     {
         $request->user()->currentAccessToken()->delete();

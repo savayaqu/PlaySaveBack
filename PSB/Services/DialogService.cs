@@ -40,6 +40,19 @@ namespace PSB.Services
             _currentDialog = null; // Обнуляем после закрытия
         }
 
+        public async Task<bool> ShowConfirmationAsync(string title, string message)
+        {
+            var dialog = new ContentDialog
+            {
+                Title = title,
+                Content = message,
+                PrimaryButtonText = "Да",
+                CloseButtonText = "Отмена",
+                XamlRoot = _xamlRoot
+            };
+            var result = await dialog.ShowAsync();
+            return result == ContentDialogResult.Primary;
+        }
         public void HideDialog()
         {
             if (_currentDialog != null)

@@ -110,14 +110,18 @@ namespace PSB
             RegistrationWindow.ExtendsContentIntoTitleBar = true;
             RegistrationWindow.Activate();
         }
-
-        public static void SwitchToMainFromLogin()
+        public static void SwitchToMain()
         {
             InitializeMainWindow();
             if (LoginWindow != null)
             {
                 LoginWindow.Close();
                 LoginWindow = null;
+            }
+            if(RegistrationWindow != null)
+            {
+                RegistrationWindow.Close();
+                RegistrationWindow = null;
             }
         }
         public static void SwitchToLoginFromMain()

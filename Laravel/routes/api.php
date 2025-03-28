@@ -12,6 +12,7 @@ use Illuminate\Support\Facades\Route;
 Route::controller(AuthController::class)->group(function () {
     Route::post('register', 'signUp'); // Регистрация
     Route::post('login',   'signIn');  // Авторизация
+    Route::post('restore-from-key', 'restoreFromKey'); // Восстановление с помощью ключа
     Route::middleware('auth:sanctum')->group(function () {
         Route::get('logout',    'logout');    // Выход с одного устройства
         Route::get('logoutAll', 'logoutAll'); // Выход со всех устройств

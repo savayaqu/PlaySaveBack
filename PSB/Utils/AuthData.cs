@@ -6,6 +6,7 @@ using System.Text.Json;
 using System.Threading.Tasks;
 using PSB.Api.Response;
 using PSB.Models;
+using PSB.Views.Auth;
 using Windows.Storage;
 using static PSB.Utils.Fetch;
 using User = PSB.Models.User;
@@ -79,7 +80,8 @@ namespace PSB.Utils
             Token = null;
             User = null;
             Libraries.Clear();
-            //ApplicationData.Current.LocalSettings.Values.Clear();
+            App.SwitchToLoginFromMain();
+            ApplicationData.Current.LocalSettings.Values.Clear();
         }
 
         // Загрузка профиля
@@ -113,8 +115,7 @@ namespace PSB.Utils
         {
             Token = token;
             User = user;
-            // Инициализируем MainWindow
-            App.SwitchToMainFromLogin();
+            App.SwitchToMain();
         }
     }
 }

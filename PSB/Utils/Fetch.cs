@@ -67,7 +67,7 @@ namespace PSB.Utils
             {
                 // Запрашиваем
                 var response = await _httpClient.SendAsync(request, cancellationToken);
-
+                
                 // Обрабатываем ответ
                 if (!response.IsSuccessStatusCode)
                 {
@@ -76,6 +76,14 @@ namespace PSB.Utils
                     {
                         Debug.WriteLine("FETCH: ERROR: Json: " + responseJsonErr);
                         var responseBodyErr = JsonSerializer.Deserialize<ErrorResponse>(responseJsonErr);
+                        if(response.StatusCode == System.Net.HttpStatusCode.Unauthorized)
+                        {
+                            if (responseBodyErr.Message == "Unauthorized")
+                            {
+                                //TODO: вместо диалога выводить справа снизу infobar
+                                var dialog =  App.DialogService!.ShowConfirmationAsync("Ошибка", "Перезайдите в аккаунт");
+                            }
+                        }
                     }
                     catch (Exception ex)
                     {
