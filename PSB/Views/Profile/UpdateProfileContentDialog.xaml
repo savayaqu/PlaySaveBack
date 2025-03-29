@@ -8,129 +8,159 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     mc:Ignorable="d"
     Background="{ThemeResource ApplicationPageBackgroundThemeBrush}"
-    Title="Редактирование профиля">
+    Title="Редактирование профиля"
+    PrimaryButtonText="Сохранить"
+    PrimaryButtonCommand="{x:Bind UpdateProfileViewModel.UpdateProfileCommand}"
+    CloseButtonText="Отменить"
+    DefaultButton="Primary">
+
     <ContentDialog.Resources>
         <x:Double x:Key="ContentDialogMaxWidth">800</x:Double>
         <x:Double x:Key="ContentDialogMinWidth">800</x:Double>
         <x:Double x:Key="ContentDialogMaxHeight">600</x:Double>
         <x:Double x:Key="ContentDialogMinHeight">600</x:Double>
     </ContentDialog.Resources>
-    <StackPanel>
-        <Button BorderThickness="0" Background="Transparent" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,-40,0,0" Click="Button_Click">
-            <FontIcon HorizontalAlignment="Center" VerticalAlignment="Center" Glyph="&#xE711;" />
-        </Button>
-        <Button 
-            BorderThickness="0" 
-            Background="Transparent" 
-            HorizontalAlignment="Right" 
-            VerticalAlignment="Top" 
-            Margin="0,-40,0,0" 
-            Click="Button_Click">
-            <FontIcon Glyph="&#xE711;" />
-        </Button>
 
-        <!-- Аватар (поле + кнопка выбора) -->
-        <Grid>
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="*" />
-                <ColumnDefinition Width="Auto" />
-            </Grid.ColumnDefinitions>
-
-            <!-- Превью аватара -->
-            <Image
-                Height="150"
-                Width="150"
-                Stretch="Fill"
-                Source="{x:Bind UpdateProfileViewModel.CurrentAvatar, Mode=OneWay}"
-                HorizontalAlignment="Center"
-                VerticalAlignment="Center"/>
-
-            <!-- Кнопка с Flyout для выбора способа загрузки -->
-            <Button
-                Grid.Column="1"
-                HorizontalAlignment="Right"
-                VerticalAlignment="Center"
-                Margin="8,0,0,0">
-                <FontIcon Glyph="&#xE70F;" />
-                <Button.Flyout>
-                    <MenuFlyout Placement="Bottom">
-                        <MenuFlyoutItem 
-                            Text="Выбрать файл" 
-                            Command="{x:Bind UpdateProfileViewModel.PickAvatarFileCommand}"/>
-                        <MenuFlyoutItem 
-                            Text="Вставить ссылку (URL)"
-                            Command="{x:Bind UpdateProfileViewModel.ShowAvatarUrlInputCommand}"/>
-                    </MenuFlyout>
-                </Button.Flyout>
+    <ScrollViewer VerticalScrollMode="Auto" VerticalScrollBarVisibility="Auto">
+        <StackPanel Spacing="16" Padding="0,8">
+            <!-- Close button (duplicate removed) -->
+            <Button 
+                BorderThickness="0" 
+                Background="Transparent" 
+                HorizontalAlignment="Right" 
+                VerticalAlignment="Top" 
+                Margin="0,-40,0,0" 
+                Click="Button_Click"
+                ToolTipService.ToolTip="Закрыть">
+                <FontIcon Glyph="&#xE711;" FontSize="14"/>
             </Button>
-        </Grid>
 
-        <!-- Поле для URL аватара (появляется только после выбора "Вставить ссылку") -->
-        
-        <!-- Поле для URL хедера (появляется только после выбора "Вставить ссылку") -->
-        <Grid ColumnSpacing="6" ColumnDefinitions="*,Auto"  Visibility="{x:Bind UpdateProfileViewModel.IsAvatarUrlInputVisible, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}, ConverterParameter=False}" HorizontalAlignment="Stretch" VerticalAlignment="Center">
-            <TextBox 
-    x:Name="AvatarUrlTextBox"
-    Header="Ссылка на аватар (URL)"
-    PlaceholderText="https://example.com/avatar.jpg"
-    Text="{x:Bind UpdateProfileViewModel.AvatarUrl, Mode=TwoWay}"  Grid.Column="0"/>
-            <Button Grid.Column="1" Command="{x:Bind UpdateProfileViewModel.ConfirmAvatarUrlCommand, Mode=OneWay}" VerticalAlignment="Bottom">
-                <FontIcon Glyph="&#xE8FB;" />
-            </Button>
-        </Grid>
-        <!-- Хедер (поле + кнопка выбора) -->
-        <Grid>
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="*" />
-                <ColumnDefinition Width="Auto" />
-            </Grid.ColumnDefinitions>
+            <!-- Avatar section -->
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
 
-            <!-- Превью хедера -->
-            <Image
-                Height="150"
-                Width="150"
-                Stretch="Fill"
-                HorizontalAlignment="Center"
-                VerticalAlignment="Center"
-                Source="{x:Bind UpdateProfileViewModel.CurrentHeader, Mode=OneWay}"/>
+                <StackPanel Spacing="8" HorizontalAlignment="Center">
+                    <TextBlock 
+                        Text="Аватар" 
+                        Style="{ThemeResource BodyStrongTextBlockStyle}"
+                        HorizontalAlignment="Center"/>
+                    <Image
+                        Height="150"
+                        Width="150"
+                        Stretch="UniformToFill"
+                        Source="{x:Bind UpdateProfileViewModel.CurrentAvatar, Mode=OneWay}"
+                        HorizontalAlignment="Center"
+                        VerticalAlignment="Center"/>
+                </StackPanel>
 
-            <!-- Кнопка с Flyout для выбора способа загрузки -->
-            <Button
-                Grid.Column="1"
-                HorizontalAlignment="Right"
-                VerticalAlignment="Center"
-                Margin="8,0,0,0">
-                <FontIcon Glyph="&#xE70F;" />
-                <Button.Flyout>
-                    <MenuFlyout Placement="Bottom">
-                        <MenuFlyoutItem 
-                            Text="Выбрать файл" 
-                            Command="{x:Bind UpdateProfileViewModel.PickHeaderFileCommand}"/>
-                        <MenuFlyoutItem 
-                            Text="Вставить ссылку (URL)"
-                            Command="{x:Bind UpdateProfileViewModel.ShowHeaderUrlInputCommand}"/>
-                    </MenuFlyout>
-                </Button.Flyout>
-            </Button>
-        </Grid>
+                <Button
+                    Grid.Column="1"
+                    HorizontalAlignment="Right"
+                    VerticalAlignment="Center"
+                    Margin="8,0,0,0"
+                    ToolTipService.ToolTip="Изменить аватар">
+                    <FontIcon Glyph="&#xE70F;"/>
+                    <Button.Flyout>
+                        <MenuFlyout Placement="Bottom">
+                            <MenuFlyoutItem 
+                                Text="Выбрать файл" 
+                                Command="{x:Bind UpdateProfileViewModel.PickAvatarFileCommand}"/>
+                            <MenuFlyoutItem 
+                                Text="Вставить ссылку (URL)"
+                                Command="{x:Bind UpdateProfileViewModel.ShowAvatarUrlInputCommand}"/>
+                        </MenuFlyout>
+                    </Button.Flyout>
+                </Button>
+            </Grid>
 
-        <!-- Поле для URL хедера (появляется только после выбора "Вставить ссылку") -->
-        <Grid ColumnSpacing="6" ColumnDefinitions="*,Auto"  Visibility="{x:Bind UpdateProfileViewModel.IsHeaderUrlInputVisible, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}, ConverterParameter=False}" HorizontalAlignment="Stretch" VerticalAlignment="Center">
-            <TextBox 
-    Header="Ссылка на хедер (URL)"
-    PlaceholderText="https://example.com/header.jpg" VerticalAlignment="Center"
-    Text="{x:Bind UpdateProfileViewModel.HeaderUrl, Mode=TwoWay}" Grid.Column="0"/>
-            <Button Grid.Column="1" Command="{x:Bind UpdateProfileViewModel.ConfirmHeaderUrlCommand, Mode=OneWay}" VerticalAlignment="Bottom">
-                <FontIcon Glyph="&#xE8FB;" />
-            </Button>
-        </Grid>
-        
+            <!-- Avatar URL input -->
+            <Grid 
+                ColumnSpacing="8" 
+                ColumnDefinitions="*,Auto"  
+                Visibility="{x:Bind UpdateProfileViewModel.IsAvatarUrlInputVisible, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}, ConverterParameter=False}">
+                <TextBox 
+                    x:Name="AvatarUrlTextBox"
+                    Header="Ссылка на аватар (URL)"
+                    PlaceholderText="https://example.com/avatar.jpg"
+                    Text="{x:Bind UpdateProfileViewModel.AvatarUrl, Mode=TwoWay}"
+                    Grid.Column="0"/>
+                <Button 
+                    Grid.Column="1" 
+                    Command="{x:Bind UpdateProfileViewModel.ConfirmAvatarUrlCommand, Mode=OneWay}" 
+                    VerticalAlignment="Bottom"
+                    ToolTipService.ToolTip="Подтвердить">
+                    <FontIcon Glyph="&#xE8FB;"/>
+                </Button>
+            </Grid>
 
-        <!-- Никнейм -->
-        <TextBox
-            Header="Отображаемое имя"
-            Text="{x:Bind UpdateProfileViewModel.NickName, Mode=TwoWay}"/>
+            <!-- Header section -->
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
 
-        <Button Content="Сохранить" HorizontalAlignment="Center" Command="{x:Bind UpdateProfileViewModel.UpdateProfileCommand}" VerticalAlignment="Bottom" Padding="12"/>
-    </StackPanel>
+                <StackPanel Spacing="8" HorizontalAlignment="Center">
+                    <TextBlock 
+                        Text="Хедер" 
+                        Style="{ThemeResource BodyStrongTextBlockStyle}"
+                        HorizontalAlignment="Center"/>
+                    <Image
+                        Height="150"
+                        Width="300"
+                        Stretch="UniformToFill"
+                        HorizontalAlignment="Center"
+                        VerticalAlignment="Center"
+                        Source="{x:Bind UpdateProfileViewModel.CurrentHeader, Mode=OneWay}"/>
+                </StackPanel>
+
+                <Button
+                    Grid.Column="1"
+                    HorizontalAlignment="Right"
+                    VerticalAlignment="Center"
+                    Margin="8,0,0,0"
+                    ToolTipService.ToolTip="Изменить хедер">
+                    <FontIcon Glyph="&#xE70F;"/>
+                    <Button.Flyout>
+                        <MenuFlyout Placement="Bottom">
+                            <MenuFlyoutItem 
+                                Text="Выбрать файл" 
+                                Command="{x:Bind UpdateProfileViewModel.PickHeaderFileCommand}"/>
+                            <MenuFlyoutItem 
+                                Text="Вставить ссылку (URL)"
+                                Command="{x:Bind UpdateProfileViewModel.ShowHeaderUrlInputCommand}"/>
+                        </MenuFlyout>
+                    </Button.Flyout>
+                </Button>
+            </Grid>
+
+            <!-- Header URL input -->
+            <Grid 
+                ColumnSpacing="8" 
+                ColumnDefinitions="*,Auto"  
+                Visibility="{x:Bind UpdateProfileViewModel.IsHeaderUrlInputVisible, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}, ConverterParameter=False}">
+                <TextBox 
+                    Header="Ссылка на хедер (URL)"
+                    PlaceholderText="https://example.com/header.jpg"
+                    Text="{x:Bind UpdateProfileViewModel.HeaderUrl, Mode=TwoWay}"
+                    Grid.Column="0"/>
+                <Button 
+                    Grid.Column="1" 
+                    Command="{x:Bind UpdateProfileViewModel.ConfirmHeaderUrlCommand, Mode=OneWay}" 
+                    VerticalAlignment="Bottom"
+                    ToolTipService.ToolTip="Подтвердить">
+                    <FontIcon Glyph="&#xE8FB;"/>
+                </Button>
+            </Grid>
+
+            <!-- Nickname -->
+            <TextBox
+                Header="Отображаемое имя"
+                Text="{x:Bind UpdateProfileViewModel.NickName, Mode=TwoWay}"
+                Margin="0,16,0,0"/>
+        </StackPanel>
+    </ScrollViewer>
 </ContentDialog>

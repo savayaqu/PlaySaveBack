@@ -8,6 +8,7 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using PSB.Helpers;
 using PSB.Interfaces;
+using PSB.Models;
 using PSB.Utils.Game;
 using Windows.Storage;
 using Windows.Storage.AccessCache;
@@ -107,11 +108,11 @@ namespace PSB.ViewModels
         [RelayCommand]
         private async Task ChooseFile()
         {
-            if(SelectedFile != string.Empty)
-            {
-                SelectedSavesFolder = null;
-                GameViewModel.FolderPath = null;
-            }
+            //if(SelectedFile != string.Empty)
+            //{
+            //    SelectedSavesFolder = null;
+            //    GameViewModel.FolderPath = null;
+            //}
             var openPicker = new Windows.Storage.Pickers.FileOpenPicker();
             var hWnd = WinRT.Interop.WindowNative.GetWindowHandle(App.MainWindow);
             WinRT.Interop.InitializeWithWindow.Initialize(openPicker, hWnd);
@@ -200,9 +201,11 @@ namespace PSB.ViewModels
                     if (libraryItem != null)
                     {
                         ProfileViewModel.Libraries.Remove(libraryItem);
+                        GameViewModel.InLibrary = false;
+                        GameViewModel.IsFavorite = false;
+                        LibraryDataManager<IGame>.RemoveLibrary(Game.Type, Game.Id);
                         Debug.WriteLine("Попытка закрыть диалог...");
                         App.DialogService!.HideDialog();
-                        GameViewModel.InLibrary = false;
                     }
                     else
                     {

@@ -81,7 +81,7 @@ namespace PSB.Utils
             User = null;
             Libraries.Clear();
             App.SwitchToLoginFromMain();
-            ApplicationData.Current.LocalSettings.Values.Clear();
+            //ApplicationData.Current.LocalSettings.Values.Clear();
         }
 
         // Загрузка профиля

@@ -25,6 +25,7 @@
         <TextBlock 
             Text="Файл" 
             Style="{StaticResource SubtitleTextBlockStyle}"/>
+        <TextBlock Text="Путь к файлу, который будет запущен при нажатии на 'Играть'" TextWrapping="Wrap"/>
 
         <Grid ColumnDefinitions="*,Auto,Auto" ColumnSpacing="8">
             <TextBox 
@@ -43,12 +44,12 @@
                 Command="{x:Bind GameSettingsContentViewModel.OpenFileCommand}"
                 MinWidth="80"/>
         </Grid>
-
         <!-- Saves section -->
         <TextBlock 
             Text="Сохранения" 
             Style="{StaticResource SubtitleTextBlockStyle}"/>
-
+        <TextBlock Text="Путь к папке сохранений, на основе которого будут создаваться сохранения" TextWrapping="Wrap"/>
+        <TextBlock Foreground="{StaticResource AccentAAFillColorDefaultBrush}" Text="Рекомендуется выбрать корневую папку с сохранениями, а не отдельную" TextWrapping="Wrap"/>
         <Grid ColumnDefinitions="*,Auto,Auto" ColumnSpacing="8">
             <TextBox 
                 Grid.Column="0" 

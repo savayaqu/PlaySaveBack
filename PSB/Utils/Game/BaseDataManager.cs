@@ -10,8 +10,8 @@ namespace PSB.Utils.Game
     {
         private static readonly ApplicationDataContainer LocalSettings = ApplicationData.Current.LocalSettings;
         private static readonly JsonSerializerOptions JsonOptions = new() { TypeInfoResolver = GameJsonContext.Default };
-
-        protected static string GetKey(string type, ulong gameId, string suffix) => $"{type}_{gameId}_{suffix}";
+        private static readonly ulong UserId = AuthData.User.Id;
+        protected static string GetKey(string type, ulong gameId, string suffix) => $"{UserId}_{type}_{gameId}_{suffix}";
 
         public static void SaveData(string type, ulong gameId, TData data, string suffix)
         {
