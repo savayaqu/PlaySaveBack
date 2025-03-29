@@ -21,7 +21,10 @@ class LibraryController extends Controller
         // Проверяем, есть ли параметр limit в запросе и равен ли он 0
         if ($request->has('limit') && $request->input('limit') == 0) {
             // Если limit равен 0, загружаем все записи без пагинации
-            $libraries = $user->libraries()->with(['game', 'sideGame'])->get();
+            $libraries = $user->libraries()
+                ->with(['game', 'sideGame'])
+                ->orderByDesc('time_played')
+                ->get();
         } else {
             // Иначе используем пагинацию с указанным лимитом или по умолчанию 30
             $perPage = $request->input('limit', 30);

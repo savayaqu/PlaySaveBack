@@ -113,22 +113,27 @@
                     <Button Command="{x:Bind ProfileViewModel.LogoutCommand}" 
                 Content="Выйти" 
                 Height="40" 
-                Style="{StaticResource DangerButton}"
-                Width="130"/>
+                            Style="{StaticResource DangerButton}"
+                            Width="130"/>
                 </StackPanel>
             </Grid>
 
             <GridView ItemsSource="{x:Bind ProfileViewModel.Libraries, Mode=OneWay}"
-                      ItemTemplateSelector="{StaticResource GameTemplateSelector}"
-                      HorizontalAlignment="Stretch"
-                      VerticalAlignment="Stretch"
-                      ScrollViewer.HorizontalScrollMode="Disabled"
-                      ScrollViewer.VerticalScrollMode="Enabled"
-                      ScrollViewer.VerticalScrollBarVisibility="Auto" Grid.Row="1">
+ItemTemplateSelector="{StaticResource GameTemplateSelector}"
+HorizontalAlignment="Stretch"
+VerticalAlignment="Stretch"
+ScrollViewer.HorizontalScrollMode="Disabled"
+ScrollViewer.VerticalScrollMode="Enabled"
+ScrollViewer.VerticalScrollBarVisibility="Auto"
+SizeChanged="GridView_SizeChanged"
+Grid.Row="1">
 
                 <GridView.ItemsPanel>
                     <ItemsPanelTemplate>
-                        <ItemsWrapGrid Orientation="Horizontal" MaximumRowsOrColumns="5"/>
+                        <ItemsWrapGrid Orientation="Horizontal"
+                MaximumRowsOrColumns="5"
+                ItemWidth="300"
+                ItemHeight="450"/>
                     </ItemsPanelTemplate>
                 </GridView.ItemsPanel>
             </GridView>
