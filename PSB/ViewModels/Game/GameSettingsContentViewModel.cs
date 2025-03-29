@@ -75,6 +75,11 @@ namespace PSB.ViewModels
         [RelayCommand]
         private async Task ChooseFile()
         {
+            if(SelectedFile != string.Empty)
+            {
+                SelectedSavesFolder = null;
+                GameViewModel.FolderPath = null;
+            }
             var openPicker = new Windows.Storage.Pickers.FileOpenPicker();
             var hWnd = WinRT.Interop.WindowNative.GetWindowHandle(App.MainWindow);
             WinRT.Interop.InitializeWithWindow.Initialize(openPicker, hWnd);

@@ -7,28 +7,76 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     Background="{ThemeResource ApplicationPageBackgroundThemeBrush}"
     Title="{x:Bind GameSettingsContentViewModel.GameName, Mode=OneWay}">
-    <StackPanel Spacing="10">
-        <Button BorderThickness="0" Background="Transparent" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,-40,0,0" Click="Button_Click">
-            <FontIcon HorizontalAlignment="Center" VerticalAlignment="Center" Glyph="&#xE711;" />
+
+    <!--<ContentDialog.Resources>
+        <x:Double x:Key="ContentDialogMinHeight">600</x:Double>
+        <x:Double x:Key="ContentDialogMinWidth">800</x:Double>
+    </ContentDialog.Resources>-->
+
+    <StackPanel Spacing="16">
+        <!-- Close button -->
+        <Button 
+            BorderThickness="0" 
+            Background="Transparent" 
+            HorizontalAlignment="Right" 
+            VerticalAlignment="Top" 
+            Margin="0,-40,0,0" 
+            Click="Button_Click"
+            ToolTipService.ToolTip="Закрыть">
+            <FontIcon Glyph="&#xE711;" FontSize="12"/>
         </Button>
-        <TextBlock Text="Файл" FontWeight="Bold"/>
-        <Grid ColumnDefinitions="*,Auto" ColumnSpacing="6">
-            <TextBox Grid.Column="0" IsReadOnly="True" Text="{x:Bind GameSettingsContentViewModel.SelectedFile, Mode=OneWay}"/>
-            <Button  Grid.Column="1" Content="Выбрать" Command="{x:Bind GameSettingsContentViewModel.ChooseFileCommand}"/>
+
+        <!-- File section -->
+        <TextBlock 
+            Text="Файл" 
+            Style="{StaticResource SubtitleTextBlockStyle}"/>
+
+        <Grid ColumnDefinitions="*,Auto" ColumnSpacing="8">
+            <TextBox 
+                Grid.Column="0" 
+                IsReadOnly="True" 
+                Text="{x:Bind GameSettingsContentViewModel.SelectedFile, Mode=OneWay}"
+                Style="{StaticResource BodyTextBlockStyle}"/>
+            <Button 
+                Grid.Column="1" 
+                Content="Выбрать" 
+                Command="{x:Bind GameSettingsContentViewModel.ChooseFileCommand}"
+                MinWidth="120"/>
         </Grid>
 
-        <TextBlock Text="Сохранения" FontWeight="Bold"/>
-        <StackPanel Orientation="Horizontal">
-            
-        </StackPanel>
-        <Grid ColumnDefinitions="*,Auto" ColumnSpacing="6">
-            <TextBox Grid.Column="0" IsReadOnly="True" Text="{x:Bind GameSettingsContentViewModel.SelectedSavesFolder, Mode=OneWay}"/>
-            <Button Grid.Column="1" Content="Выбрать" Command="{x:Bind GameSettingsContentViewModel.ChooseFolderSavesCommand}"/>
+        <!-- Saves section -->
+        <TextBlock 
+            Text="Сохранения" 
+            Style="{StaticResource SubtitleTextBlockStyle}"/>
+
+        <Grid ColumnDefinitions="*,Auto" ColumnSpacing="8">
+            <TextBox 
+                Grid.Column="0" 
+                IsReadOnly="True" 
+                Text="{x:Bind GameSettingsContentViewModel.SelectedSavesFolder, Mode=OneWay}"
+                Style="{StaticResource BodyTextBlockStyle}"/>
+            <Button 
+                Grid.Column="1" 
+                Content="Выбрать" 
+                Command="{x:Bind GameSettingsContentViewModel.ChooseFolderSavesCommand}"
+                MinWidth="120"/>
         </Grid>
-        <TextBlock Text="Опасная зона" FontWeight="Bold" Foreground="{StaticResource AccentAcrylicBackgroundFillColorDefaultBrush}"/>
-        <StackPanel Orientation="Horizontal">
-            <Button Content="Удалить из библиотеки" Background="{StaticResource AccentAcrylicBackgroundFillColorDefaultBrush}" Command="{x:Bind GameSettingsContentViewModel.RemoveFromLibraryCommand}"/>
-            <Button Content="Удалить все сохранения" Background="{StaticResource AccentAcrylicBackgroundFillColorDefaultBrush}" Command="{x:Bind GameSettingsContentViewModel.RemoveAllSavesCommand}"/>
+
+        <!-- Danger zone -->
+        <TextBlock 
+            Text="Опасная зона" 
+            Style="{StaticResource SubtitleTextBlockStyle}"
+            Foreground="{ThemeResource SystemFillColorCriticalBrush}"/>
+
+        <StackPanel Orientation="Horizontal" Spacing="8">
+            <Button 
+                Content="Удалить из библиотеки"  
+                Style="{StaticResource DangerButton}"
+                Command="{x:Bind GameSettingsContentViewModel.RemoveFromLibraryCommand}"/>
+            <Button 
+                Content="Удалить все сохранения" 
+                Style="{StaticResource DangerButton}"
+                Command="{x:Bind GameSettingsContentViewModel.RemoveAllSavesCommand}"/>
         </StackPanel>
     </StackPanel>
 </ContentDialog>

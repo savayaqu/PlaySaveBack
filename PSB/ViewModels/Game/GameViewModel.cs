@@ -48,6 +48,26 @@ namespace PSB.ViewModels
         [NotifyCanExecuteChangedFor(nameof(LaunchGameCommand))]
         public partial Boolean ExeExists { get; set; } = false;
 
+        [ObservableProperty]
+        [NotifyCanExecuteChangedFor(nameof(CreateSaveCommand))]
+        [NotifyCanExecuteChangedFor(nameof(OverwriteSaveCommand))]
+        [NotifyCanExecuteChangedFor(nameof(RestoreSaveCommand))]
+        public partial Boolean FolderSavesExists { get; set; } = false;
+
+        partial void OnFolderPathChanged(string value)
+        {
+            if(string.IsNullOrEmpty(value))
+            {
+                FolderSavesExists = false;
+            }
+            else
+            {
+                FolderSavesExists = true;
+            }
+            OnPropertyChanged(nameof(FolderSavesExists));
+
+        }
+
         public string FavoriteIcon => IsFavorite ? "\uEB52" : "\uEB51";
         partial void OnIsFavoriteChanged(Boolean value)
         {
@@ -66,7 +86,7 @@ namespace PSB.ViewModels
             }, TaskScheduler.FromCurrentSynchronizationContext());
 
         }
-        [RelayCommand]
+        [RelayCommand(CanExecute = nameof(FolderSavesExists))]
         private async Task CreateSave()
         {
             bool versionExist = Saves?.Any(s => s.Version == SaveVersion) ?? false;
@@ -120,12 +140,12 @@ namespace PSB.ViewModels
                 OnPropertyChanged(nameof(Saves));
             }
         }
-        [RelayCommand]
+        [RelayCommand(CanExecute = nameof(FolderSavesExists))]
         private async Task OverwriteSave()
         {
             Debug.WriteLine("кнопка перезаписи");
         }
-        [RelayCommand]
+        [RelayCommand(CanExecute = nameof(FolderSavesExists))]
         public async Task RestoreSave(Save save)
         {
             if(save.IsSynced == false)

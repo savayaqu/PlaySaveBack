@@ -113,7 +113,7 @@
                     <Button Command="{x:Bind ProfileViewModel.LogoutCommand}" 
                 Content="Выйти" 
                 Height="40" 
-                Background="DarkRed" 
+                Style="{StaticResource DangerButton}"
                 Width="130"/>
                 </StackPanel>
             </Grid>

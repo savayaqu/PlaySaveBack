@@ -156,7 +156,7 @@ Padding="0">
                                                 <AppBarButton.Flyout>
                                                     <Flyout>
                                                         <StackPanel Spacing="6" Width="200">
-                                                            <TextBox PlaceholderText="Описание" Text="{x:Bind Description, Mode=TwoWay}"/>
+                                                            <TextBox Loaded="TextBox_Loaded" PlaceholderText="Описание" Text="{x:Bind Description, Mode=TwoWay}"/>
                                                             <Button Command="{x:Bind vm:GameViewModel.Instance.OverwriteSaveCommand}" 
                 CommandParameter="{x:Bind}" 
                 Content="Подтвердить"
