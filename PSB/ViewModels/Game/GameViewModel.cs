@@ -65,7 +65,6 @@ namespace PSB.ViewModels
                 FolderSavesExists = true;
             }
             OnPropertyChanged(nameof(FolderSavesExists));
-
         }
 
         public string FavoriteIcon => IsFavorite ? "\uEB52" : "\uEB51";

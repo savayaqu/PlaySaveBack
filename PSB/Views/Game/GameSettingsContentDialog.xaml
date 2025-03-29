@@ -8,11 +8,6 @@
     Background="{ThemeResource ApplicationPageBackgroundThemeBrush}"
     Title="{x:Bind GameSettingsContentViewModel.GameName, Mode=OneWay}">
 
-    <!--<ContentDialog.Resources>
-        <x:Double x:Key="ContentDialogMinHeight">600</x:Double>
-        <x:Double x:Key="ContentDialogMinWidth">800</x:Double>
-    </ContentDialog.Resources>-->
-
     <StackPanel Spacing="16">
         <!-- Close button -->
         <Button 
@@ -31,7 +26,7 @@
             Text="Файл" 
             Style="{StaticResource SubtitleTextBlockStyle}"/>
 
-        <Grid ColumnDefinitions="*,Auto" ColumnSpacing="8">
+        <Grid ColumnDefinitions="*,Auto,Auto" ColumnSpacing="8">
             <TextBox 
                 Grid.Column="0" 
                 IsReadOnly="True" 
@@ -41,7 +36,12 @@
                 Grid.Column="1" 
                 Content="Выбрать" 
                 Command="{x:Bind GameSettingsContentViewModel.ChooseFileCommand}"
-                MinWidth="120"/>
+                MinWidth="80"/>
+            <Button 
+                Grid.Column="2" 
+                Content="Открыть" 
+                Command="{x:Bind GameSettingsContentViewModel.OpenFileCommand}"
+                MinWidth="80"/>
         </Grid>
 
         <!-- Saves section -->
@@ -49,7 +49,7 @@
             Text="Сохранения" 
             Style="{StaticResource SubtitleTextBlockStyle}"/>
 
-        <Grid ColumnDefinitions="*,Auto" ColumnSpacing="8">
+        <Grid ColumnDefinitions="*,Auto,Auto" ColumnSpacing="8">
             <TextBox 
                 Grid.Column="0" 
                 IsReadOnly="True" 
@@ -59,7 +59,12 @@
                 Grid.Column="1" 
                 Content="Выбрать" 
                 Command="{x:Bind GameSettingsContentViewModel.ChooseFolderSavesCommand}"
-                MinWidth="120"/>
+                MinWidth="80"/>
+            <Button 
+                Grid.Column="2" 
+                Content="Открыть" 
+                Command="{x:Bind GameSettingsContentViewModel.OpenSavesCommand}"
+                MinWidth="80"/>
         </Grid>
 
         <!-- Danger zone -->

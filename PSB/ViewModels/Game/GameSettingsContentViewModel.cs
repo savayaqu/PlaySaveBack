@@ -20,9 +20,17 @@ namespace PSB.ViewModels
     {
         public ProfileViewModel ProfileViewModel { get; set; } = MainWindow.Instance!.ProfileViewModel!;
         public GameViewModel GameViewModel { get; set; }
+
         [ObservableProperty] public partial string? SelectedFile { get; set; }
+
         [ObservableProperty] public partial string? SelectedSavesFolder { get; set; }
         [ObservableProperty] public partial string? GameName { get; set; }
+
+        [NotifyCanExecuteChangedFor(nameof(OpenFileCommand))]
+        [ObservableProperty] public partial Boolean FileExists { get; set; } = false;
+
+        [NotifyCanExecuteChangedFor(nameof(OpenSavesCommand))]
+        [ObservableProperty] public partial Boolean SavesExists { get; set; } = false;
 
         [ObservableProperty] public partial IGame Game { get; set; }
         public GameSettingsContentViewModel(IGame iGame, GameViewModel gameViewModel)
@@ -32,6 +40,30 @@ namespace PSB.ViewModels
             GameName = Game.Name;
             SelectedFile = PathDataManager<IGame>.GetFilePath(Game);
             SelectedSavesFolder = PathDataManager<IGame>.GetSavesFolderPath(Game);
+        }
+        partial void OnSelectedFileChanged(string? value)
+        {
+            if (string.IsNullOrEmpty(value))
+            {
+                FileExists = false;
+            }
+            else
+            {
+                FileExists = true;
+            }
+            OnPropertyChanged(nameof(FileExists));
+        }
+        partial void OnSelectedSavesFolderChanged(string? value)
+        {
+            if (string.IsNullOrEmpty(value))
+            {
+                SavesExists = false;
+            }
+            else
+            {
+                SavesExists = true;
+            }
+            OnPropertyChanged(nameof(SavesExists));
         }
         [RelayCommand]
         private async Task ChooseFolderSaves()
@@ -117,10 +149,40 @@ namespace PSB.ViewModels
             }
         }
 
-        [RelayCommand]
-        private async Task OpenSaves()
+        [RelayCommand(CanExecute = nameof(FileExists))]
+        private void OpenFile()
         {
-            // Логика открытия сохранений
+            if (!string.IsNullOrEmpty(SelectedFile))
+            {
+                try
+                {
+                    // Открываем папку с файлом в проводнике и выделяем файл
+                    Process.Start("explorer.exe", $"/select,\"{SelectedFile}\"");
+                }
+                catch (Exception ex)
+                {
+                    Debug.WriteLine($"Ошибка при открытии файла: {ex.Message}");
+                }
+            }
+        }
+
+        [RelayCommand(CanExecute = nameof(SavesExists))]
+        private Task OpenSaves()
+        {
+            if (!string.IsNullOrEmpty(SelectedSavesFolder))
+            {
+                try
+                {
+                    // Открываем папку с сохранениями в проводнике
+                    Process.Start("explorer.exe", $"\"{SelectedSavesFolder}\"");
+                }
+                catch (Exception ex)
+                {
+                    Debug.WriteLine($"Ошибка при открытии папки сохранений: {ex.Message}");
+                }
+            }
+
+            return Task.CompletedTask;
         }
 
         [RelayCommand]
