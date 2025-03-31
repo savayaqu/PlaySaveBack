@@ -10,7 +10,9 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     mc:Ignorable="d"
     Title="PSB">
-    <NavigationView
+    <Grid x:Name="RootGrid">
+
+        <NavigationView
             x:Name="NavView"
             IsBackEnabled="True"
             AlwaysShowHeader="True"
@@ -77,12 +79,12 @@ Spacing="12">
             </NavigationViewItem>
 
 
-            <NavigationViewItem Content="Главная" Tag="HomePage" Icon="Home" IsSelected="True"/>
+            <!--<NavigationViewItem Content="Главная" Tag="HomePage" Icon="Home" IsSelected="True"/>
             <NavigationViewItem Content="Сохранения" Tag="SavePage" Icon="Save">
                 <NavigationViewItem.InfoBadge>
                     <InfoBadge Value="0"/>
                 </NavigationViewItem.InfoBadge>
-            </NavigationViewItem>
+            </NavigationViewItem>-->
             <NavigationViewItem Content="Каталог" Tag="CatalogPage">
                 <NavigationViewItem.Icon>
                     <FontIcon Glyph="&#xF0E2;"/>
@@ -100,4 +102,23 @@ Spacing="12">
         </NavigationView.PaneFooter>
         <Frame x:Name="ContentFrame" />
     </NavigationView>
+        <!-- InfoBar в правом нижнем углу -->
+        <InfoBar x:Name="GlobalInfoBar"
+                 HorizontalAlignment="Right"
+                 VerticalAlignment="Bottom"
+                 Margin="0,0,20,20"
+                 IsOpen="False"
+                 Title="Уведомление"
+                 IsClosable="True"
+                 CornerRadius="4"
+                 Width="400"
+                 Opacity="0.95"
+                 RequestedTheme="Dark">
+            <InfoBar.Transitions>
+                <TransitionCollection>
+                    <EntranceThemeTransition FromHorizontalOffset="0" FromVerticalOffset="20"/>
+                </TransitionCollection>
+            </InfoBar.Transitions>
+        </InfoBar>
+</Grid>
 </Window>

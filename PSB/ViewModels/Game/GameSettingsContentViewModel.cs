@@ -9,6 +9,7 @@ using CommunityToolkit.Mvvm.Input;
 using PSB.Helpers;
 using PSB.Interfaces;
 using PSB.Models;
+using PSB.Services;
 using PSB.Utils.Game;
 using Windows.Storage;
 using Windows.Storage.AccessCache;
@@ -204,13 +205,14 @@ namespace PSB.ViewModels
                         GameViewModel.InLibrary = false;
                         GameViewModel.IsFavorite = false;
                         LibraryDataManager<IGame>.RemoveLibrary(Game.Type, Game.Id);
-                        Debug.WriteLine("Попытка закрыть диалог...");
                         App.DialogService!.HideDialog();
+                        NotificationService.ShowSuccess("Игра удалена из библиотеки");
                     }
                     else
                     {
                         Debug.WriteLine("Элемент библиотеки не найден.");
                     }
+                    App.NavigationService!.Navigate("ProfilePage");
                 }
             }
             if (Game.Type == "sidegame")
@@ -225,9 +227,12 @@ namespace PSB.ViewModels
                     if (libraryItem != null)
                     {
                         ProfileViewModel.Libraries.Remove(libraryItem);
-                        Debug.WriteLine("Попытка закрыть диалог...");
-                        App.DialogService!.HideDialog();
                         GameViewModel.InLibrary = false;
+                        GameViewModel.IsFavorite = false;
+                        LibraryDataManager<IGame>.RemoveLibrary(Game.Type, Game.Id);
+                        App.DialogService!.HideDialog();
+                        NotificationService.ShowSuccess("Игра удалена из библиотеки");
+
                     }
                     else
                     {

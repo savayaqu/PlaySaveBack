@@ -60,9 +60,11 @@
                 <Image 
                     Margin="-36,0,0,0"
         Source="{x:Bind ProfileViewModel.User.Header, Mode=OneWay}"
-        Stretch="Fill" 
+        Stretch="UniformToFill" 
         HorizontalAlignment="Stretch"
-        VerticalAlignment="Stretch"/>
+        VerticalAlignment="Stretch"
+                    MinHeight="200"
+                    MinWidth="200"/>
 
                     <!-- Контент поверх фона -->
                     <StackPanel 
@@ -111,29 +113,24 @@
                         </StackPanel>
                     </Button>
                     <Button Command="{x:Bind ProfileViewModel.LogoutCommand}" 
-                Content="Выйти" 
-                Height="40" 
+                            Content="Выйти" 
+                            Height="40" 
                             Style="{StaticResource DangerButton}"
                             Width="130"/>
                 </StackPanel>
             </Grid>
 
             <GridView ItemsSource="{x:Bind ProfileViewModel.Libraries, Mode=OneWay}"
-ItemTemplateSelector="{StaticResource GameTemplateSelector}"
-HorizontalAlignment="Stretch"
-VerticalAlignment="Stretch"
-ScrollViewer.HorizontalScrollMode="Disabled"
-ScrollViewer.VerticalScrollMode="Enabled"
-ScrollViewer.VerticalScrollBarVisibility="Auto"
-SizeChanged="GridView_SizeChanged"
-Grid.Row="1">
+                      ItemTemplateSelector="{StaticResource GameTemplateSelector}"
+                      HorizontalAlignment="Stretch"
+                      VerticalAlignment="Stretch"
+                      ScrollViewer.HorizontalScrollMode="Disabled"
+                      ScrollViewer.VerticalScrollMode="Enabled"
+                      ScrollViewer.VerticalScrollBarVisibility="Auto" Grid.Row="1">
 
                 <GridView.ItemsPanel>
                     <ItemsPanelTemplate>
-                        <ItemsWrapGrid Orientation="Horizontal"
-                MaximumRowsOrColumns="5"
-                ItemWidth="300"
-                ItemHeight="450"/>
+                        <ItemsWrapGrid Orientation="Horizontal" MaximumRowsOrColumns="5"/>
                     </ItemsPanelTemplate>
                 </GridView.ItemsPanel>
             </GridView>

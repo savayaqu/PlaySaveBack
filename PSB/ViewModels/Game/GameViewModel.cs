@@ -17,6 +17,7 @@ using PSB.Api.Response;
 using PSB.ContentDialogs;
 using PSB.Interfaces;
 using PSB.Models;
+using PSB.Services;
 using PSB.Utils;
 using PSB.Utils.Game;
 using static PSB.Utils.Fetch;
@@ -137,6 +138,7 @@ namespace PSB.ViewModels
                 Saves = new ObservableCollection<Save>(Saves);
                 SavesDataManager<IGame>.SaveSaves(Game, Saves.ToList());
                 OnPropertyChanged(nameof(Saves));
+                NotificationService.ShowSuccess("Сохранение успешно синхронизировано");
             }
         }
         [RelayCommand(CanExecute = nameof(FolderSavesExists))]
@@ -152,6 +154,7 @@ namespace PSB.ViewModels
                 string folderPath = PathDataManager<IGame>.GetSavesFolderPath(Game);
                 await App.ZipHelper!.RestoreFromZip(save.ZipPath, folderPath);
                 Debug.WriteLine("Сохранения восстановлены");
+                NotificationService.ShowSuccess("Сохранения восстановлены");
                 return;
             }
             string zipFilePath = Path.Combine(Path.GetTempPath(), "game_saves_restore", "saves_backup.zip");
@@ -183,6 +186,7 @@ namespace PSB.ViewModels
                 if (!await App.ZipHelper!.ZipFileValid(zipFilePath))
                 {
                     Debug.WriteLine("Архив поврежден после загрузки");
+                    NotificationService.ShowError("Архив поврежден после загрузки");
                     return;
                 }
 
@@ -190,11 +194,14 @@ namespace PSB.ViewModels
                 string folderPath = PathDataManager<IGame>.GetSavesFolderPath(Game);
                 await App.ZipHelper!.RestoreFromZip(zipFilePath, folderPath);
 
+                NotificationService.ShowSuccess("Восстановление завершено успешно");
                 Debug.WriteLine("Восстановление завершено успешно");
             }
             catch (Exception ex)
             {
                 Debug.WriteLine($"Ошибка: {ex.Message}");
+                NotificationService.ShowError($"Ошибка: {ex.Message}");
+
                 if (File.Exists(zipFilePath))
                     File.Delete(zipFilePath);
                 throw;
@@ -242,6 +249,7 @@ namespace PSB.ViewModels
                     catch (System.ComponentModel.Win32Exception ex)
                     {
                         Debug.WriteLine("Ошибка запуска: " + ex.Message);
+                        NotificationService.ShowError("Ошибка запуска: " + ex.Message);
                         return;
                     }
 
@@ -387,6 +395,7 @@ namespace PSB.ViewModels
                 // Удаление с пк
                 App.ZipHelper!.DeleteFile(save.ZipPath);
                 SavesDataManager<IGame>.SaveSaves(Game, [.. Saves]);
+                NotificationService.ShowSuccess($"Сохранение {save.FileName} {save.Version} удалено.");
                 return;
             }
             try
@@ -403,6 +412,8 @@ namespace PSB.ViewModels
                         App.ZipHelper!.DeleteFile(save.ZipPath);
                     }
                     Debug.WriteLine($"Сохранение {save.FileName} удалено.");
+                    NotificationService.ShowSuccess($"Сохранение {save.FileName} {save.Version} удалено.");
+
                 }
                 else
                 {
@@ -412,6 +423,7 @@ namespace PSB.ViewModels
             catch (Exception ex)
             {
                 Debug.WriteLine($"Ошибка: {ex.Message}");
+                NotificationService.ShowError($"Ошибка: {ex.Message}");
             }
         }
         [RelayCommand]
@@ -437,6 +449,8 @@ namespace PSB.ViewModels
 
                 // Вызываем обновление интерфейса
                 GameLoaded?.Invoke();
+                NotificationService.ShowSuccess($"Игра {Game.Name} добавлена в библиотеку");
+
             }
         }
         [RelayCommand]

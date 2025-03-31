@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using PSB.Api;
 using PSB.Api.Response;
 using PSB.Converters;
+using PSB.Services;
 
 namespace PSB.Utils
 {
@@ -80,8 +81,7 @@ namespace PSB.Utils
                         {
                             if (responseBodyErr.Message == "Unauthorized")
                             {
-                                //TODO: вместо диалога выводить справа снизу infobar
-                                var dialog =  App.DialogService!.ShowConfirmationAsync("Ошибка", "Перезайдите в аккаунт");
+                                NotificationService.ShowError("Перезайдите в аккаунт");
                             }
                         }
                     }

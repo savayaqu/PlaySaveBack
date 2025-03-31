@@ -29,6 +29,7 @@ namespace PSB
 
             // Инициализируем сервисы
             _navigationService = new NavigationService(ContentFrame, NavView, HeaderText);
+            NotificationService.Initialize(GlobalInfoBar, RootGrid);
 
             ContentFrame.Navigated += ContentFrame_Navigated;
 
