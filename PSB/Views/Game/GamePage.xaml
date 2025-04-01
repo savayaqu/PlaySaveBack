@@ -38,15 +38,15 @@
                             </StackPanel>
                             <StackPanel Orientation="Vertical" Visibility="{x:Bind GameViewModel.InLibrary, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}, ConverterParameter=False}">
                                 <TextBlock Text="СОХРАНЕНИЯ" Style="{StaticResource BodyStrongTextBlockStyle}" Foreground="Gray"/>
-                                <TextBlock Foreground="White" Style="{StaticResource BodyTextBlockStyle}" Text="Синхронизированы| или нет" FontSize="14"/>
+                                <TextBlock  Style="{StaticResource BodyTextBlockStyle}" Text="Синхронизированы| или нет" FontSize="14"/>
                             </StackPanel>
                             <StackPanel Orientation="Vertical" Visibility="{x:Bind GameViewModel.InLibrary, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}, ConverterParameter=False}">
                                 <TextBlock Text="ПОСЛЕДНИЙ ЗАПУСК" Style="{StaticResource BodyStrongTextBlockStyle}" Foreground="Gray"/>
-                                <TextBlock Foreground="White" Style="{StaticResource BodyTextBlockStyle}" Text="{x:Bind GameViewModel.LastPlayedText, Mode=OneWay}" FontSize="14"/>
+                                <TextBlock  Style="{StaticResource BodyTextBlockStyle}" Text="{x:Bind GameViewModel.LastPlayedText, Mode=OneWay}" FontSize="14"/>
                             </StackPanel>
                             <StackPanel Orientation="Vertical" Visibility="{x:Bind GameViewModel.InLibrary, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}, ConverterParameter=False}">
                                 <TextBlock Text="ВЫ ИГРАЛИ" Style="{StaticResource BodyStrongTextBlockStyle}" Foreground="Gray"/>
-                                <TextBlock Foreground="White" Style="{StaticResource BodyTextBlockStyle}" Text="{x:Bind GameViewModel.Library.TimePlayed, Mode=OneWay, Converter={StaticResource TimePlayedConverter}}" FontSize="14"/>
+                                <TextBlock Style="{StaticResource BodyTextBlockStyle}" Text="{x:Bind GameViewModel.Library.TimePlayed, Mode=OneWay, Converter={StaticResource TimePlayedConverter}}" FontSize="14"/>
                             </StackPanel>
                         </StackPanel>
                         <!-- Иконки справа -->
