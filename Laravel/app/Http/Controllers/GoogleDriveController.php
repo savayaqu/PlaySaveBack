@@ -136,9 +136,10 @@ class GoogleDriveController extends Controller
         return response()->json(SaveResource::make($save), 201);
     }
 
-    public function downloadFile($fileId)
+    public function downloadFile(Save $save)
     {
         $user = auth()->user();
+        $fileId = $save->file_id;
         $cloudService = CloudService::query()->where('name', 'Google Drive')->first();
         $service = UserCloudService::query()->where('user_id', $user->id)->where('cloud_service_id', $cloudService->id)->first();
 
@@ -151,9 +152,10 @@ class GoogleDriveController extends Controller
         ]);
     }
 
-    public function shareFile($fileId)
+    public function shareFile(Save $save)
     {
         $user = auth()->user();
+        $fileId = $save->file_id;
         $cloudService = CloudService::query()->where('name', 'Google Drive')->first();
         $service = UserCloudService::query()->where('user_id', $user->id)->where('cloud_service_id', $cloudService->id)->first();
 
@@ -163,9 +165,10 @@ class GoogleDriveController extends Controller
         return response()->json(['url' => $url], 200);
     }
 
-    public function deleteFile($fileId)
+    public function deleteFile(Save $save)
     {
         $user = auth()->user();
+        $fileId = $save->file_id;
         $cloudService = CloudService::query()->where('name', 'Google Drive')->first();
         $service = UserCloudService::query()->where('user_id', $user->id)->where('cloud_service_id', $cloudService->id)->first();
 
@@ -176,9 +179,10 @@ class GoogleDriveController extends Controller
 
         return response()->json(['message' => 'File deleted successfully'], 200);
     }
-    public function overwriteFile(OverwriteSaveRequest $request, $fileId)
+    public function overwriteFile(OverwriteSaveRequest $request, Save $save)
     {
         $user = auth()->user();
+        $fileId = $save->file_id;
         $file = $request->file('file');
         $filePath = $file->getPathname();
         $fileName = $file->getClientOriginalName();

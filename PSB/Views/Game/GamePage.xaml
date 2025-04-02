@@ -102,7 +102,7 @@
                         </Button>
                         <HyperlinkButton Content="Посмотреть сохранения пользователей к этой игре"/>
                     </StackPanel>
-
+<!-- TODO: пофиксить дату последней синхронизации, переводить в дату пользователя-->
                     <ListView ItemsSource="{x:Bind GameViewModel.Saves, Mode=OneWay}" 
           SelectionMode="None"
           IsItemClickEnabled="False">
