@@ -20,7 +20,7 @@
                         Tapped="OnGameTapped">
                 <Image Source="{Binding Game.LibraryImg}" 
                        Width="150" Height="225" Stretch="UniformToFill"/>
-                <Grid ColumnDefinitions="Auto,Auto"  VerticalAlignment="Top" Background="#CC000000" Margin="8" Padding="4" BorderBrush="{StaticResource ControlStrongStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="6" ColumnSpacing="6">
+                <Grid ColumnDefinitions="Auto,Auto"  VerticalAlignment="Top" Background="{ThemeResource SystemControlAltMediumLowAcrylicWindowMediumBrush}" Margin="8" Padding="4" BorderBrush="{StaticResource ControlStrongStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="6" ColumnSpacing="6">
                     <FontIcon VerticalAlignment="Top" Glyph="&#xE823;"/>
                     <TextBlock Grid.Column="1" Text="{Binding TimePlayed, Converter={StaticResource TimePlayedConverter}}"/>
                 </Grid>
@@ -39,7 +39,7 @@
                            TextWrapping="Wrap"
                            TextAlignment="Center"
                            Style="{StaticResource SubtitleTextBlockStyle}"/>
-                <Grid ColumnDefinitions="Auto,Auto"  VerticalAlignment="Top" Background="#CC000000" Margin="8" Padding="4" BorderBrush="{StaticResource ControlStrongStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="6" ColumnSpacing="6">
+                <Grid ColumnDefinitions="Auto,Auto"  VerticalAlignment="Top" Background="{ThemeResource SystemControlAltMediumLowAcrylicWindowMediumBrush}" Margin="8" Padding="4" BorderBrush="{StaticResource ControlStrongStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="6" ColumnSpacing="6">
                     <FontIcon VerticalAlignment="Top" Glyph="&#xE823;"/>
                     <TextBlock Grid.Column="1" Text="{Binding TimePlayed, Converter={StaticResource TimePlayedConverter}}"/>
                 </Grid>
