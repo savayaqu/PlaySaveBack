@@ -25,15 +25,26 @@ namespace PSB.Utils
         {
             Debug.WriteLine("FETCH: Start");
 
-
             // Готовим запрос
             Uri fullUrl;
-            if (path is Uri uri) fullUrl = uri;
+            if (path is Uri uri)
+            {
+                fullUrl = uri;
+            }
             else if (path is string urlEnd)
             {
                 try
                 {
-                    fullUrl = new Uri($"{URLs.API_URL}/{urlEnd}");
+                    // Проверяем, начинается ли строка с http:// или https://
+                    if (urlEnd.StartsWith("http://", StringComparison.OrdinalIgnoreCase) ||
+                        urlEnd.StartsWith("https://", StringComparison.OrdinalIgnoreCase))
+                    {
+                        fullUrl = new Uri(urlEnd);
+                    }
+                    else
+                    {
+                        fullUrl = new Uri($"{URLs.API_URL}/{urlEnd}");
+                    }
                 }
                 catch (Exception ex)
                 {
@@ -68,39 +79,86 @@ namespace PSB.Utils
             {
                 // Запрашиваем
                 var response = await _httpClient.SendAsync(request, cancellationToken);
-                
+
                 // Обрабатываем ответ
                 if (!response.IsSuccessStatusCode)
                 {
-                    var responseJsonErr = await response.Content.ReadAsStringAsync(cancellationToken);
-                    try
+                    var responseContent = await response.Content.ReadAsStringAsync(cancellationToken);
+                    Debug.WriteLine($"FETCH: ERROR: Status: {response.StatusCode}, Content: {responseContent}");
+
+                    // Проверяем, является ли ответ JSON
+                    if (response.Content.Headers.ContentType?.MediaType?.Contains("application/json") == true)
                     {
-                        Debug.WriteLine("FETCH: ERROR: Json: " + responseJsonErr);
-                        var responseBodyErr = JsonSerializer.Deserialize<ErrorResponse>(responseJsonErr);
-                        if(response.StatusCode == System.Net.HttpStatusCode.Unauthorized)
+                        try
                         {
-                            if (responseBodyErr.Message == "Unauthorized")
+                            var responseBodyErr = JsonSerializer.Deserialize<ErrorResponse>(responseContent);
+                            if (response.StatusCode == System.Net.HttpStatusCode.Unauthorized)
                             {
-                                NotificationService.ShowError("Перезайдите в аккаунт");
+                                if (responseBodyErr?.Message == "Unauthorized")
+                                {
+                                    NotificationService.ShowError("Перезайдите в аккаунт");
+                                }
                             }
                         }
+                        catch (Exception ex)
+                        {
+                            Debug.WriteLine($"Fetcher: Error parsing error response: {ex.Message}");
+                        }
                     }
-                    catch (Exception ex)
+                    else
                     {
-                        Debug.WriteLine("Fetcher: responseJsonErr: " + ex.Message);
+                        // Если это HTML, попробуем извлечь полезную информацию
+                        string errorMessage = ExtractErrorMessageFromHtml(responseContent);
+                        if (!string.IsNullOrEmpty(errorMessage))
+                        {
+                            Debug.WriteLine($"FETCH: Extracted error message: {errorMessage}");
+                            NotificationService.ShowError(errorMessage);
+                        }
+                        else
+                        {
+                            Debug.WriteLine($"FETCH: Received non-JSON error response");
+                            NotificationService.ShowError($"Ошибка сервера: {response.StatusCode}");
+                        }
                     }
                 }
                 return response;
             }
             catch (TaskCanceledException)
             {
+                NotificationService.ShowError("Превышено время ожидания ответа от сервера");
                 return new();
             }
             catch (HttpRequestException ex)
             {
                 string message = ex.Message == "Connection failure" ? "Не удалось установить соединение с сервером" : ex.Message;
+                NotificationService.ShowError(message);
                 return new();
             }
+        }
+
+        private static string ExtractErrorMessageFromHtml(string htmlContent)
+        {
+            // Простая попытка извлечь сообщение об ошибке из HTML
+            // Может потребоваться доработка под конкретный формат ошибок Laravel
+
+            // Ищем типичные паттерны ошибок Laravel
+            int startIndex = htmlContent.IndexOf("<div class=\"error-message\">") + "<div class=\"error-message\">".Length;
+            if (startIndex < 0)
+            {
+                startIndex = htmlContent.IndexOf("<h1 class=\"text-red-600\">") + "<h1 class=\"text-red-600\">".Length;
+            }
+
+            if (startIndex >= 0)
+            {
+                int endIndex = htmlContent.IndexOf("</", startIndex);
+                if (endIndex > startIndex)
+                {
+                    return htmlContent.Substring(startIndex, endIndex - startIndex).Trim();
+                }
+            }
+
+            // Если не нашли по паттернам, вернем первые 200 символов или пустую строку
+            return htmlContent.Length > 200 ? htmlContent.Substring(0, 200) : htmlContent;
         }
 
         public static async Task<(HttpResponseMessage, T?)> FetchAsync<T>(
@@ -147,4 +205,3 @@ namespace PSB.Utils
         }
     }
 }
-
