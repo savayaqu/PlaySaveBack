@@ -74,7 +74,8 @@ namespace PSB
                         var query = System.Web.HttpUtility.ParseQueryString(uri.Query);
                         if (query["success"] == "1")
                         {
-                            _ = MainWindow.AccountViewModel.LoadCloudServices();
+                            _ = MainWindow.AccountViewModel.LoadCloudServicesAsync();
+                            NotificationService.ShowSuccess("Google Drive успешно подключен");
                         }
                     }
                 });

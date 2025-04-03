@@ -2,6 +2,7 @@ using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Navigation;
 using PSB.Services;
+using PSB.Utils;
 using PSB.ViewModels;
 
 namespace PSB
@@ -30,7 +31,6 @@ namespace PSB
             // Инициализируем сервисы
             _navigationService = new NavigationService(ContentFrame, NavView, HeaderText);
             NotificationService.Initialize(GlobalInfoBar, RootGrid);
-
             ContentFrame.Navigated += ContentFrame_Navigated;
 
         }

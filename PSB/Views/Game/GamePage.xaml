@@ -8,6 +8,7 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:models="using:PSB.Models"
+    xmlns:utils="using:PSB.Utils"
     mc:Ignorable="d"
     Background="{ThemeResource ApplicationPageBackgroundThemeBrush}"
     Name="{x:Bind GameViewModel.Game.Name, Mode=OneWay}">
@@ -146,9 +147,40 @@ DefaultLabelPosition="Right"
 Background="Transparent"
 Padding="0">
                                             <AppBarButton Icon="Sync" Label="Синхронизировать"
-      Command="{x:Bind vm:GameViewModel.Instance.SyncSaveCommand}"
-      CommandParameter="{x:Bind}"
-      Visibility="{x:Bind IsSynced, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}, ConverterParameter=True}"/>
+              Visibility="{x:Bind IsSynced, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}, ConverterParameter=True}">
+                                                <AppBarButton.Flyout>
+                                                    <Flyout Placement="Bottom">
+                                                        <StackPanel>
+                                                            <TextBlock Text="Выберите облачное хранилище" 
+                           Style="{StaticResource SubtitleTextBlockStyle}"
+                           Margin="0,0,0,8"/>
+
+                                                            <ListView 
+                    ItemsSource="{x:Bind utils:AuthData.ConnectedCloudServices, Mode=OneWay}"
+                    SelectionMode="Single"
+                                         SelectedItem="{x:Bind vm:GameViewModel.Instance.SelectedCloudService, Mode=TwoWay}"                       
+                    x:Name="CloudServicesList"
+                                                                >
+                                                                <ListView.ItemTemplate>
+                                                                    <DataTemplate>
+                                                                        <StackPanel Orientation="Horizontal" Spacing="12" Padding="8">
+                                                                            <Image Height="30" Width="30" Source="{Binding Icon}"/>
+                                                                            <TextBlock Text="{Binding Name}" VerticalAlignment="Center"/>
+                                                                        </StackPanel>
+                                                                    </DataTemplate>
+                                                                </ListView.ItemTemplate>
+                                                            </ListView>
+
+                                                            <Button Content="Синхронизировать" 
+        Command="{x:Bind vm:GameViewModel.Instance.SyncSaveCommand}"
+        CommandParameter="{x:Bind }"
+                                                                    IsEnabled="{x:Bind vm:GameViewModel.Instance.SelectedCloudService, Converter={StaticResource NullToBoolConverter}, Mode=OneWay}"
+        />
+                                                            <!--IsEnabled="{x:Bind vm:GameViewModel.Instance.SelectedCloudService, Mode=OneWay, Converter={StaticResource NullToBoolConverter}}"-->
+                                                        </StackPanel>
+                                                    </Flyout>
+                                                </AppBarButton.Flyout>
+                                            </AppBarButton>
                                             <AppBarButton Icon="Undo" Label="Восстановить"
       Command="{x:Bind vm:GameViewModel.Instance.RestoreSaveCommand}"
       CommandParameter="{x:Bind}"/>

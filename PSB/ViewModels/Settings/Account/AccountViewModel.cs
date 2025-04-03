@@ -24,6 +24,7 @@ namespace PSB.ViewModels
     {
         [ObservableProperty] public partial User? User { get; set; } = AuthData.User;
         [ObservableProperty] public partial ObservableCollection<CloudService> CloudServices { get; set; } = new();
+        [ObservableProperty] public partial ObservableCollection<CloudService> ConnectedCloudServices { get; set; } = new();
         public static AccountViewModel? Instance = App.MainWindow!.AccountViewModel;
 
         [ObservableProperty]
@@ -32,7 +33,7 @@ namespace PSB.ViewModels
         public static Array VisibilityOptions => Enum.GetValues(typeof(UserVisibility));
         public AccountViewModel()
         {
-            _ = LoadCloudServices();
+            _ = LoadCloudServicesAsync();
             // Подписываемся на изменение SelectedVisibility
             PropertyChanged += async (sender, args) =>
             {
@@ -65,6 +66,21 @@ namespace PSB.ViewModels
                 }
             }
         }
+        // Загрузка облачных сервисов
+        public async Task LoadCloudServicesAsync()
+        {
+            (var res, var body) = await FetchAsync<List<CloudService>>(HttpMethod.Get, "profile/services");
+            if (res.IsSuccessStatusCode && body != null)
+            {
+                CloudServices.Clear();
+                foreach (var item in body)
+                {
+                    CloudServices.Add(item);
+                    if(item.IsConnected)
+                        AuthData.ConnectedCloudServices.Add(item);
+                }
+            }
+        }
         [RelayCommand]
         public async Task ConnectService(CloudService cloudService)
         {
@@ -73,15 +89,6 @@ namespace PSB.ViewModels
             {
                 await ConnectionGoogleDrive();
             }
-        }
-        public async Task LoadCloudServices()
-        {
-            (var res, var body) = await FetchAsync<List<CloudService>>(HttpMethod.Get, "profile/services");
-            if (res.IsSuccessStatusCode && body != null)
-            {
-                CloudServices = new ObservableCollection<CloudService>(body);
-            }
-
         }
         [RelayCommand]
         public async Task UpdateEmail()

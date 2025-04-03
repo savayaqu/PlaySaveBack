@@ -134,13 +134,6 @@ namespace PSB.Utils
                     Converters = { new NullableDateTimeConverter() }
                 };
 
-                // Дополнительная проверка на валидность JSON
-                if (!IsValidJson(responseJson))
-                {
-                    Debug.WriteLine("FETCH: Invalid JSON received");
-                    return (response, default(T));
-                }
-
                 var responseBody = JsonSerializer.Deserialize<T>(responseJson, options);
                 Debug.WriteLine("FETCH: responseBody: " + responseBody);
                 return (response, responseBody);
@@ -150,20 +143,6 @@ namespace PSB.Utils
                 Debug.WriteLine($"Error during deserialization: {ex.Message}");
                 Debug.WriteLine($"Stack Trace: {ex.StackTrace}");
                 return (response, default(T));
-            }
-        }
-
-        // Проверка, что строка является валидным JSON
-        private static bool IsValidJson(string json)
-        {
-            try
-            {
-                JsonDocument.Parse(json);
-                return true;
-            }
-            catch
-            {
-                return false;
             }
         }
     }

@@ -12,6 +12,7 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
+using Microsoft.UI.Xaml.Input;
 using PSB.Api.Request;
 using PSB.Api.Response;
 using PSB.ContentDialogs;
@@ -40,6 +41,8 @@ namespace PSB.ViewModels
         [ObservableProperty] public partial string FilePath { get; set; }
         [ObservableProperty] public partial string FolderPath { get; set; }
         [ObservableProperty] public partial Boolean IsUploading { get; set; }
+
+        [ObservableProperty] public partial CloudService? SelectedCloudService { get; set; } = null;
         [ObservableProperty] public partial string SaveDescription { get; set; } = "";
         [ObservableProperty] public partial string SaveVersion { get; set; } = "";
         [ObservableProperty] public partial ObservableCollection<Save> Saves { get; set; } = new ObservableCollection<Save>();
@@ -122,23 +125,26 @@ namespace PSB.ViewModels
         [RelayCommand]
         private async Task SyncSave(Save save)
         {
-            if (save.IsSynced == true) return;
+            if (save.IsSynced == true || SelectedCloudService == null) return;
+
             SaveVersion = save.Version;
             SaveDescription = save.Description;
-            bool uploadSuccess = await UploadFile(save);
+            bool uploadSuccess = await UploadFile(save, SelectedCloudService);
+
             if (uploadSuccess)
             {
                 SaveVersion = "";
                 SaveDescription = "";
-                // Если стоит галочка в настройках об удалении с пк после синхронизации - удаление с пк
+
                 if (SettingsData.DeleteLocalSaveAfterSync == true)
                 {
                     App.ZipHelper!.DeleteFile(save.ZipPath);
                 }
+
                 Saves = new ObservableCollection<Save>(Saves);
                 SavesDataManager<IGame>.SaveSaves(Game, Saves.ToList());
                 OnPropertyChanged(nameof(Saves));
-                NotificationService.ShowSuccess("Сохранение успешно синхронизировано");
+                NotificationService.ShowSuccess($"Сохранение успешно синхронизировано с {SelectedCloudService.Name}");
             }
         }
         [RelayCommand(CanExecute = nameof(FolderSavesExists))]
@@ -172,7 +178,7 @@ namespace PSB.ViewModels
                     return;
                 }
 
-                var res = await FetchAsync(HttpMethod.Get, $"google-drive/download/{save.FileId}");
+                var res = await FetchAsync(HttpMethod.Get, $"saves/{save.Id}google-drive/download");
                 if (res != null && res.IsSuccessStatusCode)
                 {
                     // Асинхронно сохраняем содержимое
@@ -327,7 +333,7 @@ namespace PSB.ViewModels
             }
             App.LibraryService!.UpdateLibraryMenu();
         }
-        public async Task<bool> UploadFile(Save save)
+        public async Task<bool> UploadFile(Save save, CloudService selectedService)
         {
             if (!File.Exists(save.ZipPath))
             {
@@ -338,6 +344,14 @@ namespace PSB.ViewModels
             try
             {
                 IsUploading = true;
+                // Выбираем URL для запроса в зависимости от выбранного сервиса
+                string endpoint = selectedService.Name switch
+                {
+                    "Google Drive" => "google-drive/upload",
+                    "Dropbox" => "cloud/dropbox/upload",
+                    "OneDrive" => "cloud/onedrive/upload",
+                    _ => throw new NotImplementedException(),
+                };
 
                 // Читаем файл в массив байтов
                 var fileBytes = await File.ReadAllBytesAsync(save.ZipPath);
@@ -351,7 +365,7 @@ namespace PSB.ViewModels
                     { new StringContent(SaveDescription), "description" }
                 };
 
-               (var res, var body) = await FetchAsync<Save>(HttpMethod.Post, "google-drive/upload", body: content);
+               (var res, var body) = await FetchAsync<Save>(HttpMethod.Post, endpoint, body: content);
 
 
                 // Если статус ответа не успешный
@@ -401,7 +415,7 @@ namespace PSB.ViewModels
             try
             {
                 // Отправляем запрос на удаление файла
-                var res = await FetchAsync(HttpMethod.Delete,$"google-drive/delete/{save.FileId}");
+                var res = await FetchAsync(HttpMethod.Delete,$"saves/{save.Id}/google-drive/delete");
 
                 if (res.IsSuccessStatusCode)
                 {

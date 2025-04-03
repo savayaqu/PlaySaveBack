@@ -16,7 +16,6 @@ namespace PSB.Views
     public sealed partial class GamePage : Page
     {
         public GameViewModel? GameViewModel { get; set; }
-
         public GamePage()
         {
             this.InitializeComponent();
