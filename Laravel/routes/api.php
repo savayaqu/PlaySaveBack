@@ -56,26 +56,22 @@ Route::middleware('auth:sanctum')->group(function () {
             Route::get('game/{game}', 'showPostToGame'); // Просмотр постов к игре
         });
     });
-    //TODO: сделать этот контроллер
     Route::controller(SaveController::class)->group(function () {
-
         Route::prefix('saves')->group(function () {
-           Route::get('game/{game}/my', 'getMySavesGame'); // Просмотр моих сохранений к игре
-           Route::get('sidegame/{sideGame}/my', 'getMySavesSideGame'); // Просмотр моих сохранений к сторонней игре
+            // Просмотр своих сохранений
+           Route::get('game/{game}/my', 'getMySavesGame');
+           Route::get('sidegame/{sideGame}/my', 'getMySavesSideGame');
 
            Route::prefix('{save}')->group(function () {
                Route::controller(GoogleDriveController::class)->group(function () {
                    Route::prefix('google-drive')->group(function () { // Действия с Google Drive
-                       Route::post('overwrite', 'overwriteFile'); // Перезаписать сейв (Google Drive)
-                       Route::get('download', 'downloadFile'); // Скачать сейв (Google Drive)
-                       Route::get('share', 'shareFile'); // Предоставить доступ (Google Drive)
-                       Route::delete('delete', 'deleteFile'); // Удалить сейв (Google Drive)
+                       // Управление файлами
+                       Route::post('overwrite', 'overwriteFile');
+                       Route::get('download', 'downloadFile');
+                       Route::get('share', 'shareFile');
+                       Route::delete('delete', 'deleteFile');
                    });
                });
-               //TODO: мб сделать
-              Route::prefix('psb')->group(function () { // Действия с сервером
-
-              });
            });
         });
     });
@@ -101,9 +97,16 @@ Route::middleware('auth:sanctum')->group(function () {
     });
     Route::controller(GoogleDriveController::class)->group(function () {
         Route::prefix('google-drive')->group(function () {
-            Route::get('auth-url', 'getAuthUrl'); // Генерация ссылка на доступ к гуглу
-            Route::get('callback', 'callback')->withoutMiddleware('auth:sanctum'); // Ответ от гугла
-            Route::post('upload', 'uploadFile'); // Загрузить сейв для игры
+            // Аутентификация
+            Route::get('auth-url', 'getAuthUrl');
+            Route::get('callback', 'callback')->withoutMiddleware('auth:sanctum');
+
+            // Новая система загрузки
+            Route::post('generate-upload-url', 'generateUploadUrl'); // Генерация URL для загрузки
+            Route::post('confirm-upload/{save}', 'confirmUpload'); // Подтверждение загрузки
+
+            // Старая система (можно оставить временно для обратной совместимости)
+            Route::post('upload', 'uploadFile'); // Устаревший метод (перенаправлять на новую систему)
         });
     });
 });

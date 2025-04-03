@@ -19,12 +19,14 @@ namespace PSB
         public static NavigationService? NavigationService { get; private set; }
         public static LibraryService? LibraryService { get; private set; }
         public static ZipHelper? ZipHelper { get; private set; }
+        public static CloudFileUploader? CloudFileUploader { get; private set; }
 
         public App()
         {
             InitializeComponent();
             DialogService = new DialogService();
             ZipHelper = new ZipHelper();
+            CloudFileUploader = new CloudFileUploader();
         }
 
         protected override async void OnLaunched(Microsoft.UI.Xaml.LaunchActivatedEventArgs args)

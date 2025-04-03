@@ -73,67 +73,94 @@ class GoogleDriveController extends Controller
         );
         return redirect('auth/success');
     }
-
-    public function uploadFile(UploadSaveRequest $request)
+    /**
+     * Генерирует URL для прямой загрузки файла в Google Drive
+     */
+    public function generateUploadUrl(Request $request): JsonResponse
     {
         $user = auth()->user();
-        // Определяем, какой ID использовать: side_game_id или game_id
-        $gameId = $request->game_id;
-        $sideGameId = $request->side_game_id;
+        $game = $this->resolveGame($request);
 
-        // Получаем название игры для создания папки
-        $game = Game::query()->find($gameId); // Если game_id передан, используем его
-        if ($sideGameId) {
-            $game = SideGame::query()->find($sideGameId); // Если side_game_id передан, ищем игру по нему
-        }
-        $existSave = $user->saves()->where('game_id', $game->id)->orWhere('side_game_id', $game->id)->where('version', $request->version)->exists();
-        if($existSave) {
+        // Проверка существующей версии
+        $existSave = $user->saves()
+            ->where(function($q) use ($game) {
+                $q->where('game_id', $game->id)
+                    ->orWhere('side_game_id', $game->id);
+            })
+            ->where('version', $request->version)
+            ->exists();
+
+        if ($existSave) {
             throw new ConflictException();
         }
 
-        $fileRequest = $request->file('file');
-        $filePath = $fileRequest->getPathname();
-        $fileName = $fileRequest->getClientOriginalName();
-        $fileSize = $fileRequest->getSize();
+        // Создаем запись о файле до загрузки
+        $saveData = [
+            'version' => $request->version,
+            'description' => $request->description,
+            'user_id' => $user->id,
+            'status' => 'uploading',
+            'file_name' => $request->input('file_name'),
+            'size' => $request->input('file_size'),
+        ];
 
-        $cloudService = CloudService::query()->where('name', 'Google Drive')->first();
-        $service = UserCloudService::query()->where('user_id', $user->id)->where('cloud_service_id', $cloudService->id)->first();
+        $game instanceof Game
+            ? $saveData['game_id'] = $game->id
+            : $saveData['side_game_id'] = $game->id;
+
+        $save = Save::create($saveData);
+
+        // Генерируем URL для загрузки
+        $cloudService = CloudService::where('name', 'Google Drive')->first();
+        $service = UserCloudService::where('user_id', $user->id)
+            ->where('cloud_service_id', $cloudService->id)
+            ->first();
 
         $googleDriveService = new GoogleDriveService($service);
 
+        $folderPath = "PlaySaveBack/{$game->name}/{$request->version}";
+        $uploadUrl = $googleDriveService->generateResumableUploadUrl(
+            fileName: $request->input('file_name'),
+            folderPath: $folderPath
+        );
 
-        // Создаем структуру папок
-        $rootFolderId = $googleDriveService->getOrCreateFolder('PlaySaveBack');
-        $gameFolderId = $googleDriveService->getOrCreateFolder($game->name, $rootFolderId);
-        $saveVersionFolderId = $googleDriveService->getOrCreateFolder($request->version, $gameFolderId);
+        return response()->json([
+            'upload_url' => $uploadUrl,
+            'save_id' => $save->id,
+            'expires_at' => now()->addHours(1)->toIso8601String()
+        ]);
+    }
+    /**
+     * Подтверждает успешную загрузку файла
+     */
+    public function confirmUpload(Request $request, Save $save): JsonResponse
+    {
+        $request->validate([
+            'file_id' => 'required|string',
+            'file_hash' => 'required|string'
+        ]);
 
-        // Загружаем файл
-        $fileId = $googleDriveService->uploadFile($filePath, $fileName, $saveVersionFolderId);
+        $user = auth()->user();
+        $cloudService = CloudService::where('name', 'Google Drive')->first();
+        $service = UserCloudService::where('user_id', $user->id)
+            ->where('cloud_service_id', $cloudService->id)
+            ->first();
 
-        // Подготавливаем данные для создания Save
-        $saveData = [
-            'file_id' => $fileId,
-            'file_name' => $fileName,
-            'version' => $request->version,
-            'size' => $fileSize,
-            'description' => $request->description ?? null,
-            'user_id' => $user->id,
-            'hash' => hash('sha256', file_get_contents($fileRequest)),
-            'last_sync_at' => Carbon::now(),
-            'user_cloud_service_id' => $service->id,
-        ];
+        $save->update([
+            'file_id' => $request->file_id,
+            'hash' => $request->file_hash,
+            'last_sync_at' => now(),
+            'user_cloud_service_id' => $service->id
+        ]);
 
-        // Заполняем либо game_id, либо side_game_id
-        if ($sideGameId) {
-            $saveData['side_game_id'] = $sideGameId;
-        } else {
-            $saveData['game_id'] = $gameId;
+        return response()->json(SaveResource::make($save));
+    }
+    private function resolveGame(Request $request)
+    {
+        if ($request->has('side_game_id') && $request->side_game_id != null) {
+            return SideGame::findOrFail($request->side_game_id);
         }
-
-        // Сохраняем информацию о файле в базе данных
-        $save = Save::query()->create($saveData);
-
-        return response()->json(SaveResource::make($save), 201);
+        return Game::findOrFail($request->game_id);
     }
 
     public function downloadFile(Save $save)

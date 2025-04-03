@@ -5,14 +5,10 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Net.Http;
-using System.Net.Http.Headers;
 using System.Text.Json;
 using System.Threading.Tasks;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using Microsoft.UI.Xaml;
-using Microsoft.UI.Xaml.Controls;
-using Microsoft.UI.Xaml.Input;
 using PSB.Api.Request;
 using PSB.Api.Response;
 using PSB.ContentDialogs;
@@ -125,26 +121,50 @@ namespace PSB.ViewModels
         [RelayCommand]
         private async Task SyncSave(Save save)
         {
-            if (save.IsSynced == true || SelectedCloudService == null) return;
+            if (save.IsSynced == true || SelectedCloudService == null)
+                return;
 
-            SaveVersion = save.Version;
-            SaveDescription = save.Description;
-            bool uploadSuccess = await UploadFile(save, SelectedCloudService);
-
-            if (uploadSuccess)
+            try
             {
-                SaveVersion = "";
-                SaveDescription = "";
+                SaveVersion = save.Version;
+                SaveDescription = save.Description;
+                IsUploading = true;
+                (bool uploadSuccess, Save? updatedSave ) = await App.CloudFileUploader.UploadFileAsync(
+                    save,
+                    SelectedCloudService,
+                    Game,
+                    SaveVersion,
+                    SaveDescription);
 
-                if (SettingsData.DeleteLocalSaveAfterSync == true)
+                if (uploadSuccess)
                 {
-                    App.ZipHelper!.DeleteFile(save.ZipPath);
-                }
+                    SaveVersion = "";
+                    SaveDescription = "";
 
-                Saves = new ObservableCollection<Save>(Saves);
-                SavesDataManager<IGame>.SaveSaves(Game, Saves.ToList());
-                OnPropertyChanged(nameof(Saves));
-                NotificationService.ShowSuccess($"Сохранение успешно синхронизировано с {SelectedCloudService.Name}");
+                    if (SettingsData.DeleteLocalSaveAfterSync)
+                    {
+                        App.ZipHelper!.DeleteFile(save.ZipPath);
+                    }
+                    if (updatedSave != null)
+                    {
+                        var index = Saves.IndexOf(save);
+                        if (index != -1)
+                        {
+                            Saves[index] = updatedSave;
+                            SavesDataManager<IGame>.SaveSaves(Game, Saves.ToList());
+                            OnPropertyChanged(nameof(Saves));
+                        }
+                    }
+                    NotificationService.ShowSuccess($"Сохранение синхронизировано с {SelectedCloudService.Name}");
+                }
+            }
+            catch (Exception ex)
+            {
+                NotificationService.ShowError($"Ошибка синхронизации: {ex.Message}");
+            }
+            finally
+            {
+                IsUploading = false;
             }
         }
         [RelayCommand(CanExecute = nameof(FolderSavesExists))]
@@ -333,72 +353,7 @@ namespace PSB.ViewModels
             }
             App.LibraryService!.UpdateLibraryMenu();
         }
-        public async Task<bool> UploadFile(Save save, CloudService selectedService)
-        {
-            if (!File.Exists(save.ZipPath))
-            {
-                Debug.WriteLine("Файл не найден.");
-                return false;
-            }
-
-            try
-            {
-                IsUploading = true;
-                // Выбираем URL для запроса в зависимости от выбранного сервиса
-                string endpoint = selectedService.Name switch
-                {
-                    "Google Drive" => "google-drive/upload",
-                    "Dropbox" => "cloud/dropbox/upload",
-                    "OneDrive" => "cloud/onedrive/upload",
-                    _ => throw new NotImplementedException(),
-                };
-
-                // Читаем файл в массив байтов
-                var fileBytes = await File.ReadAllBytesAsync(save.ZipPath);
-
-                // Создаем MultipartFormDataContent
-                var content = new MultipartFormDataContent
-                {
-                    { new ByteArrayContent(fileBytes), "file", Path.GetFileName(save.ZipPath) },
-                    { new StringContent(SaveVersion), "version" },
-                    { new StringContent(GameId.ToString()), Game is SideGame ? "side_game_id" : "game_id" },
-                    { new StringContent(SaveDescription), "description" }
-                };
-
-               (var res, var body) = await FetchAsync<Save>(HttpMethod.Post, endpoint, body: content);
-
-
-                // Если статус ответа не успешный
-                if (!res.IsSuccessStatusCode)
-                {
-                    Debug.WriteLine($"Ошибка при загрузке файла: {res.StatusCode}");
-                    return false;
-                }
-                if(body != null)
-                {
-                    var index = Saves.IndexOf(save);
-                    if (index != -1)
-                    {
-                        Debug.WriteLine("сохранение найдено");
-                        body.IsSynced = true;
-                        Saves[index] = body;
-                        SavesDataManager<IGame>.SaveSaves(Game, [.. Saves]);
-                    }
-
-                }
-                return true;
-
-            }
-            catch (Exception ex)
-            {
-                Debug.WriteLine($"Ошибка: {ex.Message}");
-                return false;
-            }
-            finally
-            {
-                IsUploading = false;
-            }
-        }
+  
         [RelayCommand]
         public async Task DeleteSave(Save save)
         {
