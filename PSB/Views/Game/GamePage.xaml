@@ -38,10 +38,6 @@
                                 </Button>
                             </StackPanel>
                             <StackPanel Orientation="Vertical" Visibility="{x:Bind GameViewModel.InLibrary, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}, ConverterParameter=False}">
-                                <TextBlock Text="СОХРАНЕНИЯ" Style="{StaticResource BodyStrongTextBlockStyle}" Foreground="Gray"/>
-                                <TextBlock  Style="{StaticResource BodyTextBlockStyle}" Text="Синхронизированы| или нет" FontSize="14"/>
-                            </StackPanel>
-                            <StackPanel Orientation="Vertical" Visibility="{x:Bind GameViewModel.InLibrary, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}, ConverterParameter=False}">
                                 <TextBlock Text="ПОСЛЕДНИЙ ЗАПУСК" Style="{StaticResource BodyStrongTextBlockStyle}" Foreground="Gray"/>
                                 <TextBlock  Style="{StaticResource BodyTextBlockStyle}" Text="{x:Bind GameViewModel.LastPlayedText, Mode=OneWay}" FontSize="14"/>
                             </StackPanel>
@@ -111,11 +107,11 @@
                             <DataTemplate x:DataType="models:Save">
                                 <Expander>
                                     <Expander.Header>
-                                        <Grid ColumnDefinitions="*,Auto,Auto" Padding="8">
-                                            <TextBlock Text="{x:Bind FileName}" VerticalAlignment="Center">
-                                            </TextBlock>
+                                        <Grid ColumnDefinitions="*,Auto,Auto,Auto" Padding="8">
+                                            <TextBlock Text="{x:Bind FileName}" VerticalAlignment="Center"/>
                                             <TextBlock Text="{x:Bind Version}" Grid.Column="1" Margin="12,0" VerticalAlignment="Center"/>
                                             <TextBlock Text="{x:Bind CreatedAt}" Grid.Column="2" VerticalAlignment="Center"/>
+                                            <FontIcon VerticalAlignment="Center" HorizontalAlignment="Right" Glyph="&#xEDAB;" Foreground="{x:Bind SyncIconColor}" Grid.Column="3" Margin="16,0,0,0" />
                                         </Grid>
                                     </Expander.Header>
 
@@ -135,10 +131,19 @@
                                                 <Run Text="Описание:" FontWeight="SemiBold"/>
                                                 <Run Text="{x:Bind Description}"/>
                                             </TextBlock>
-                                            <TextBlock>
-                                                <Run Text="Последняя синхронизация:" FontWeight="SemiBold"/>
-                                                <Run Text="{x:Bind LastSyncAt}"/>
-                                            </TextBlock>
+                                            <StackPanel Visibility="{x:Bind IsSynced, Converter={StaticResource BoolToVisibilityConverter}}">
+                                                <TextBlock>
+    <Run Text="Последняя синхронизация:" FontWeight="SemiBold"/>
+    <Run Text="{x:Bind LastSyncAt}"/>
+                                                </TextBlock>
+                                                <StackPanel Orientation="Horizontal" Spacing="6">
+                                                    <TextBlock>
+        <Run Text="Синхронизировано на:" FontWeight="SemiBold"/>
+        <Run Text="{x:Bind CloudService.Name}"/>
+                                                    </TextBlock>
+                                                    <Image Height="30" Width="30" Source="{x:Bind CloudService.Icon}"/>
+                                                </StackPanel>
+                                            </StackPanel>
                                         </StackPanel>
 
                                         <!-- Кнопка меню действий -->

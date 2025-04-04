@@ -1,6 +1,9 @@
 ﻿using System;
+using System.Diagnostics;
+using System.Linq;
 using System.Text.Json.Serialization;
 using PSB.Converters;
+using PSB.Utils;
 
 namespace PSB.Models
 {
@@ -24,9 +27,29 @@ namespace PSB.Models
         [JsonPropertyName("updated_at")]
         [JsonConverter(typeof(CustomDateTimeConverter))]
         public DateTime UpdatedAt { get; set; }
-        public Boolean IsSynced { get; set; }
-        public string? ZipPath { get; set; }
-        public string? Backup { get; set; }
+
+        private bool? _isSynced; // backing field для ручного управления статусом
+        [JsonIgnore]
+        public bool IsSynced
+        {
+            get => _isSynced ?? !string.IsNullOrEmpty(LastSyncAt) || !string.IsNullOrEmpty(FileId);
+            set
+            {
+                _isSynced = value;
+            }
+        }
+        [JsonIgnore] public string? ZipPath { get; set; }
+        [JsonIgnore] public string? Backup { get; set; }
         public DateTime? LastRestored { get; set; }
+        [JsonIgnore]
+        public CloudService? CloudService
+        {
+            get
+            {
+              return AuthData.ConnectedCloudServices.FirstOrDefault(ccc => ccc.UserCloudServiceId == UserCloudServiceId && ccc.IsConnected);
+            }
+        }
+        [JsonIgnore]
+        public string SyncIconColor => IsSynced ? "#FF4CAF50" : "#FFFFC107"; // Зеленый для синхронизированного, желтый для ожидания
     }
 }
