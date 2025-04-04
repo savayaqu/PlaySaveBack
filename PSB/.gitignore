@@ -2,3 +2,4 @@ PSB.csproj.user
 bin
 obj
 .vs
+/Properties/PublishProfiles/win-x64.pubxml.user

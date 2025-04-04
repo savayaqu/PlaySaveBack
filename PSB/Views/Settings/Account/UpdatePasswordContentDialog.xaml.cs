@@ -24,11 +24,11 @@ namespace PSB.Views.Settings.Account
 
         private void Nav_Click(object sender, RoutedEventArgs e)
         {
-            // РњРµРЅСЏРµРј РєРѕРЅС‚РµРЅС‚ РЅР° С„РѕСЂРјСѓ РґР»СЏ РѕР±РЅРѕРІР»РµРЅРёСЏ РїР°СЂРѕР»СЏ
+            // Меняем контент на форму для обновления пароля
             var updateEmailDialog = new UpdateEmailContentDialog();
-            this.Hide(); // РЎРєСЂС‹С‚СЊ С‚РµРєСѓС‰РёР№ РґРёР°Р»РѕРі
+            this.Hide(); // Скрыть текущий диалог
 
-            // РџРѕРєР°Р·С‹РІР°РµРј РЅРѕРІС‹Р№ РґРёР°Р»РѕРі
+            // Показываем новый диалог
             _ = App.DialogService.ShowDialogAsync(updateEmailDialog);
         }
 
@@ -40,11 +40,11 @@ namespace PSB.Views.Settings.Account
         {
             if (sender is ToggleButton toggleButton && toggleButton.Tag is string tag)
             {
-                // РќР°С…РѕРґРёРј PasswordBox РїРѕ Tag
+                // Находим PasswordBox по Tag
                 var passwordBox = FindChild<PasswordBox>((StackPanel)toggleButton.Parent, tag);
                 if (passwordBox != null)
                 {
-                    passwordBox.PasswordRevealMode = PasswordRevealMode.Visible; // РџРѕРєР°Р·С‹РІР°РµРј РїР°СЂРѕР»СЊ
+                    passwordBox.PasswordRevealMode = PasswordRevealMode.Visible; // Показываем пароль
                 }
             }
         }
@@ -53,16 +53,16 @@ namespace PSB.Views.Settings.Account
         {
             if (sender is ToggleButton toggleButton && toggleButton.Tag is string tag)
             {
-                // РќР°С…РѕРґРёРј PasswordBox РїРѕ Tag
+                // Находим PasswordBox по Tag
                 var passwordBox = FindChild<PasswordBox>((StackPanel)toggleButton.Parent, tag);
                 if (passwordBox != null)
                 {
-                    passwordBox.PasswordRevealMode = PasswordRevealMode.Hidden; // РЎРєСЂС‹РІР°РµРј РїР°СЂРѕР»СЊ
+                    passwordBox.PasswordRevealMode = PasswordRevealMode.Hidden; // Скрываем пароль
                 }
             }
         }
 
-        // Р’СЃРїРѕРјРѕРіР°С‚РµР»СЊРЅС‹Р№ РјРµС‚РѕРґ РґР»СЏ РїРѕРёСЃРєР° РґРѕС‡РµСЂРЅРµРіРѕ СЌР»РµРјРµРЅС‚Р° РїРѕ Tag
+        // Вспомогательный метод для поиска дочернего элемента по Tag
         private T? FindChild<T>(DependencyObject parent, string tag) where T : FrameworkElement
         {
             if (parent == null) return null;

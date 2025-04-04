@@ -4,6 +4,7 @@ using Microsoft.UI.Xaml.Navigation;
 using PSB.Services;
 using PSB.Utils;
 using PSB.ViewModels;
+using PSB.Views;
 using Windows.Storage;
 
 namespace PSB
@@ -19,6 +20,7 @@ namespace PSB
         public NavigationView NavigationViewControl => NavView;
         public TextBlock HeaderTextBlock => HeaderText;
         public GeneralViewModel GeneralViewModel { get; set; }
+        public CatalogViewModel CatalogViewModel { get; set; }
         public MainWindow()
         {
             Instance = this;
@@ -28,6 +30,7 @@ namespace PSB
             ProfileViewModel = new ProfileViewModel();
             AccountViewModel = new AccountViewModel();
             GeneralViewModel = new GeneralViewModel();
+            CatalogViewModel = new CatalogViewModel();
 
             // Инициализируем сервисы
             _navigationService = new NavigationService(ContentFrame, NavView, HeaderText);
@@ -46,6 +49,14 @@ namespace PSB
         {
             BackButton.Visibility = ContentFrame.CanGoBack ? Visibility.Visible : Visibility.Collapsed;
         }
-
+        private async void AutoSuggestBox_QuerySubmitted(AutoSuggestBox sender, AutoSuggestBoxQuerySubmittedEventArgs args)
+        {
+            if (ContentFrame.Content is CatalogPage catalogPage)
+            {
+                catalogPage.CatalogViewModel.Name = sender.Text;
+                catalogPage.CatalogViewModel.LoadGamesCommand.Execute(null);
+            }
+            await CatalogViewModel.LoadGamesAsync();
+        }
     }
 }
