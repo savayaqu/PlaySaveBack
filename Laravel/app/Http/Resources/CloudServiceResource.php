@@ -18,6 +18,7 @@ class CloudServiceResource extends JsonResource
 
         $isConnected = (bool) $userCloudService;
         $expiresAt = $isConnected ? $userCloudService->expires_at : null;
+        $cloudServiceId = $isConnected ? $userCloudService->id : null;
 
         return [
             'id' => $this->id,
@@ -25,6 +26,7 @@ class CloudServiceResource extends JsonResource
             'icon' => $this->icon,
             'description' => $this->description,
             'is_connected' => $isConnected,
+            'user_cloud_service_id' =>$this->when($isConnected, $cloudServiceId),
             'expires_at' => $this->when($isConnected, $expiresAt), // Только если подключен
         ];
     }

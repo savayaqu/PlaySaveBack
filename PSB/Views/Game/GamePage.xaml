@@ -94,8 +94,8 @@
                             <Button.Flyout>
                                 <Flyout>
                                     <StackPanel Spacing="6" Width="200">
-                                        <TextBox PlaceholderText="Версия сохранения" Text="{x:Bind GameViewModel.SaveVersion, Mode=TwoWay}"/>
-                                        <TextBox PlaceholderText="Описание сохранения" Text="{x:Bind GameViewModel.SaveDescription, Mode=TwoWay}"/>
+                                        <TextBox Header="Версия"   PlaceholderText="Версия сохранения" Text="{x:Bind GameViewModel.SaveVersion, Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"/>
+                                        <TextBox Header="Описание" PlaceholderText="Описание сохранения" Text="{x:Bind GameViewModel.SaveDescription, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
                                         <Button HorizontalAlignment="Center" Command="{x:Bind GameViewModel.CreateSaveCommand}" Content="Создать"></Button>
                                     </StackPanel>
                                 </Flyout>
@@ -186,9 +186,10 @@ Padding="0">
       CommandParameter="{x:Bind}"/>
                                             <AppBarButton Icon="Save" Label="Перезаписать">
                                                 <AppBarButton.Flyout>
-                                                    <Flyout>
+                                                    <Flyout Opening="Flyout_Opening">
                                                         <StackPanel Spacing="6" Width="200">
-                                                            <TextBox Loaded="TextBox_Loaded" PlaceholderText="Описание" Text="{x:Bind Description, Mode=TwoWay}"/>
+                                                            <TextBox Header="Версия"   Loaded="TextBox_Loaded" PlaceholderText="Версия" Text="{x:Bind vm:GameViewModel.Instance.SaveVersion, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
+                                                            <TextBox Header="Описание" Loaded="TextBox_Loaded" PlaceholderText="Описание" Text="{x:Bind vm:GameViewModel.Instance.SaveDescription, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
                                                             <Button Command="{x:Bind vm:GameViewModel.Instance.OverwriteSaveCommand}" 
                 CommandParameter="{x:Bind}" 
                 Content="Подтвердить"

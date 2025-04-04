@@ -10,6 +10,7 @@ namespace PSB.Models
         [JsonPropertyName("icon")] public required string Icon { get; set; }
         [JsonPropertyName("description")] public string? Description { get; set; }
         [JsonPropertyName("is_connected")] public Boolean IsConnected { get; set; }
+        [JsonPropertyName("user_cloud_service_id")] public ulong? UserCloudServiceId { get; set; }
         [JsonPropertyName("expires_at")] string? ExpiresAt { get; set; }
 
         // Добавляем вычисляемое свойство для статуса

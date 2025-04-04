@@ -7,7 +7,7 @@ namespace PSB.Models
     public class Save
     {
         [JsonPropertyName("id")] public uint Id { get; set; }
-        [JsonPropertyName("file_id")] public required string FileId { get; set; }
+        [JsonPropertyName("file_id")] public string? FileId { get; set; }
         [JsonPropertyName("file_name")] public required string FileName { get; set; }
         [JsonPropertyName("version")] public required string Version { get; set; }
         [JsonPropertyName("size")] public ulong Size { get; set; }

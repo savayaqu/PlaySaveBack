@@ -103,7 +103,16 @@ namespace PSB.Views
         {
             if (sender is TextBox textBox)
             {
-                textBox.Focus(FocusState.Programmatic);
+                textBox.AllowFocusOnInteraction = true;
+            }
+        }
+        private void Flyout_Opening(object sender, object e)
+        {
+            if (sender is Flyout flyout &&
+                flyout.Target is FrameworkElement element &&
+                element.DataContext is Save save)
+            {
+                GameViewModel!.PrepareOverwrite(save);
             }
         }
     }

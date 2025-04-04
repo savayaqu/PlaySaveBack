@@ -10,8 +10,10 @@ class OverwriteSaveRequest extends ApiRequest
     public function rules(): array
     {
         return [
-            'file' => 'required|file',
+            'version' => 'string',
             'description' => 'nullable|string',
+            'hash' => 'string',
+            'last_sync_at' => 'date',
         ];
     }
 }

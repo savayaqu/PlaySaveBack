@@ -162,7 +162,28 @@ class GoogleDriveController extends Controller
         }
         return Game::findOrFail($request->game_id);
     }
+    public function generateOverwriteUrl(Save $save, Request $request)
+    {
+        $request->validate([
+            'file_name' => 'required|string',
+            'file_size' => 'required|integer'
+        ]);
 
+        $user = auth()->user();
+        $cloudService = CloudService::where('name', 'Google Drive')->first();
+        $service = UserCloudService::where('user_id', $user->id)
+            ->where('cloud_service_id', $cloudService->id)
+            ->first();
+        $googleDriveService = new GoogleDriveService($service);
+
+        return response()->json([
+            'upload_url' => $googleDriveService->generateResumableOverwriteUrl(
+                $save->file_id,
+                $request->input('file_name')
+            ),
+            'expires_at' => now()->addHours(1)->toIso8601String()
+        ]);
+    }
     public function downloadFile(Save $save)
     {
         $user = auth()->user();
@@ -205,38 +226,5 @@ class GoogleDriveController extends Controller
         Save::query()->where('file_id', $fileId)->where('user_id', $user->id)->delete();
 
         return response()->json(['message' => 'File deleted successfully'], 200);
-    }
-    public function overwriteFile(OverwriteSaveRequest $request, Save $save)
-    {
-        $user = auth()->user();
-        $fileId = $save->file_id;
-        $file = $request->file('file');
-        $filePath = $file->getPathname();
-        $fileName = $file->getClientOriginalName();
-        $fileSize = $file->getSize();
-
-        $cloudService = CloudService::query()->where('name', 'Google Drive')->first();
-        $service = UserCloudService::query()->where('user_id', $user->id)->where('cloud_service_id', $cloudService->id)->first();
-
-        $googleDriveService = new GoogleDriveService($service);
-
-        try {
-            // Перезаписываем файл
-            $newFileId = $googleDriveService->overwriteFile($fileId, $filePath, $fileName);
-            // Обновляем запись в базе данных
-            $save = Save::query()->where('file_id', $fileId)->where('user_id', $user->id)->first();
-            $save->update([
-                'file_id' => $newFileId,
-                'file_name' => $fileName,
-                'size' => $fileSize,
-                'hash' => hash('sha256', file_get_contents($file)),
-                'description' => $request->description ?? null,
-                'last_sync_at' => Carbon::now(),
-            ]);
-
-            return response()->json(SaveResource::make($save), 200);
-        } catch (\Exception $e) {
-            return response()->json(['error' => $e->getMessage()], 500);
-        }
     }
 }

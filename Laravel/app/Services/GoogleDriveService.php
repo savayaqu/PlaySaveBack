@@ -109,7 +109,53 @@ class GoogleDriveService
             throw new ApiException('Failed to generate upload URL: ' . $e->getMessage());
         }
     }
+    public function generateResumableOverwriteUrl(string $fileId, string $fileName): string
+    {
+        try {
+            $client = $this->driveService->getClient();
+            $httpClient = $client->authorize();
 
+            // 1. Создаем метаданные файла
+            $fileMetadata = new DriveFile([
+                'name' => $fileName
+            ]);
+
+            // 2. Формируем URL с параметрами
+            $uri = 'https://www.googleapis.com/upload/drive/v3/files/' . urlencode($fileId) . '?' . http_build_query([
+                    'uploadType' => 'resumable',
+                    'supportsAllDrives' => 'true'
+                ]);
+
+            // 3. Создаем PSR-7 запрос (PATCH для обновления)
+            $request = new \GuzzleHttp\Psr7\Request(
+                'PATCH', // Важно использовать PATCH вместо POST
+                $uri,
+                [
+                    'Content-Type' => 'application/json',
+                    'X-Upload-Content-Type' => 'application/octet-stream',
+                    'Authorization' => 'Bearer ' . $client->getAccessToken()['access_token']
+                ],
+                json_encode($fileMetadata)
+            );
+
+            // 4. Отправляем запрос
+            $response = $httpClient->send($request);
+
+            // 5. Проверяем ответ
+            if ($response->getStatusCode() != 200) {
+                throw new ApiException('Invalid status code: ' . $response->getStatusCode());
+            }
+
+            $location = $response->getHeaderLine('Location');
+            if (empty($location)) {
+                throw new ApiException('Location header is missing');
+            }
+
+            return $location;
+        } catch (\Exception $e) {
+            throw new ApiException('Failed to generate overwrite URL: ' . $e->getMessage());
+        }
+    }
     private function createFolderStructure(string $path): string
     {
         $parts = explode('/', $path);
@@ -147,32 +193,6 @@ class GoogleDriveService
 
         $folder = $this->driveService->files->create($folderMetadata, ['fields' => 'id']);
         return $folder->getId();
-    }
-
-
-    public function uploadFile($filePath, $fileName, $folderId)
-    {
-        try {
-            $fileMetadata = new DriveFile([
-                'name' => $fileName,
-                'parents' => [$folderId],
-            ]);
-
-            $content = file_get_contents($filePath);
-
-            $file = $this->driveService->files->create($fileMetadata, [
-                'data' => $content,
-                'mimeType' => mime_content_type($filePath),
-                'uploadType' => 'multipart',
-                'fields' => 'id',
-            ]);
-
-            return $file->getId();
-        } catch (\Google\Service\Exception $e) {
-            throw GoogleApiException::fromGoogleException($e);
-        } catch (\Exception $e) {
-            throw new ApiException('Failed to uploadFile: ' . $e->getMessage(), $e->getCode());
-        }
     }
 
     public function deleteFile($fileId)
@@ -222,28 +242,74 @@ class GoogleDriveService
             throw new ApiException('Failed to downloadFile: ' . $e->getMessage(), $e->getCode());
         }
     }
-    public function overwriteFile($fileId, $filePath, $fileName)
+    /**
+     * Получает ID родительской папки для указанного файла
+     *
+     * @param string $fileId ID файла в Google Drive
+     * @return string|null ID родительской папки или null, если файл в корне
+     * @throws ApiException
+     */
+    public function getFileParentFolderId(string $fileId): ?string
     {
         try {
-            // Обновляем существующий файл
-            $fileMetadata = new DriveFile([
-                'name' => $fileName,
+            $file = $this->driveService->files->get($fileId, [
+                'fields' => 'parents',
+                'supportsAllDrives' => true
             ]);
 
-            $content = file_get_contents($filePath);
+            if (empty($file->getParents())) {
+                return null;
+            }
 
-            $file = $this->driveService->files->update($fileId, $fileMetadata, [
-                'data' => $content,
-                'mimeType' => mime_content_type($filePath),
-                'uploadType' => 'multipart',
-                'fields' => 'id',
-            ]);
-
-            return $file->getId();
-        } catch (\Google\Service\Exception $e) {
-            throw GoogleApiException::fromGoogleException($e);
+            // Возвращаем первую родительскую папку (файл может быть в нескольких папках)
+            return $file->getParents()[0];
         } catch (\Exception $e) {
-            throw new ApiException('Failed to overwriteFile: ' . $e->getMessage(), $e->getCode());
+            throw new ApiException('Failed to get parent folder: ' . $e->getMessage());
         }
+    }
+
+    /**
+     * Переименовывает папку в Google Drive
+     *
+     * @param string $folderId ID папки
+     * @param string $newName Новое название папки
+     * @return DriveFile Обновленная папка
+     * @throws ApiException
+     */
+    public function renameFolder(string $folderId, string $newName): DriveFile
+    {
+        try {
+            $folderMetadata = new DriveFile([
+                'name' => $newName
+            ]);
+
+            return $this->driveService->files->update($folderId, $folderMetadata, [
+                'fields' => 'id,name',
+                'supportsAllDrives' => true
+            ]);
+        } catch (\Exception $e) {
+            throw new ApiException('Failed to rename folder: ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * Получает родительскую папку файла и переименовывает её
+     *
+     * @param string $fileId ID файла
+     * @param string $newFolderName Новое название папки
+     * @return string ID переименованной папки
+     * @throws ApiException Если файл не имеет родительской папки или произошла ошибка
+     */
+    public function getAndRenameParentFolder(string $fileId, string $newFolderName): string
+    {
+        $parentId = $this->getFileParentFolderId($fileId);
+
+        if ($parentId === null) {
+            throw new ApiException('The file is not in any folder (it is in the root)');
+        }
+
+        $this->renameFolder($parentId, $newFolderName);
+
+        return $parentId;
     }
 }

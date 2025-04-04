@@ -63,10 +63,11 @@ Route::middleware('auth:sanctum')->group(function () {
            Route::get('sidegame/{sideGame}/my', 'getMySavesSideGame');
 
            Route::prefix('{save}')->group(function () {
+               Route::patch('', 'updateSave');
                Route::controller(GoogleDriveController::class)->group(function () {
                    Route::prefix('google-drive')->group(function () { // Действия с Google Drive
                        // Управление файлами
-                       Route::post('overwrite', 'overwriteFile');
+                       Route::post('generate-overwrite-url', 'generateOverwriteUrl');
                        Route::get('download', 'downloadFile');
                        Route::get('share', 'shareFile');
                        Route::delete('delete', 'deleteFile');
@@ -105,8 +106,6 @@ Route::middleware('auth:sanctum')->group(function () {
             Route::post('generate-upload-url', 'generateUploadUrl'); // Генерация URL для загрузки
             Route::post('confirm-upload/{save}', 'confirmUpload'); // Подтверждение загрузки
 
-            // Старая система (можно оставить временно для обратной совместимости)
-            Route::post('upload', 'uploadFile'); // Устаревший метод (перенаправлять на новую систему)
         });
     });
 });

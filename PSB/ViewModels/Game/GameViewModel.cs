@@ -39,8 +39,8 @@ namespace PSB.ViewModels
         [ObservableProperty] public partial Boolean IsUploading { get; set; }
 
         [ObservableProperty] public partial CloudService? SelectedCloudService { get; set; } = null;
-        [ObservableProperty] public partial string SaveDescription { get; set; } = "";
-        [ObservableProperty] public partial string SaveVersion { get; set; } = "";
+        [ObservableProperty] public partial string SaveDescription { get; set; } = string.Empty;
+        [ObservableProperty] public partial string SaveVersion { get; set; } = string.Empty;
         [ObservableProperty] public partial ObservableCollection<Save> Saves { get; set; } = new ObservableCollection<Save>();
         public event Action? GameLoaded;
 
@@ -53,6 +53,11 @@ namespace PSB.ViewModels
         [NotifyCanExecuteChangedFor(nameof(OverwriteSaveCommand))]
         [NotifyCanExecuteChangedFor(nameof(RestoreSaveCommand))]
         public partial Boolean FolderSavesExists { get; set; } = false;
+
+        [ObservableProperty]
+        [NotifyCanExecuteChangedFor(nameof(OverwriteSaveCommand))]
+        [NotifyCanExecuteChangedFor(nameof(CreateSaveCommand))]
+        public partial Boolean VersionExists { get; set; } = false;
 
         partial void OnFolderPathChanged(string value)
         {
@@ -72,6 +77,17 @@ namespace PSB.ViewModels
         {
             OnPropertyChanged(nameof(FavoriteIcon));
         }
+        partial void OnSaveVersionChanged(string value)
+        {
+            VersionExists = Saves?.Any(s => s.Version == value) ?? false;
+            SaveVersion = value;
+            OverwriteSaveCommand.NotifyCanExecuteChanged();
+            CreateSaveCommand.NotifyCanExecuteChanged();
+        }
+        private bool CanCreateOverwriteSave()
+        {
+            return FolderSavesExists && !string.IsNullOrEmpty(SaveVersion) && !VersionExists;
+        }
         public GameViewModel(ulong gameId, string type)
         {
 
@@ -85,16 +101,9 @@ namespace PSB.ViewModels
             }, TaskScheduler.FromCurrentSynchronizationContext());
 
         }
-        [RelayCommand(CanExecute = nameof(FolderSavesExists))]
+        [RelayCommand(CanExecute = nameof(CanCreateOverwriteSave))]
         private async Task CreateSave()
         {
-            bool versionExist = Saves?.Any(s => s.Version == SaveVersion) ?? false;
-            //TODO: доработать, запретить нажимать кнопку, если версия сходится
-            if (versionExist)
-            {
-                SaveVersion = "go to na xyu";
-                return;
-            }
             if (FolderPath == null)
                 return;
             Debug.WriteLine("Folder Path " + FolderPath);
@@ -117,6 +126,98 @@ namespace PSB.ViewModels
             };
             Saves.Add(newSave);
             SavesDataManager<IGame>.SaveSaves(Game, Saves.ToList());
+        }
+        [RelayCommand(CanExecute = nameof(CanCreateOverwriteSave))]
+        private async Task OverwriteSave(Save existingSave)
+        {
+            if (!existingSave.IsSynced)
+            {
+                try
+                {
+                    // Создаем бэкап перед перезаписью
+                    string backupPath = await App.ZipHelper.CreateBackup(
+                        FolderPath,
+                        Game.Name,
+                        $"{existingSave.Version}_backup_{DateTime.Now:yyyyMMdd_HHmmss}");
+
+                    Debug.WriteLine($"Создан бэкап: {backupPath}");
+
+                    // Перезаписываем сохранение
+                    var (folderName, zipPath, hash, size) = await App.ZipHelper.CreateZip(
+                        FolderPath,
+                        Game.Name,
+                        existingSave.Version);
+
+                    existingSave.FileName = $"{folderName}.zip";
+                    existingSave.Hash = hash;
+                    existingSave.Size = size;
+                    existingSave.ZipPath = zipPath;
+                    existingSave.Version = SaveVersion;
+                    existingSave.Description = SaveDescription;
+                    existingSave.CreatedAt = DateTime.Now;
+
+                    // Удаляем старый файл, если путь изменился
+                    if (existingSave.ZipPath != zipPath && File.Exists(existingSave.ZipPath))
+                    {
+                        App.ZipHelper.DeleteFile(existingSave.ZipPath);
+                    }
+
+                    UpdateExistingSave(existingSave, existingSave);
+                    NotificationService.ShowSuccess("Сохранение успешно перезаписано");
+                }
+                catch (Exception ex)
+                {
+                    NotificationService.ShowError($"Ошибка перезаписи: {ex.Message}");
+                    Debug.WriteLine(ex.ToString());
+                }
+                finally
+                {
+                    SaveVersion = "";
+                    SaveDescription = "";
+                }
+            }
+            if (existingSave.IsSynced)
+            {
+                try
+                {
+
+                    var connectedService = AuthData.ConnectedCloudServices.FirstOrDefault(s => s.UserCloudServiceId == existingSave.UserCloudServiceId);
+                    if (connectedService != null)
+                    {
+                        SelectedCloudService = connectedService;
+
+                        // Создаем бэкап перед перезаписью
+                        string backupPath = await App.ZipHelper.CreateBackup(
+                            FolderPath,
+                            Game.Name,
+                            $"{existingSave.Version}_backup_{DateTime.Now:yyyyMMdd_HHmmss}");
+
+                        Debug.WriteLine($"Создан бэкап: {backupPath}");
+
+                        // Перезаписываем сохранение
+                        var (folderName, zipPath, hash, size) = await App.ZipHelper.CreateZip(
+                            FolderPath,
+                            Game.Name,
+                            existingSave.Version);
+
+                        (bool success, Save updatedSave) = await App.CloudFileUploader.OverwriteFileAsync(existingSave, zipPath, SaveVersion, SaveDescription);
+
+                        if (success && updatedSave != null)
+                        {
+                            SaveVersion = "";
+                            SaveDescription = "";
+
+                            UpdateExistingSave(existingSave, updatedSave);
+
+                            NotificationService.ShowSuccess("Файл успешно перезаписан");
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+                    NotificationService.ShowError($"Ошибка перезаписи: {ex.Message}");
+                }
+            }
         }
         [RelayCommand]
         private async Task SyncSave(Save save)
@@ -147,13 +248,7 @@ namespace PSB.ViewModels
                     }
                     if (updatedSave != null)
                     {
-                        var index = Saves.IndexOf(save);
-                        if (index != -1)
-                        {
-                            Saves[index] = updatedSave;
-                            SavesDataManager<IGame>.SaveSaves(Game, Saves.ToList());
-                            OnPropertyChanged(nameof(Saves));
-                        }
+                        UpdateExistingSave(save, updatedSave);
                     }
                     NotificationService.ShowSuccess($"Сохранение синхронизировано с {SelectedCloudService.Name}");
                 }
@@ -167,10 +262,19 @@ namespace PSB.ViewModels
                 IsUploading = false;
             }
         }
-        [RelayCommand(CanExecute = nameof(FolderSavesExists))]
-        private async Task OverwriteSave()
+        private void UpdateExistingSave(Save oldSave, Save newSave)
         {
-            Debug.WriteLine("кнопка перезаписи");
+            var index = Saves.IndexOf(oldSave);
+            // Обновляем в коллекции
+            Saves[index] = newSave;
+            SavesDataManager<IGame>.SaveSaves(Game, Saves.ToList());
+            OnPropertyChanged(nameof(Saves));
+        }
+        public void PrepareOverwrite(Save save)
+        {
+            SaveDescription = save.Description;
+            SaveVersion = save.Version;
+            // Другие инициализации
         }
         [RelayCommand(CanExecute = nameof(FolderSavesExists))]
         public async Task RestoreSave(Save save)

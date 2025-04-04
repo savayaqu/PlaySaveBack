@@ -7,6 +7,7 @@ using System.Net.Http;
 using System.Net.Http.Json;
 using System.Text;
 using System.Threading.Tasks;
+using PSB.Api.Request;
 using PSB.Api.Request.GoogleDrive;
 using PSB.Api.Response.GoogleDrive;
 using PSB.Helpers;
@@ -86,5 +87,48 @@ namespace PSB.Utils
 
             return (true, confirmBody);
         }
+        public async Task<(bool Success, Save? UpdatedSave)> OverwriteFileAsync(Save existingSave,string newFilePath,string version,string description)
+        {
+            try
+            {
+                // 1. Получаем URL для перезаписи
+                var (urlResponse, urlBody) = await FetchAsync<OverwriteUrlResponse>(
+                    HttpMethod.Post,
+                    $"saves/{existingSave.Id}/google-drive/generate-overwrite-url",
+                    new
+                    {
+                        file_name = Path.GetFileName(newFilePath),
+                        file_size = new FileInfo(newFilePath).Length
+                    },
+                    true);
+
+                if (!urlResponse.IsSuccessStatusCode || urlBody == null)
+                    return (false, null);
+
+                // 2. Загружаем новый файл
+                using var fileStream = File.OpenRead(newFilePath);
+                var (uploadResponse, _) = await FetchAsync<object>(
+                    HttpMethod.Put,
+                    urlBody.UploadUrl,
+                    new StreamContent(fileStream));
+
+                if (!uploadResponse.IsSuccessStatusCode)
+                    return (false, null);
+
+                // 3. Обновляем метаданные
+                var (updateResponse, updatedSave) = await FetchAsync<Save>(
+                    HttpMethod.Patch,
+                    $"saves/{existingSave.Id}",
+                    new UpdateSaveRequest(version, description, App.ZipHelper.CalculateFileHash(newFilePath), DateTime.Now),true);
+
+                return (updateResponse.IsSuccessStatusCode, updatedSave);
+            }
+            catch (Exception ex)
+            {
+                NotificationService.ShowError($"Overwrite failed: {ex.Message}");
+                return (false, null);
+            }
+        }
     }
+
 }

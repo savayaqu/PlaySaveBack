@@ -79,12 +79,8 @@ Spacing="12">
             </NavigationViewItem>
 
 
-            <!--<NavigationViewItem Content="Главная" Tag="HomePage" Icon="Home" IsSelected="True"/>
-            <NavigationViewItem Content="Сохранения" Tag="SavePage" Icon="Save">
-                <NavigationViewItem.InfoBadge>
-                    <InfoBadge Value="0"/>
-                </NavigationViewItem.InfoBadge>
-            </NavigationViewItem>-->
+            <NavigationViewItem Content="Главная" Tag="HomePage" Icon="Home" IsSelected="True"/>
+            <NavigationViewItem Content="Сохранения" Tag="SavePage" Icon="Save"/>
             <NavigationViewItem Content="Каталог" Tag="CatalogPage">
                 <NavigationViewItem.Icon>
                     <FontIcon Glyph="&#xF0E2;"/>
