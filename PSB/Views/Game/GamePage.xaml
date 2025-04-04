@@ -39,7 +39,7 @@
                             </StackPanel>
                             <StackPanel Orientation="Vertical" Visibility="{x:Bind GameViewModel.InLibrary, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}, ConverterParameter=False}">
                                 <TextBlock Text="ПОСЛЕДНИЙ ЗАПУСК" Style="{StaticResource BodyStrongTextBlockStyle}" Foreground="Gray"/>
-                                <TextBlock  Style="{StaticResource BodyTextBlockStyle}" Text="{x:Bind GameViewModel.LastPlayedText, Mode=OneWay}" FontSize="14"/>
+                                <TextBlock  Style="{StaticResource BodyTextBlockStyle}" Text="{x:Bind GameViewModel.Library.LastPlayedText, Mode=OneWay}" FontSize="14"/>
                             </StackPanel>
                             <StackPanel Orientation="Vertical" Visibility="{x:Bind GameViewModel.InLibrary, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}, ConverterParameter=False}">
                                 <TextBlock Text="ВЫ ИГРАЛИ" Style="{StaticResource BodyStrongTextBlockStyle}" Foreground="Gray"/>
@@ -105,7 +105,7 @@
           IsItemClickEnabled="False">
                         <ListView.ItemTemplate>
                             <DataTemplate x:DataType="models:Save">
-                                <Expander>
+                                <Expander MinWidth="420">
                                     <Expander.Header>
                                         <Grid ColumnDefinitions="*,Auto,Auto,Auto" Padding="8">
                                             <TextBlock Text="{x:Bind FileName}" VerticalAlignment="Center"/>

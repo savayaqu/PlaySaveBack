@@ -24,11 +24,11 @@ namespace PSB.Views.Settings.Account
 
         private void Nav_Click(object sender, RoutedEventArgs e)
         {
-            // Меняем контент на форму для обновления пароля
+            // РњРµРЅСЏРµРј РєРѕРЅС‚РµРЅС‚ РЅР° С„РѕСЂРјСѓ РґР»СЏ РѕР±РЅРѕРІР»РµРЅРёСЏ РїР°СЂРѕР»СЏ
             var updateEmailDialog = new UpdateEmailContentDialog();
-            this.Hide(); // Скрыть текущий диалог
+            this.Hide(); // РЎРєСЂС‹С‚СЊ С‚РµРєСѓС‰РёР№ РґРёР°Р»РѕРі
 
-            // Показываем новый диалог
+            // РџРѕРєР°Р·С‹РІР°РµРј РЅРѕРІС‹Р№ РґРёР°Р»РѕРі
             _ = App.DialogService.ShowDialogAsync(updateEmailDialog);
         }
 
@@ -40,11 +40,11 @@ namespace PSB.Views.Settings.Account
         {
             if (sender is ToggleButton toggleButton && toggleButton.Tag is string tag)
             {
-                // Находим PasswordBox по Tag
-                var passwordBox = FindChild<PasswordBox>(toggleButton.Parent as StackPanel, tag);
+                // РќР°С…РѕРґРёРј PasswordBox РїРѕ Tag
+                var passwordBox = FindChild<PasswordBox>((StackPanel)toggleButton.Parent, tag);
                 if (passwordBox != null)
                 {
-                    passwordBox.PasswordRevealMode = PasswordRevealMode.Visible; // Показываем пароль
+                    passwordBox.PasswordRevealMode = PasswordRevealMode.Visible; // РџРѕРєР°Р·С‹РІР°РµРј РїР°СЂРѕР»СЊ
                 }
             }
         }
@@ -53,17 +53,17 @@ namespace PSB.Views.Settings.Account
         {
             if (sender is ToggleButton toggleButton && toggleButton.Tag is string tag)
             {
-                // Находим PasswordBox по Tag
-                var passwordBox = FindChild<PasswordBox>(toggleButton.Parent as StackPanel, tag);
+                // РќР°С…РѕРґРёРј PasswordBox РїРѕ Tag
+                var passwordBox = FindChild<PasswordBox>((StackPanel)toggleButton.Parent, tag);
                 if (passwordBox != null)
                 {
-                    passwordBox.PasswordRevealMode = PasswordRevealMode.Hidden; // Скрываем пароль
+                    passwordBox.PasswordRevealMode = PasswordRevealMode.Hidden; // РЎРєСЂС‹РІР°РµРј РїР°СЂРѕР»СЊ
                 }
             }
         }
 
-        // Вспомогательный метод для поиска дочернего элемента по Tag
-        private T FindChild<T>(DependencyObject parent, string tag) where T : FrameworkElement
+        // Р’СЃРїРѕРјРѕРіР°С‚РµР»СЊРЅС‹Р№ РјРµС‚РѕРґ РґР»СЏ РїРѕРёСЃРєР° РґРѕС‡РµСЂРЅРµРіРѕ СЌР»РµРјРµРЅС‚Р° РїРѕ Tag
+        private T? FindChild<T>(DependencyObject parent, string tag) where T : FrameworkElement
         {
             if (parent == null) return null;
 

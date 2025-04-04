@@ -55,39 +55,38 @@ namespace PSB
             
         }
 
-        private async void OnAppActivated(object? sender, AppActivationArguments args)
+        private void OnAppActivated(object? sender, AppActivationArguments args)
         {
             if (args.Kind == ExtendedActivationKind.Protocol)
             {
                 var protocolArgs = (ProtocolActivatedEventArgs)args.Data;
-                await ProcessDeepLink(protocolArgs.Uri);
+                ProcessDeepLink(protocolArgs.Uri);
             }
         }
 
-        private static async Task ProcessDeepLink(Uri uri)
+        private static void ProcessDeepLink(Uri uri)
         {
-            if (MainWindow != null)
+            // Вариант 1: Без await (если не нужно ждать завершения)
+            MainWindow?.DispatcherQueue.TryEnqueue(() =>
             {
-                // Вариант 1: Без await (если не нужно ждать завершения)
-                MainWindow.DispatcherQueue.TryEnqueue(() =>
+                if (uri.Scheme == "playsaveback" && uri.Host == "google-oauth")
                 {
-                    if (uri.Scheme == "playsaveback" && uri.Host == "google-oauth")
+                    var query = System.Web.HttpUtility.ParseQueryString(uri.Query);
+                    if (query["success"] == "1")
                     {
-                        var query = System.Web.HttpUtility.ParseQueryString(uri.Query);
-                        if (query["success"] == "1")
-                        {
-                            _ = MainWindow.AccountViewModel.LoadCloudServicesAsync();
-                            NotificationService.ShowSuccess("Google Drive успешно подключен");
-                        }
+                        _ = MainWindow.AccountViewModel.LoadCloudServicesAsync();
+                        NotificationService.ShowSuccess("Google Drive успешно подключен");
                     }
-                });
-            }
+                }
+            });
         }
 
         private static void InitializeMainWindow()
         {
-            MainWindow = new MainWindow();
-            MainWindow.ExtendsContentIntoTitleBar = true;
+            MainWindow = new MainWindow
+            {
+                ExtendsContentIntoTitleBar = true
+            };
 
             NavigationService = new NavigationService(
                 MainWindow.ContentFrameControl,
@@ -103,14 +102,18 @@ namespace PSB
         }
         private static void InitializeLoginWindow()
         {
-            LoginWindow = new LoginWindow();
-            LoginWindow.ExtendsContentIntoTitleBar = true;
+            LoginWindow = new LoginWindow
+            {
+                ExtendsContentIntoTitleBar = true
+            };
             LoginWindow.Activate();
         }
         private static void InitializeRegistrationWindow()
         {
-            RegistrationWindow = new RegistrationWindow();
-            RegistrationWindow.ExtendsContentIntoTitleBar = true;
+            RegistrationWindow = new RegistrationWindow
+            {
+                ExtendsContentIntoTitleBar = true
+            };
             RegistrationWindow.Activate();
         }
         public static void SwitchToMain()

@@ -21,7 +21,7 @@ namespace PSB.Utils
 {
     public class CloudFileUploader
     {
-        public async Task<(bool Success, Save? UpdatedSave)> UploadFileAsync(
+        public static async Task<(bool Success, Save? UpdatedSave)> UploadFileAsync(
             Save save,
             CloudService cloudService,
             IGame game,
@@ -45,7 +45,7 @@ namespace PSB.Utils
             }
         }
 
-        private async Task<(bool Success, Save? UpdatedSave)> UploadToGoogleDriveAsync(
+        private static async Task<(bool Success, Save? UpdatedSave)> UploadToGoogleDriveAsync(
             Save save,
             IGame game,
             string version,
@@ -78,7 +78,7 @@ namespace PSB.Utils
                 return (false, null);
 
             // 3. Confirm upload
-            var fileHash = App.ZipHelper!.CalculateFileHash(save.ZipPath);
+            var fileHash = ZipHelper.CalculateFileHash(save.ZipPath);
             (var confirmResponse, var confirmBody) = await
                 FetchAsync<Save>(
                 HttpMethod.Post,
@@ -87,7 +87,7 @@ namespace PSB.Utils
 
             return (true, confirmBody);
         }
-        public async Task<(bool Success, Save? UpdatedSave)> OverwriteFileAsync(Save existingSave,string newFilePath,string version,string description)
+        public static async Task<(bool Success, Save? UpdatedSave)> OverwriteFileAsync(Save existingSave,string newFilePath,string version,string description)
         {
             try
             {
@@ -119,7 +119,7 @@ namespace PSB.Utils
                 var (updateResponse, updatedSave) = await FetchAsync<Save>(
                     HttpMethod.Patch,
                     $"saves/{existingSave.Id}",
-                    new UpdateSaveRequest(version, description, App.ZipHelper.CalculateFileHash(newFilePath), DateTime.Now),true);
+                    new UpdateSaveRequest(version, description, ZipHelper.CalculateFileHash(newFilePath), DateTime.Now),true);
 
                 return (updateResponse.IsSuccessStatusCode, updatedSave);
             }

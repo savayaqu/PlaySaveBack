@@ -4,19 +4,19 @@ using PSB.Models;
 
 namespace PSB.Selectors
 {
-    public class GameTemplateSelector : DataTemplateSelector
+    public partial class GameTemplateSelector : DataTemplateSelector
     {
-        public DataTemplate MainGameTemplate { get; set; }
-        public DataTemplate SideGameTemplate { get; set; }
+        public DataTemplate? MainGameTemplate { get; set; }
+        public DataTemplate? SideGameTemplate { get; set; }
 
         protected override DataTemplate SelectTemplateCore(object item, DependencyObject container)
         {
             if (item is Library library)
             {
                 if (library.SideGame != null)
-                    return SideGameTemplate;
+                    return SideGameTemplate!;
                 else if (library.Game != null)
-                    return MainGameTemplate;
+                    return MainGameTemplate!;
             }
 
             return base.SelectTemplateCore(item, container);
