@@ -22,7 +22,7 @@ namespace PSB.Services
             { "ProfilePage", typeof(ProfilePage) },
             { "SavePage", typeof(SavePage) },
         };
-        public Page GetCurrentPage()
+        public Page? GetCurrentPage()
         {
             return _frame.Content as Page;
         }
@@ -117,7 +117,7 @@ namespace PSB.Services
                 {
                     if (page.Content.XamlRoot != null)
                     {
-                        App.DialogService.SetXamlRoot(page.Content.XamlRoot);
+                        App.DialogService!.SetXamlRoot(page.Content.XamlRoot);
                     }
                 };
 
@@ -139,7 +139,7 @@ namespace PSB.Services
             // Временно отключаем обработчик SelectionChanged
             _navView.SelectionChanged -= OnNavigationViewSelectionChanged;
 
-            NavigationViewItem selectedItem = null;
+            NavigationViewItem? selectedItem = null;
 
             if (page == null)
             {
@@ -177,7 +177,7 @@ namespace PSB.Services
                 .FirstOrDefault(item => item.Tag?.ToString() == tag);
         }
 
-        private ulong ExtractGameId(string pageTag)
+        private static ulong ExtractGameId(string pageTag)
         {
             var parts = pageTag.Split('|');
             string gameIdPart = parts[0];
@@ -197,7 +197,7 @@ namespace PSB.Services
             }
         }
 
-        private string ExtractGameName(string pageTag)
+        private static string ExtractGameName(string pageTag)
         {
             var parts = pageTag.Split('|', 2); // Ограничиваем Split, чтобы избежать лишних разбиений
             return parts.Length > 1 && !string.IsNullOrWhiteSpace(parts[1]) ? parts[1] : "Unknown Game";

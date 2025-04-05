@@ -21,5 +21,8 @@ class Game extends Model
     {
         return $this->belongsToMany(User::class);
     }
-
+    public function gamePaths()
+    {
+        return $this->hasMany(GamePath::class);
+    }
 }

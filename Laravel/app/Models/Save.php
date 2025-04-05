@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class Save extends Model
 {
+    protected $hidden = ['file_id'];
     protected $fillable = [
       'file_id',
       'file_name',

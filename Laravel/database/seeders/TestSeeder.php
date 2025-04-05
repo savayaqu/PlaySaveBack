@@ -15,14 +15,6 @@ class TestSeeder extends Seeder
      */
     public function run(): void
     {
-        //for ($i = 0; $i < 200; $i++) {
-        //    Game::query()->updateOrCreate([
-        //        'name' => fake()->unique()->name(),
-        //        'icon' => fake()->imageUrl(),
-        //        'header' => fake()->imageUrl(),
-        //        'description' => fake()->text(),
-        //    ]);
-        //}
         if(User::query()->count() <= 2) {
              $user = User::query()->firstOrCreate([
                 'login' => 'admin',
@@ -37,21 +29,5 @@ class TestSeeder extends Seeder
                 'key' => 666666
             ]);
         }
-        //for($i = 0; $i < 5; $i++) {
-        //    $log =  fake()->unique()->word();
-        //    User::query()->firstOrCreate([
-        //        'login' => $log,
-        //        'nickname' => $log,
-        //        'password' => 'Test123!',
-        //        'key' => 666666,
-        //    ]);
-        //}
-        for($i = 0; $i < 40; $i++) {
-            Library::query()->firstOrCreate([
-                'user_id' => $user->id,
-                'game_id' => Game::query()->inRandomOrder()->first()->id,
-            ]);
-        }
-
     }
 }

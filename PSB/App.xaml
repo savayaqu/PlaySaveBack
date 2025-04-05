@@ -24,6 +24,7 @@
             <converters:BytesToSizeConverter x:Key="BytesToSizeConverter" />
             <converters:CamelCaseTextConverter x:Key="CamelCaseTextConverter"/>
             <converters:StringToVisibilityConverter x:Key="StringToVisibilityConverter"/>
+            <converters:NullToBoolConverter x:Key="NullToBoolConverter"/>
         </ResourceDictionary>
     </Application.Resources>
 </Application>

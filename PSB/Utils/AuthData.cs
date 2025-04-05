@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.Net.Http;
@@ -16,7 +17,6 @@ namespace PSB.Utils
     public static class AuthData
     {
         private static readonly ApplicationDataContainer LocalSettings = ApplicationData.Current.LocalSettings;
-
         // Токен
         private static string? _token = null;
         public static string? Token
@@ -72,7 +72,28 @@ namespace PSB.Utils
                 LocalSettings.Values["libraries"] = value == null ? null : JsonSerializer.Serialize(value);
             }
         }
-
+        // Подключенные облачные сервисы пользователя
+        private static ObservableCollection<CloudService>? _connectedCloudServices = null;
+        public static ObservableCollection<CloudService> ConnectedCloudServices
+        {
+            get
+            {
+                if (_connectedCloudServices == null)
+                {
+                    var setting = LocalSettings.Values["connectedCloudServices"];
+                    if (setting != null)
+                        _connectedCloudServices = JsonSerializer.Deserialize<ObservableCollection<CloudService>>((string)setting);
+                    else
+                        _connectedCloudServices = new ObservableCollection<CloudService>();
+                }
+                return _connectedCloudServices!;
+            }
+            set
+            {
+                _connectedCloudServices = value;
+                LocalSettings.Values["connectedCloudServices"] = value == null ? null : JsonSerializer.Serialize(value);
+            }
+        }
         // Выход и очистка данных
         public static async Task ExitAndNavigate()
         {

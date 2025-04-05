@@ -11,7 +11,7 @@ namespace PSB.Helpers
 {
     public class ZipHelper
     {
-        public async Task<(string folderName, string zipFilePath, string hash, ulong sizeInBytes)> CreateZip(string folderPath, string gameName, string saveVersion)
+        public static async Task<(string folderName, string zipFilePath, string hash, ulong sizeInBytes)> CreateZip(string folderPath, string gameName, string saveVersion)
         {
             // Получаем путь к месту сохранения
             string UserPath = SettingsData.PathToLocalSaves;
@@ -32,7 +32,7 @@ namespace PSB.Helpers
             return (folderName, zipFilePath, hash, sizeInBytes);
         }
 
-        private async Task<string> ZipFolder(string folderPath, string zipFilePath)
+        private static async Task<string> ZipFolder(string folderPath, string zipFilePath)
         {
             // Проверяем, существует ли исходная папка
             if (!Directory.Exists(folderPath))
@@ -70,11 +70,9 @@ namespace PSB.Helpers
                     entry.LastWriteTime = new FileInfo(file).LastWriteTime;
 
                     // Копируем содержимое файла в архив
-                    using (var entryStream = entry.Open())
-                    using (var fileStream = File.OpenRead(file))
-                    {
-                        await fileStream.CopyToAsync(entryStream);
-                    }
+                    using var entryStream = entry.Open();
+                    using var fileStream = File.OpenRead(file);
+                    await fileStream.CopyToAsync(entryStream);
                 }
             }
 
@@ -85,21 +83,19 @@ namespace PSB.Helpers
             return zipFilePath;
         }
 
-        public string GetRelativePath(string fullPath, string basePath)
+        public static string GetRelativePath(string fullPath, string basePath)
         {
             return Path.GetRelativePath(basePath, fullPath);
         }
 
-        public string CalculateFileHash(string filePath)
+        public static string CalculateFileHash(string filePath)
         {
-            using (var stream = File.OpenRead(filePath))
-            using (var sha256 = SHA256.Create())
-            {
-                var hashBytes = sha256.ComputeHash(stream);
-                return BitConverter.ToString(hashBytes).Replace("-", "").ToLowerInvariant();
-            }
+            using var stream = File.OpenRead(filePath);
+            using var sha256 = SHA256.Create();
+            var hashBytes = sha256.ComputeHash(stream);
+            return Convert.ToHexStringLower(hashBytes);
         }
-        public void DeleteFile(string filePath)
+        public static void DeleteFile(string filePath)
         {
             if (!File.Exists(filePath))
             {
@@ -128,7 +124,7 @@ namespace PSB.Helpers
                 Console.WriteLine($"Ошибка при удалении: {ex.Message}");
             }
         }
-        public async Task<string> CreateBackup(string folderPath, string gameName, string saveVersion)
+        public static async Task<string> CreateBackup(string folderPath, string gameName, string saveVersion)
         {
 
             // Папка temp
@@ -140,7 +136,7 @@ namespace PSB.Helpers
             return zipFilePath;
         }
         // В классе ZipCreator добавляем новый метод
-        public async Task RestoreFromZip(string zipFilePath, string targetFolderPath)
+        public static void RestoreFromZip(string zipFilePath, string targetFolderPath)
         {
             if (!File.Exists(zipFilePath))
             {
@@ -184,15 +180,13 @@ namespace PSB.Helpers
             }
         }
         // Метод для проверки целостности ZIP-архива
-        public async Task<bool> ZipFileValid(string filePath)
+        public static bool ZipFileValid(string filePath)
         {
             try
             {
-                using (var archive = ZipFile.OpenRead(filePath))
-                {
-                    var entries = archive.Entries;
-                    return entries.Count > 0; // Простая проверка
-                }
+                using var archive = ZipFile.OpenRead(filePath);
+                var entries = archive.Entries;
+                return entries.Count > 0; // Простая проверка
             }
             catch
             {

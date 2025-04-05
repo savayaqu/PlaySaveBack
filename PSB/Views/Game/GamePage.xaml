@@ -8,18 +8,54 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:models="using:PSB.Models"
+    xmlns:utils="using:PSB.Utils"
+    xmlns:selectors="using:PSB.Selectors"
+    xmlns:controls="using:CommunityToolkit.WinUI.Controls"
     mc:Ignorable="d"
     Background="{ThemeResource ApplicationPageBackgroundThemeBrush}"
     Name="{x:Bind GameViewModel.Game.Name, Mode=OneWay}">
+    <Page.Resources>
+        <!-- Шаблон для основного Game -->
+        <DataTemplate x:Key="GameContentTemplate" x:DataType="models:Game">
+            <Grid  Background="{StaticResource SolidBackgroundFillColorSecondaryBrush}">
+                <Image Source="{x:Bind Header}" Stretch="UniformToFill" VerticalAlignment="Center"/>
+                <Image Source="{x:Bind LogoImg}" Stretch="Uniform" 
+                       HorizontalAlignment="Left" VerticalAlignment="Center"
+                       Margin="20,80,0,0" Width="300"/>
+            </Grid>
+        </DataTemplate>
 
+        <!-- Шаблон для SideGame -->
+        <DataTemplate x:Key="SideGameContentTemplate" x:DataType="models:SideGame">
+            <Grid  Background="{StaticResource SolidBackgroundFillColorSecondaryBrush}" HorizontalAlignment="Stretch">
+                <!-- Текст SideGame -->
+                <TextBlock Text="{x:Bind Name}"
+                       HorizontalAlignment="Left"
+                           TextAlignment="DetectFromContent"
+                       Padding="36"
+                       VerticalAlignment="Bottom"
+                       Style="{StaticResource DisplayTextBlockStyle}"
+                       TextWrapping="WrapWholeWords"
+                           FontFamily="Centaur"/>
+            </Grid>
+        </DataTemplate>
+        <!-- Селектор шаблонов -->
+        <selectors:GameTemplateSelector x:Key="GameTemplateSelector"
+                            MainGameTemplate="{StaticResource GameContentTemplate}"
+                            SideGameTemplate="{StaticResource SideGameContentTemplate}"/>
+    </Page.Resources>
     <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
         <StackPanel>
-            <Grid>
+            <StackPanel MaxHeight="420">
                 <!-- Картинка или название -->
-                <Grid x:Name="GameContentGrid" Height="420"/>
-                <!-- Блок с информацией  Background="#CC000000" -->
-                <StackPanel VerticalAlignment="Bottom" Background="{StaticResource AcrylicBackgroundFillColorDefaultBrush}">
-                    <Grid>
+                <ContentControl
+                    Content="{x:Bind GameViewModel.Game, Mode=OneWay}"
+                    ContentTemplateSelector="{StaticResource GameTemplateSelector}" Height="350"
+                    HorizontalContentAlignment="Stretch"
+                    VerticalContentAlignment="Stretch"/>
+                <!-- Блок с информацией  -->
+                <StackPanel VerticalAlignment="Center" Background="{StaticResource AcrylicBackgroundFillColorDefaultBrush}" Height="70">
+                    <Grid VerticalAlignment="Center">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="*" />
                             <ColumnDefinition Width="Auto"/>
@@ -37,12 +73,8 @@
                                 </Button>
                             </StackPanel>
                             <StackPanel Orientation="Vertical" Visibility="{x:Bind GameViewModel.InLibrary, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}, ConverterParameter=False}">
-                                <TextBlock Text="СОХРАНЕНИЯ" Style="{StaticResource BodyStrongTextBlockStyle}" Foreground="Gray"/>
-                                <TextBlock  Style="{StaticResource BodyTextBlockStyle}" Text="Синхронизированы| или нет" FontSize="14"/>
-                            </StackPanel>
-                            <StackPanel Orientation="Vertical" Visibility="{x:Bind GameViewModel.InLibrary, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}, ConverterParameter=False}">
                                 <TextBlock Text="ПОСЛЕДНИЙ ЗАПУСК" Style="{StaticResource BodyStrongTextBlockStyle}" Foreground="Gray"/>
-                                <TextBlock  Style="{StaticResource BodyTextBlockStyle}" Text="{x:Bind GameViewModel.LastPlayedText, Mode=OneWay}" FontSize="14"/>
+                                <TextBlock  Style="{StaticResource BodyTextBlockStyle}" Text="{x:Bind GameViewModel.Library.LastPlayedText, Mode=OneWay}" FontSize="14"/>
                             </StackPanel>
                             <StackPanel Orientation="Vertical" Visibility="{x:Bind GameViewModel.InLibrary, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}, ConverterParameter=False}">
                                 <TextBlock Text="ВЫ ИГРАЛИ" Style="{StaticResource BodyStrongTextBlockStyle}" Foreground="Gray"/>
@@ -50,21 +82,24 @@
                             </StackPanel>
                         </StackPanel>
                         <!-- Иконки справа -->
-                        <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="16" Padding="24">
+                        <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="16" Padding="24,0" VerticalAlignment="Center">
                             <!-- Добавить в библиотеку -->
-                            <Button Content="Добавить в библиотеку" Command="{x:Bind GameViewModel.AddToLibraryCommand}" Visibility="{x:Bind GameViewModel.InLibrary, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}, ConverterParameter=True}"/>
-                            <!-- Настройки -->
-                            <Button Command="{x:Bind GameViewModel.OpenGameSettingsCommand, Mode=OneTime}" Visibility="{x:Bind GameViewModel.InLibrary, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}, ConverterParameter=False}">
-                                <FontIcon Glyph="&#xE713;" FontSize="16"/>
-                            </Button>
+                            <Button VerticalAlignment="Center" Content="Добавить в библиотеку" Command="{x:Bind GameViewModel.AddToLibraryCommand}" Visibility="{x:Bind GameViewModel.InLibrary, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}, ConverterParameter=True}"/>
                             <!-- Избранное -->
-                            <Button Command="{x:Bind GameViewModel.ToggleFavoriteCommand, Mode=OneWay}" Visibility="{x:Bind GameViewModel.InLibrary, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}, ConverterParameter=False}">
+                            <Button VerticalAlignment="Center" Height="40" Width="50" Command="{x:Bind GameViewModel.ToggleFavoriteCommand, Mode=OneWay}" Visibility="{x:Bind GameViewModel.InLibrary, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}, ConverterParameter=False}">
                                 <FontIcon Glyph="{x:Bind GameViewModel.FavoriteIcon, Mode=OneWay}" FontSize="16"/>
+                            </Button>
+                            <!-- Настройки -->
+                            <Button Height="40" VerticalAlignment="Center" Command="{x:Bind GameViewModel.OpenGameSettingsCommand, Mode=OneTime}" Visibility="{x:Bind GameViewModel.InLibrary, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}, ConverterParameter=False}">
+                                <StackPanel Orientation="Horizontal" Spacing="12">
+                                    <FontIcon Glyph="&#xE713;" FontSize="16"/>
+                                    <TextBlock Text="Настройки"/>
+                                </StackPanel>
                             </Button>
                         </StackPanel>
                     </Grid>
                 </StackPanel>
-            </Grid>
+            </StackPanel>
             <StackPanel Margin="16,0">
                 <StackPanel Orientation="Vertical" Spacing="12">
                     <StackPanel Orientation="Horizontal">
@@ -93,8 +128,8 @@
                             <Button.Flyout>
                                 <Flyout>
                                     <StackPanel Spacing="6" Width="200">
-                                        <TextBox PlaceholderText="Версия сохранения" Text="{x:Bind GameViewModel.SaveVersion, Mode=TwoWay}"/>
-                                        <TextBox PlaceholderText="Описание сохранения" Text="{x:Bind GameViewModel.SaveDescription, Mode=TwoWay}"/>
+                                        <TextBox Header="Версия"   PlaceholderText="Версия сохранения" Text="{x:Bind GameViewModel.SaveVersion, Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"/>
+                                        <TextBox Header="Описание" PlaceholderText="Описание сохранения" Text="{x:Bind GameViewModel.SaveDescription, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
                                         <Button HorizontalAlignment="Center" Command="{x:Bind GameViewModel.CreateSaveCommand}" Content="Создать"></Button>
                                     </StackPanel>
                                 </Flyout>
@@ -102,19 +137,19 @@
                         </Button>
                         <HyperlinkButton Content="Посмотреть сохранения пользователей к этой игре"/>
                     </StackPanel>
-
+<!-- TODO: пофиксить дату последней синхронизации, переводить в дату пользователя-->
                     <ListView ItemsSource="{x:Bind GameViewModel.Saves, Mode=OneWay}" 
           SelectionMode="None"
           IsItemClickEnabled="False">
                         <ListView.ItemTemplate>
                             <DataTemplate x:DataType="models:Save">
-                                <Expander>
+                                <Expander MinWidth="420">
                                     <Expander.Header>
-                                        <Grid ColumnDefinitions="*,Auto,Auto" Padding="8">
-                                            <TextBlock Text="{x:Bind FileName}" VerticalAlignment="Center">
-                                            </TextBlock>
+                                        <Grid ColumnDefinitions="*,Auto,Auto,Auto" Padding="8">
+                                            <TextBlock Text="{x:Bind FileName}" VerticalAlignment="Center"/>
                                             <TextBlock Text="{x:Bind Version}" Grid.Column="1" Margin="12,0" VerticalAlignment="Center"/>
                                             <TextBlock Text="{x:Bind CreatedAt}" Grid.Column="2" VerticalAlignment="Center"/>
+                                            <FontIcon VerticalAlignment="Center" HorizontalAlignment="Right" Glyph="&#xEDAB;" Foreground="{x:Bind SyncIconColor}" Grid.Column="3" Margin="16,0,0,0" />
                                         </Grid>
                                     </Expander.Header>
 
@@ -134,10 +169,19 @@
                                                 <Run Text="Описание:" FontWeight="SemiBold"/>
                                                 <Run Text="{x:Bind Description}"/>
                                             </TextBlock>
-                                            <TextBlock>
-                                                <Run Text="Последняя синхронизация:" FontWeight="SemiBold"/>
-                                                <Run Text="{x:Bind LastSyncAt}"/>
-                                            </TextBlock>
+                                            <StackPanel Visibility="{x:Bind IsSynced, Converter={StaticResource BoolToVisibilityConverter}}">
+                                                <TextBlock>
+    <Run Text="Последняя синхронизация:" FontWeight="SemiBold"/>
+    <Run Text="{x:Bind LastSyncAt}"/>
+                                                </TextBlock>
+                                                <StackPanel Orientation="Horizontal" Spacing="6">
+                                                    <TextBlock>
+        <Run Text="Синхронизировано на:" FontWeight="SemiBold"/>
+        <Run Text="{x:Bind CloudService.Name}"/>
+                                                    </TextBlock>
+                                                    <Image Height="30" Width="30" Source="{x:Bind CloudService.Icon}"/>
+                                                </StackPanel>
+                                            </StackPanel>
                                         </StackPanel>
 
                                         <!-- Кнопка меню действий -->
@@ -146,17 +190,49 @@ DefaultLabelPosition="Right"
 Background="Transparent"
 Padding="0">
                                             <AppBarButton Icon="Sync" Label="Синхронизировать"
-      Command="{x:Bind vm:GameViewModel.Instance.SyncSaveCommand}"
-      CommandParameter="{x:Bind}"
-      Visibility="{x:Bind IsSynced, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}, ConverterParameter=True}"/>
+              Visibility="{x:Bind IsSynced, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}, ConverterParameter=True}">
+                                                <AppBarButton.Flyout>
+                                                    <Flyout Placement="Bottom">
+                                                        <StackPanel>
+                                                            <TextBlock Text="Выберите облачное хранилище" 
+                           Style="{StaticResource SubtitleTextBlockStyle}"
+                           Margin="0,0,0,8"/>
+
+                                                            <ListView 
+                    ItemsSource="{x:Bind utils:AuthData.ConnectedCloudServices, Mode=OneWay}"
+                    SelectionMode="Single"
+                                         SelectedItem="{x:Bind vm:GameViewModel.Instance.SelectedCloudService, Mode=TwoWay}"                       
+                    x:Name="CloudServicesList"
+                                                                >
+                                                                <ListView.ItemTemplate>
+                                                                    <DataTemplate>
+                                                                        <StackPanel Orientation="Horizontal" Spacing="12" Padding="8">
+                                                                            <Image Height="30" Width="30" Source="{Binding Icon}"/>
+                                                                            <TextBlock Text="{Binding Name}" VerticalAlignment="Center"/>
+                                                                        </StackPanel>
+                                                                    </DataTemplate>
+                                                                </ListView.ItemTemplate>
+                                                            </ListView>
+
+                                                            <Button Content="Синхронизировать" 
+        Command="{x:Bind vm:GameViewModel.Instance.SyncSaveCommand}"
+        CommandParameter="{x:Bind }"
+                                                                    IsEnabled="{x:Bind vm:GameViewModel.Instance.SelectedCloudService, Converter={StaticResource NullToBoolConverter}, Mode=OneWay}"
+        />
+                                                            <!--IsEnabled="{x:Bind vm:GameViewModel.Instance.SelectedCloudService, Mode=OneWay, Converter={StaticResource NullToBoolConverter}}"-->
+                                                        </StackPanel>
+                                                    </Flyout>
+                                                </AppBarButton.Flyout>
+                                            </AppBarButton>
                                             <AppBarButton Icon="Undo" Label="Восстановить"
       Command="{x:Bind vm:GameViewModel.Instance.RestoreSaveCommand}"
       CommandParameter="{x:Bind}"/>
                                             <AppBarButton Icon="Save" Label="Перезаписать">
                                                 <AppBarButton.Flyout>
-                                                    <Flyout>
+                                                    <Flyout Opening="Flyout_Opening">
                                                         <StackPanel Spacing="6" Width="200">
-                                                            <TextBox Loaded="TextBox_Loaded" PlaceholderText="Описание" Text="{x:Bind Description, Mode=TwoWay}"/>
+                                                            <TextBox Header="Версия"   Loaded="TextBox_Loaded" PlaceholderText="Версия" Text="{x:Bind vm:GameViewModel.Instance.SaveVersion, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
+                                                            <TextBox Header="Описание" Loaded="TextBox_Loaded" PlaceholderText="Описание" Text="{x:Bind vm:GameViewModel.Instance.SaveDescription, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
                                                             <Button Command="{x:Bind vm:GameViewModel.Instance.OverwriteSaveCommand}" 
                 CommandParameter="{x:Bind}" 
                 Content="Подтвердить"

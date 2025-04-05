@@ -1,94 +1,326 @@
-﻿using System.Collections.ObjectModel;
+﻿using System;
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.ComponentModel;
 using System.Diagnostics;
+using System.Linq;
+using System.Net;
 using System.Net.Http;
-using System.Text.Json;
+using System.Runtime.CompilerServices;
+using System.Threading;
 using System.Threading.Tasks;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using Microsoft.UI.Dispatching;
 using PSB.Api.Response;
+using PSB.Helpers;
 using PSB.Models;
+using PSB.Views;
 using static PSB.Utils.Fetch;
+
 
 namespace PSB.ViewModels
 {
     public partial class CatalogViewModel : ObservableObject
     {
+        [ObservableProperty]
+        public partial ObservableCollection<Game> Games { get; set; } = new();
 
-        public CatalogViewModel()
-        {
-            _ = LoadGamesAsync();
-        }
-        [ObservableProperty] public partial ObservableCollection<Game> Games { get; set; } = new();
-        [ObservableProperty] public partial int? CurrentPage { get; set; } = 1;
-        [ObservableProperty] public partial int? TotalPages { get; set; } = 1;
-        [ObservableProperty] public partial string? PageInput { get; set; }
-        [ObservableProperty] public partial int? Total { get; set; }
-        [ObservableProperty] public partial string? Name { get; set; } = null;
+        [ObservableProperty]
+        public partial int? CurrentPage { get; set; } = 1;
+        [ObservableProperty]
+        public partial int? TotalPages { get; set; } = 1;
 
+        [ObservableProperty]
+        public partial int? Total { get; set; }
+
+        [ObservableProperty]
+        public partial string? Name { get; set; }
+
+        private bool _isLoading;
+        private CancellationTokenSource? _searchTokenSource;
+
+        [ObservableProperty]
+        public partial ObservableCollection<PageNumberItem> PageItems { get; set; } = new();
 
         [RelayCommand]
-        public async Task LoadGamesAsync(int? page = 1)
+        private void NavigateToPage(int? page)
         {
-            (var res, var body) = await FetchAsync<PaginatedResponse<Game>>(HttpMethod.Get, $"games?page={page}&name={Name}");
-            if (!res.IsSuccessStatusCode || body == null)
-                return;
-
-            // Логируем JSON-ответ
-            string bodyJson = JsonSerializer.Serialize(body, new JsonSerializerOptions
+            Debug.WriteLine("нажата");
+            if (page != null && page != CurrentPage)
             {
-                WriteIndented = true
-            });
-            Debug.WriteLine(bodyJson);
-
-            // Очистка коллекции и добавление новых элементов
-            Games.Clear();
-            foreach (var item in body.Data) // Теперь берем body.Data, а не body напрямую
-            {
-                Games.Add(item);
+                CurrentPage = page;
+                UpdatePageNumbers();
+                LoadGamesAsync(page);
             }
-            // Обновляем информацию о пагинации
-            CurrentPage = body.Meta.CurrentPage;
-            TotalPages = body.Meta.LastPage;
-            Total = body.Meta.Total;
-            Name = null;
         }
+
+        public async Task UpdatePageNumbers()
+        {
+            var items = new List<PageNumberItem>();
+            var pages = new List<int?>();
+            int current = CurrentPage ?? 1;
+            int total = TotalPages ?? 1;
+
+            // Всегда добавляем первую страницу
+            pages.Add(1);
+
+            // Добавляем многоточие, если текущая страница далеко от начала
+            if (current > 3)
+            {
+                pages.Add(null); // null будет обозначать многоточие
+            }
+
+            // Добавляем страницы вокруг текущей
+            int start = Math.Max(2, current - 1);
+            int end = Math.Min(total - 1, current + 1);
+
+            for (int i = start; i <= end; i++)
+            {
+                if (i > 1 && i < total)
+                {
+                    pages.Add(i);
+                }
+            }
+
+            // Добавляем многоточие, если текущая страница далеко от конца
+            if (current < total - 2)
+            {
+                pages.Add(null);
+            }
+
+            // Всегда добавляем последнюю страницу, если она не первая
+            if (total > 1)
+            {
+                pages.Add(total);
+            }
+
+            foreach (var page in pages)
+            {
+                items.Add(new PageNumberItem
+                {
+                    Number = page ?? -1,
+                    IsCurrent = page == CurrentPage,
+                    IsEllipsis = page == null
+
+                });
+            }
+
+            PageItems.Clear();
+            foreach (var item in items)
+            {
+                PageItems.Add(item);
+            }
+        }
+
         [RelayCommand]
+        public async Task LoadGamesAsync(int? page = null)
+        {
+            if (_isLoading) return;
+
+            _isLoading = true;
+            try
+            {
+                var actualPage = page ?? CurrentPage;
+                var query = $"games?page={actualPage}";
+
+                if (!string.IsNullOrEmpty(Name))
+                {
+                    query += $"&name={WebUtility.UrlEncode(Name)}";
+                }
+
+                var (response, body) = await FetchAsync<PaginatedResponse<Game>>(HttpMethod.Get, query);
+
+                if (response.IsSuccessStatusCode && body != null)
+                {
+                    // Создаем копию данных для UI потока
+                    var gamesToAdd = body.Data.ToList();
+                    var currentPage = body.Meta.CurrentPage;
+                    var totalPages = body.Meta.LastPage;
+                    var total = body.Meta.Total;
+                    // Обновляем UI через Dispatcher
+                    await UpdateUIAsync(() =>
+                    {
+                        Games.Clear();
+                        foreach (var item in gamesToAdd)
+                        {
+                            Games.Add(item);
+                        }
+
+                        CurrentPage = currentPage;
+                        TotalPages = totalPages;
+                        Total = total;
+                    });
+                }
+            }
+            finally
+            {
+                _isLoading = false;
+            }
+        }
+
+        private async Task UpdateUIAsync(Action updateAction)
+        {
+            try
+            {
+                // Получаем DispatcherQueue для UI потока
+                var dispatcherQueue = Microsoft.UI.Dispatching.DispatcherQueue.GetForCurrentThread()
+                    ?? App.MainWindow?.DispatcherQueue;
+
+                if (dispatcherQueue == null)
+                {
+                    Debug.WriteLine("DispatcherQueue не доступен");
+                    return;
+                }
+
+                // Если мы уже в UI потоке
+                if (dispatcherQueue.HasThreadAccess)
+                {
+                    updateAction();
+                    UpdatePageNumbers(); // Обновляем номера страниц после загрузки данных
+
+                    return;
+                }
+
+                // Создаем TaskCompletionSource для ожидания завершения
+                var tcs = new TaskCompletionSource<bool>();
+
+                // Отправляем действие в UI поток
+                bool enqueued = dispatcherQueue.TryEnqueue(() =>
+                {
+                    try
+                    {
+                        updateAction();
+                        UpdatePageNumbers(); // Обновляем номера страниц после загрузки данных
+                        tcs.SetResult(true);
+                    }
+                    catch (Exception ex)
+                    {
+                        tcs.SetException(ex);
+                    }
+                });
+
+                if (!enqueued)
+                {
+                    tcs.SetException(new InvalidOperationException("Не удалось отправить задание в DispatcherQueue"));
+                    return;
+                }
+
+                await tcs.Task; // Ожидаем завершения обновления UI
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"Ошибка обновления UI: {ex.Message}");
+                // Здесь можно добавить дополнительную обработку ошибок
+            }
+        }
+
+        [RelayCommand]
+        private async Task SearchGamesAsync()
+        {
+            var currentSearch = Name;
+            _searchTokenSource?.Cancel();
+            _searchTokenSource = new CancellationTokenSource();
+
+            try
+            {
+                await Task.Delay(300, _searchTokenSource.Token);
+
+                if (!_searchTokenSource.IsCancellationRequested && currentSearch == Name)
+                {
+                    CurrentPage = 1;
+                    await LoadGamesAsync(1);
+                }
+            }
+            catch (TaskCanceledException)
+            {
+                Debug.WriteLine("Search was canceled");
+            }
+        }
+        
+        private bool CanGoToPreviousPage() => CurrentPage > 1;
+        private bool CanGoToNextPage() => CurrentPage < TotalPages;
+        partial void OnCurrentPageChanged(int? value)
+        {
+            PreviousPageCommand.NotifyCanExecuteChanged();
+            NextPageCommand.NotifyCanExecuteChanged();
+        }
+
+        partial void OnTotalPagesChanged(int? value)
+        {
+            PreviousPageCommand.NotifyCanExecuteChanged();
+            NextPageCommand.NotifyCanExecuteChanged();
+        }
+
+        [RelayCommand(CanExecute = nameof(CanGoToPreviousPage))]
         private async Task PreviousPageAsync()
         {
-            if (CurrentPage > 1)
-            {
-                await LoadGamesAsync(CurrentPage - 1);
-            }
+            await LoadGamesAsync(CurrentPage - 1);
         }
 
-        [RelayCommand]
+        [RelayCommand(CanExecute = nameof(CanGoToNextPage))]
         private async Task NextPageAsync()
         {
-            if (CurrentPage < TotalPages)
-            {
-                await LoadGamesAsync(CurrentPage + 1);
-            }
+            await LoadGamesAsync(CurrentPage + 1);
         }
-        [RelayCommand]
-        private async Task JumpToPageAsync()
+
+        private string _lastProcessedName = string.Empty;
+        private DateTime _lastNameChangeTime = DateTime.MinValue;
+
+        partial void OnNameChanged(string value)
         {
-            if (int.TryParse(PageInput, out int pageNumber))
+            _lastNameChangeTime = DateTime.Now;
+
+            if (App.NavigationService!.GetCurrentPage() is CatalogPage)
             {
-                // Проверяем, что номер страницы в допустимых пределах
-                if (pageNumber >= 1 && pageNumber <= TotalPages)
-                {
-                    await LoadGamesAsync(pageNumber);
-                }
-                else
-                {
-                    // Если номер страницы некорректен - остаёмся
-                    await LoadGamesAsync(CurrentPage);
-                }
+                HandleSearch();
             }
             else
             {
-                // Если ввод некорректен, очищаем текстовое поле
-                PageInput = string.Empty;
+                App.NavigationService!.Navigate("CatalogPage");
+            }
+        }
+
+        private async void HandleSearch()
+        {
+            try
+            {
+                // Запоминаем текущее значение
+                var currentName = Name;
+                var changeTime = _lastNameChangeTime;
+
+                // Для пустого значения - немедленная загрузка
+                if (string.IsNullOrEmpty(currentName))
+                {
+                    _searchTokenSource?.Cancel();
+                    _lastProcessedName = currentName;
+                    CurrentPage = 1;
+                    await LoadGamesAsync(1);
+                    return;
+                }
+
+                // Для непустого значения - задержка 500 мс
+                await Task.Delay(500);
+
+                // Проверяем, что значение не изменилось за время задержки
+                if (currentName == Name && changeTime == _lastNameChangeTime)
+                {
+                    _searchTokenSource?.Cancel();
+                    _searchTokenSource = new CancellationTokenSource();
+
+                    await Task.Delay(300, _searchTokenSource.Token); // Дополнительная небольшая задержка
+
+                    if (!_searchTokenSource.IsCancellationRequested)
+                    {
+                        _lastProcessedName = currentName;
+                        CurrentPage = 1;
+                        await LoadGamesAsync(1);
+                    }
+                }
+            }
+            catch (TaskCanceledException)
+            {
+                // Игнорируем отмену
             }
         }
     }

@@ -5,13 +5,10 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Net.Http;
-using System.Net.Http.Headers;
 using System.Text.Json;
 using System.Threading.Tasks;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using Microsoft.UI.Xaml;
-using Microsoft.UI.Xaml.Controls;
 using PSB.Api.Request;
 using PSB.Api.Response;
 using PSB.ContentDialogs;
@@ -24,7 +21,6 @@ using static PSB.Utils.Fetch;
 
 namespace PSB.ViewModels
 {
-    //TODO: добавитьь к каждой команде проверку на то что её можно нажать + есть ли папка с сохранениями и т.д.
     public partial class GameViewModel : ObservableObject
     {
         public ProfileViewModel ProfileViewModel { get; set; } = MainWindow.Instance?.ProfileViewModel!;
@@ -33,15 +29,15 @@ namespace PSB.ViewModels
         [ObservableProperty] public partial string Type { get; set; }
         [ObservableProperty] public partial IGame Game { get; set; }
         [ObservableProperty] public partial Library Library { get; set; }
-        [ObservableProperty] public partial string LastPlayedText { get; set; }
-        [ObservableProperty] public partial string PlayedHoursText { get; set; }
         [ObservableProperty] public partial Boolean IsFavorite { get; set; } = false;
         [ObservableProperty] public partial Boolean InLibrary { get; set; }
         [ObservableProperty] public partial string FilePath { get; set; }
         [ObservableProperty] public partial string FolderPath { get; set; }
         [ObservableProperty] public partial Boolean IsUploading { get; set; }
-        [ObservableProperty] public partial string SaveDescription { get; set; } = "";
-        [ObservableProperty] public partial string SaveVersion { get; set; } = "";
+
+        [ObservableProperty] public partial CloudService? SelectedCloudService { get; set; } = null;
+        [ObservableProperty] public partial string SaveDescription { get; set; } = string.Empty;
+        [ObservableProperty] public partial string SaveVersion { get; set; } = string.Empty;
         [ObservableProperty] public partial ObservableCollection<Save> Saves { get; set; } = new ObservableCollection<Save>();
         public event Action? GameLoaded;
 
@@ -54,6 +50,11 @@ namespace PSB.ViewModels
         [NotifyCanExecuteChangedFor(nameof(OverwriteSaveCommand))]
         [NotifyCanExecuteChangedFor(nameof(RestoreSaveCommand))]
         public partial Boolean FolderSavesExists { get; set; } = false;
+
+        [ObservableProperty]
+        [NotifyCanExecuteChangedFor(nameof(OverwriteSaveCommand))]
+        [NotifyCanExecuteChangedFor(nameof(CreateSaveCommand))]
+        public partial Boolean VersionExists { get; set; } = false;
 
         partial void OnFolderPathChanged(string value)
         {
@@ -73,6 +74,17 @@ namespace PSB.ViewModels
         {
             OnPropertyChanged(nameof(FavoriteIcon));
         }
+        partial void OnSaveVersionChanged(string value)
+        {
+            VersionExists = Saves?.Any(s => s.Version == value) ?? false;
+            SaveVersion = value;
+            OverwriteSaveCommand.NotifyCanExecuteChanged();
+            CreateSaveCommand.NotifyCanExecuteChanged();
+        }
+        private bool CanCreateOverwriteSave()
+        {
+            return FolderSavesExists && !string.IsNullOrEmpty(SaveVersion) && !VersionExists;
+        }
         public GameViewModel(ulong gameId, string type)
         {
 
@@ -86,21 +98,14 @@ namespace PSB.ViewModels
             }, TaskScheduler.FromCurrentSynchronizationContext());
 
         }
-        [RelayCommand(CanExecute = nameof(FolderSavesExists))]
+        [RelayCommand(CanExecute = nameof(CanCreateOverwriteSave))]
         private async Task CreateSave()
         {
-            bool versionExist = Saves?.Any(s => s.Version == SaveVersion) ?? false;
-            //TODO: доработать, запретить нажимать кнопку, если версия сходится
-            if (versionExist)
-            {
-                SaveVersion = "go to na xyu";
-                return;
-            }
             if (FolderPath == null)
                 return;
             Debug.WriteLine("Folder Path " + FolderPath);
 
-            var (folderName, zipPath, hash, size) = await App.ZipHelper!.CreateZip(FolderPath, Game.Name, SaveVersion);
+            var (folderName, zipPath, hash, size) = await Helpers.ZipHelper.CreateZip(FolderPath, Game.Name, SaveVersion);
 
             var newSave = new Save
             {
@@ -117,34 +122,156 @@ namespace PSB.ViewModels
                 CreatedAt = DateTime.Now,
             };
             Saves.Add(newSave);
-            SavesDataManager<IGame>.SaveSaves(Game, Saves.ToList());
+            SavesDataManager<IGame>.SaveSaves(Game, [.. Saves]);
+        }
+        [RelayCommand(CanExecute = nameof(CanCreateOverwriteSave))]
+        private async Task OverwriteSave(Save existingSave)
+        {
+            if (!existingSave.IsSynced)
+            {
+                try
+                {
+                    // Создаем бэкап перед перезаписью
+                    string backupPath = await Helpers.ZipHelper.CreateBackup(
+                        FolderPath,
+                        Game.Name,
+                        $"{existingSave.Version}_backup_{DateTime.Now:yyyyMMdd_HHmmss}");
+
+                    Debug.WriteLine($"Создан бэкап: {backupPath}");
+
+                    // Перезаписываем сохранение
+                    var (folderName, zipPath, hash, size) = await Helpers.ZipHelper.CreateZip(
+                        FolderPath,
+                        Game.Name,
+                        existingSave.Version);
+
+                    existingSave.FileName = $"{folderName}.zip";
+                    existingSave.Hash = hash;
+                    existingSave.Size = size;
+                    existingSave.ZipPath = zipPath;
+                    existingSave.Version = SaveVersion;
+                    existingSave.Description = SaveDescription;
+                    existingSave.CreatedAt = DateTime.Now;
+
+                    // Удаляем старый файл, если путь изменился
+                    if (existingSave.ZipPath != zipPath && File.Exists(existingSave.ZipPath))
+                    {
+                        Helpers.ZipHelper.DeleteFile(existingSave.ZipPath);
+                    }
+
+                    UpdateExistingSave(existingSave, existingSave);
+                    NotificationService.ShowSuccess("Сохранение успешно перезаписано");
+                }
+                catch (Exception ex)
+                {
+                    NotificationService.ShowError($"Ошибка перезаписи: {ex.Message}");
+                    Debug.WriteLine(ex.ToString());
+                }
+                finally
+                {
+                    SaveVersion = "";
+                    SaveDescription = "";
+                }
+            }
+            if (existingSave.IsSynced)
+            {
+                try
+                {
+
+                    var connectedService = AuthData.ConnectedCloudServices.FirstOrDefault(s => s.UserCloudServiceId == existingSave.UserCloudServiceId);
+                    if (connectedService != null)
+                    {
+                        SelectedCloudService = connectedService;
+
+                        // Создаем бэкап перед перезаписью
+                        string backupPath = await Helpers.ZipHelper.CreateBackup(
+                            FolderPath,
+                            Game.Name,
+                            $"{existingSave.Version}_backup_{DateTime.Now:yyyyMMdd_HHmmss}");
+
+                        Debug.WriteLine($"Создан бэкап: {backupPath}");
+
+                        // Перезаписываем сохранение
+                        var (folderName, zipPath, hash, size) = await Helpers.ZipHelper.CreateZip(
+                            FolderPath,
+                            Game.Name,
+                            existingSave.Version);
+
+                        (bool success, Save updatedSave) = await CloudFileUploader.OverwriteFileAsync(existingSave, zipPath, SaveVersion, SaveDescription);
+
+                        if (success && updatedSave != null)
+                        {
+                            SaveVersion = "";
+                            SaveDescription = "";
+
+                            UpdateExistingSave(existingSave, updatedSave);
+
+                            NotificationService.ShowSuccess("Файл успешно перезаписан");
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+                    NotificationService.ShowError($"Ошибка перезаписи: {ex.Message}");
+                }
+            }
         }
         [RelayCommand]
         private async Task SyncSave(Save save)
         {
-            if (save.IsSynced == true) return;
-            SaveVersion = save.Version;
-            SaveDescription = save.Description;
-            bool uploadSuccess = await UploadFile(save);
-            if (uploadSuccess)
+            if (save.IsSynced == true || SelectedCloudService == null)
+                return;
+
+            try
             {
-                SaveVersion = "";
-                SaveDescription = "";
-                // Если стоит галочка в настройках об удалении с пк после синхронизации - удаление с пк
-                if (SettingsData.DeleteLocalSaveAfterSync == true)
+                SaveVersion = save.Version;
+                SaveDescription = save.Description;
+                IsUploading = true;
+                (bool uploadSuccess, Save? updatedSave ) = await CloudFileUploader.UploadFileAsync(
+                    save,
+                    SelectedCloudService,
+                    Game,
+                    SaveVersion,
+                    SaveDescription);
+
+                if (uploadSuccess)
                 {
-                    App.ZipHelper!.DeleteFile(save.ZipPath);
+                    SaveVersion = "";
+                    SaveDescription = "";
+
+                    if (SettingsData.DeleteLocalSaveAfterSync)
+                    {
+                        Helpers.ZipHelper.DeleteFile(save.ZipPath);
+                    }
+                    if (updatedSave != null)
+                    {
+                        UpdateExistingSave(save, updatedSave);
+                    }
+                    NotificationService.ShowSuccess($"Сохранение синхронизировано с {SelectedCloudService.Name}");
                 }
-                Saves = new ObservableCollection<Save>(Saves);
-                SavesDataManager<IGame>.SaveSaves(Game, Saves.ToList());
-                OnPropertyChanged(nameof(Saves));
-                NotificationService.ShowSuccess("Сохранение успешно синхронизировано");
+            }
+            catch (Exception ex)
+            {
+                NotificationService.ShowError($"Ошибка синхронизации: {ex.Message}");
+            }
+            finally
+            {
+                IsUploading = false;
             }
         }
-        [RelayCommand(CanExecute = nameof(FolderSavesExists))]
-        private async Task OverwriteSave()
+        private void UpdateExistingSave(Save oldSave, Save newSave)
         {
-            Debug.WriteLine("кнопка перезаписи");
+            var index = Saves.IndexOf(oldSave);
+            // Обновляем в коллекции
+            Saves[index] = newSave;
+            SavesDataManager<IGame>.SaveSaves(Game, [.. Saves]);
+            OnPropertyChanged(nameof(Saves));
+        }
+        public void PrepareOverwrite(Save save)
+        {
+            SaveDescription = save.Description;
+            SaveVersion = save.Version;
+            // Другие инициализации
         }
         [RelayCommand(CanExecute = nameof(FolderSavesExists))]
         public async Task RestoreSave(Save save)
@@ -152,7 +279,7 @@ namespace PSB.ViewModels
             if(save.IsSynced == false)
             {
                 string folderPath = PathDataManager<IGame>.GetSavesFolderPath(Game);
-                await App.ZipHelper!.RestoreFromZip(save.ZipPath, folderPath);
+                Helpers.ZipHelper.RestoreFromZip(save.ZipPath, folderPath);
                 Debug.WriteLine("Сохранения восстановлены");
                 NotificationService.ShowSuccess("Сохранения восстановлены");
                 return;
@@ -172,18 +299,16 @@ namespace PSB.ViewModels
                     return;
                 }
 
-                var res = await FetchAsync(HttpMethod.Get, $"google-drive/download/{save.FileId}");
+                var res = await FetchAsync(HttpMethod.Get, $"saves/{save.Id}google-drive/download");
                 if (res != null && res.IsSuccessStatusCode)
                 {
                     // Асинхронно сохраняем содержимое
-                    await using (var fileStream = File.Create(zipFilePath))
-                    {
-                        await res.Content.CopyToAsync(fileStream);
-                    }
+                    await using var fileStream = File.Create(zipFilePath);
+                    await res.Content.CopyToAsync(fileStream);
                 }
 
                 // 2. Проверка архива
-                if (!await App.ZipHelper!.ZipFileValid(zipFilePath))
+                if (!Helpers.ZipHelper.ZipFileValid(zipFilePath))
                 {
                     Debug.WriteLine("Архив поврежден после загрузки");
                     NotificationService.ShowError("Архив поврежден после загрузки");
@@ -192,7 +317,7 @@ namespace PSB.ViewModels
 
                 // 3. Восстановление
                 string folderPath = PathDataManager<IGame>.GetSavesFolderPath(Game);
-                await App.ZipHelper!.RestoreFromZip(zipFilePath, folderPath);
+                Helpers.ZipHelper.RestoreFromZip(zipFilePath, folderPath);
 
                 NotificationService.ShowSuccess("Восстановление завершено успешно");
                 Debug.WriteLine("Восстановление завершено успешно");
@@ -223,71 +348,69 @@ namespace PSB.ViewModels
                     return;
                 }
 
-                using (Process gameProcess = new Process())
+                using Process gameProcess = new();
+                ProcessStartInfo startInfo = new()
                 {
-                    ProcessStartInfo startInfo = new ProcessStartInfo
+                    FileName = FilePath,
+                    UseShellExecute = true,
+                    WorkingDirectory = Path.GetDirectoryName(FilePath), // Рабочая папка
+                    CreateNoWindow = false,
+                    RedirectStandardOutput = false,
+                    RedirectStandardError = false
+                };
+
+                gameProcess.StartInfo = startInfo;
+                gameProcess.EnableRaisingEvents = true;
+
+                var tcs = new TaskCompletionSource<bool>();
+                gameProcess.Exited += (sender, e) => tcs.TrySetResult(true);
+                DateTime startTime = DateTime.Now;
+
+                try
+                {
+                    gameProcess.Start();
+                }
+                catch (System.ComponentModel.Win32Exception ex)
+                {
+                    Debug.WriteLine("Ошибка запуска: " + ex.Message);
+                    NotificationService.ShowError("Ошибка запуска: " + ex.Message);
+                    return;
+                }
+
+                Debug.WriteLine($"Игра запущена: {FilePath}");
+                await tcs.Task;
+
+                DateTime endTime = DateTime.Now;
+                TimeSpan playTime = endTime - startTime;
+                uint secondsPlayed = (uint)playTime.TotalSeconds;
+
+
+
+                Library.TimePlayed = (Library.TimePlayed ?? 0) + secondsPlayed;
+                Library.LastPlayedAt = endTime;
+                OnPropertyChanged(nameof(Library));
+
+
+                try
+                {
+                    var res = await FetchAsync(
+                        HttpMethod.Patch,
+                        $"library/{Type}/{GameId}/update",
+                        new UpdateLibraryGameRequest(Library.TimePlayed, endTime.ToString("yyyy-MM-dd HH:mm:ss")),
+                        serialize: true
+                    );
+
+                    GameDataManager.SaveGame(Game);
+                    LibraryDataManager<IGame>.SaveLibrary(Game, Library);
+                    if (Saves != null)
                     {
-                        FileName = FilePath,
-                        UseShellExecute = true,
-                        WorkingDirectory = Path.GetDirectoryName(FilePath), // Рабочая папка
-                        CreateNoWindow = false,
-                        RedirectStandardOutput = false,
-                        RedirectStandardError = false
-                    };
-
-                    gameProcess.StartInfo = startInfo;
-                    gameProcess.EnableRaisingEvents = true;
-
-                    var tcs = new TaskCompletionSource<bool>();
-                    gameProcess.Exited += (sender, e) => tcs.TrySetResult(true);
-                    DateTime startTime = DateTime.Now;
-
-                    try
-                    {
-                        gameProcess.Start();
+                        SavesDataManager<IGame>.SaveSaves(Game, [.. Saves]);
                     }
-                    catch (System.ComponentModel.Win32Exception ex)
-                    {
-                        Debug.WriteLine("Ошибка запуска: " + ex.Message);
-                        NotificationService.ShowError("Ошибка запуска: " + ex.Message);
-                        return;
-                    }
-
-                    Debug.WriteLine($"Игра запущена: {FilePath}");
-                    await tcs.Task;
-
-                    DateTime endTime = DateTime.Now;
-                    TimeSpan playTime = endTime - startTime;
-                    uint secondsPlayed = (uint)playTime.TotalSeconds;
-
-
-
-                    Library.TimePlayed = (Library.TimePlayed ?? 0) + secondsPlayed;
-                    Library.LastPlayedAt = endTime;
-                    OnPropertyChanged(nameof(Library));
-
-
-                    try
-                    {
-                        var res = await FetchAsync(
-                            HttpMethod.Patch,
-                            $"library/{Type}/{GameId}/update",
-                            new UpdateLibraryGameRequest(Library.TimePlayed, endTime.ToString("yyyy-MM-dd HH:mm:ss")),
-                            serialize: true
-                        );
-
-                        GameDataManager.SaveGame(Game);
-                        LibraryDataManager<IGame>.SaveLibrary(Game, Library);
-                        if (Saves != null)
-                        {
-                            SavesDataManager<IGame>.SaveSaves(Game, Saves.ToList());
-                        }
-                        UpdateLibraryDetails(Library);
-                    }
-                    catch (HttpRequestException ex)
-                    {
-                        Debug.WriteLine("Ошибка соединения: " + ex.Message);
-                    }
+                    UpdateLibraryDetails(Library);
+                }
+                catch (HttpRequestException ex)
+                {
+                    Debug.WriteLine("Ошибка соединения: " + ex.Message);
                 }
             }
             catch (Exception ex)
@@ -298,13 +421,7 @@ namespace PSB.ViewModels
         [RelayCommand]
         public async Task OpenGameSettings()
         {
-            if (App.DialogService.XamlRoot == null)
-            {
-                Debug.WriteLine("XamlRoot is not set. Call SetXamlRoot first.");
-                return;
-            }
-            var dialog = new GameSettingsContentDialog(Game, this);
-            await App.DialogService.ShowDialogAsync(dialog);
+            await App.DialogService!.ShowDialogAsync(new GameSettingsContentDialog(Game, this));
         }
 
 
@@ -327,64 +444,7 @@ namespace PSB.ViewModels
             }
             App.LibraryService!.UpdateLibraryMenu();
         }
-        public async Task<bool> UploadFile(Save save)
-        {
-            if (!File.Exists(save.ZipPath))
-            {
-                Debug.WriteLine("Файл не найден.");
-                return false;
-            }
-
-            try
-            {
-                IsUploading = true;
-
-                // Читаем файл в массив байтов
-                var fileBytes = await File.ReadAllBytesAsync(save.ZipPath);
-
-                // Создаем MultipartFormDataContent
-                var content = new MultipartFormDataContent
-                {
-                    { new ByteArrayContent(fileBytes), "file", Path.GetFileName(save.ZipPath) },
-                    { new StringContent(SaveVersion), "version" },
-                    { new StringContent(GameId.ToString()), Game is SideGame ? "side_game_id" : "game_id" },
-                    { new StringContent(SaveDescription), "description" }
-                };
-
-               (var res, var body) = await FetchAsync<Save>(HttpMethod.Post, "google-drive/upload", body: content);
-
-
-                // Если статус ответа не успешный
-                if (!res.IsSuccessStatusCode)
-                {
-                    Debug.WriteLine($"Ошибка при загрузке файла: {res.StatusCode}");
-                    return false;
-                }
-                if(body != null)
-                {
-                    var index = Saves.IndexOf(save);
-                    if (index != -1)
-                    {
-                        Debug.WriteLine("сохранение найдено");
-                        body.IsSynced = true;
-                        Saves[index] = body;
-                        SavesDataManager<IGame>.SaveSaves(Game, [.. Saves]);
-                    }
-
-                }
-                return true;
-
-            }
-            catch (Exception ex)
-            {
-                Debug.WriteLine($"Ошибка: {ex.Message}");
-                return false;
-            }
-            finally
-            {
-                IsUploading = false;
-            }
-        }
+  
         [RelayCommand]
         public async Task DeleteSave(Save save)
         {
@@ -393,7 +453,7 @@ namespace PSB.ViewModels
                 // Удаление из коллекции
                 Saves?.Remove(save);
                 // Удаление с пк
-                App.ZipHelper!.DeleteFile(save.ZipPath);
+                Helpers.ZipHelper.DeleteFile(save.ZipPath);
                 SavesDataManager<IGame>.SaveSaves(Game, [.. Saves]);
                 NotificationService.ShowSuccess($"Сохранение {save.FileName} {save.Version} удалено.");
                 return;
@@ -401,7 +461,7 @@ namespace PSB.ViewModels
             try
             {
                 // Отправляем запрос на удаление файла
-                var res = await FetchAsync(HttpMethod.Delete,$"google-drive/delete/{save.FileId}");
+                var res = await FetchAsync(HttpMethod.Delete,$"saves/{save.Id}/google-drive/delete");
 
                 if (res.IsSuccessStatusCode)
                 {
@@ -409,7 +469,7 @@ namespace PSB.ViewModels
                     Saves?.Remove(save);
                     if (save.ZipPath != null)
                     {
-                        App.ZipHelper!.DeleteFile(save.ZipPath);
+                        Helpers.ZipHelper.DeleteFile(save.ZipPath);
                     }
                     Debug.WriteLine($"Сохранение {save.FileName} удалено.");
                     NotificationService.ShowSuccess($"Сохранение {save.FileName} {save.Version} удалено.");
@@ -444,7 +504,7 @@ namespace PSB.ViewModels
                 LibraryDataManager<IGame>.SaveLibrary(Game, Library);
                 if (Saves != null)
                 {
-                    SavesDataManager<IGame>.SaveSaves(Game, Saves.ToList());
+                    SavesDataManager<IGame>.SaveSaves(Game, [.. Saves]);
                 }
 
                 // Вызываем обновление интерфейса
@@ -461,15 +521,8 @@ namespace PSB.ViewModels
             if (!res.IsSuccessStatusCode || body == null)
                 return;
 
-            // Логируем JSON-ответ
-            string bodyJson = JsonSerializer.Serialize(body, new JsonSerializerOptions
-            {
-                WriteIndented = true
-            });
-            Debug.WriteLine(bodyJson);
-
             // Сохраняем локальные несинхронизированные сохранения
-            var localSaves = Saves?.Where(s => !s.IsSynced).ToList() ?? new List<Save>();
+            var localSaves = Saves?.Where(s => !s.IsSynced).ToList() ?? [];
 
             // Очистка коллекции
             Saves.Clear();
@@ -505,7 +558,7 @@ namespace PSB.ViewModels
                     if (cachedGame != null)
                     {
                         Game = cachedGame;
-                        Saves = new ObservableCollection<Save>(cachedSaves ?? new List<Save>());
+                        Saves = [.. cachedSaves ?? []];
                         Library = cachedLibrary;
 
                         FilePath = PathDataManager<IGame>.GetFilePath(Game) ?? string.Empty;
@@ -564,8 +617,8 @@ namespace PSB.ViewModels
                         {
                             save.IsSynced = true;
                         }
-                        Saves = new ObservableCollection<Save>(body.Saves ?? new List<Save>());
-                        SavesDataManager<IGame>.SaveSaves(Game, Saves.ToList());
+                        Saves = [.. body.Saves ?? []];
+                        SavesDataManager<IGame>.SaveSaves(Game, [.. Saves]);
                     }
                     Debug.WriteLine($"Данные для игры '{GameId}' сохранены в кэше.");
                 }
@@ -582,36 +635,14 @@ namespace PSB.ViewModels
         {
             if (library != null)
             {
-                LastPlayedText = library.LastPlayedAt.HasValue
-                    ? $"Последний запуск {GetDaysAgoText(library.LastPlayedAt.Value)}"
-                    : "Последний запуск: Никогда";
-                PlayedHoursText = $"Сыграно {(library.TimePlayed ?? 0) / 3600} часов";
                 IsFavorite = library.IsFavorite;
                 InLibrary = true;
             }
             else
             {
-                LastPlayedText = "Последний запуск: Никогда";
-                PlayedHoursText = "Сыграно 0 часов";
                 InLibrary = false;
             }
-            OnPropertyChanged(nameof(LastPlayedText));
-            OnPropertyChanged(nameof(PlayedHoursText));
-            OnPropertyChanged(nameof(IsFavorite));
-            OnPropertyChanged(nameof(InLibrary));
-        }
-
-
-
-        private string GetDaysAgoText(DateTime lastPlayed)
-        {
-            var daysAgo = (DateTime.UtcNow - lastPlayed).Days;
-            return daysAgo switch
-            {
-                0 => "сегодня",
-                1 => "вчера",
-                _ => $"{daysAgo} дней назад"
-            };
+            OnPropertyChanged(nameof(Library));
         }
     }
 }

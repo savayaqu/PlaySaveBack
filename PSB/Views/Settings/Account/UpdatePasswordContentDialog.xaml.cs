@@ -41,7 +41,7 @@ namespace PSB.Views.Settings.Account
             if (sender is ToggleButton toggleButton && toggleButton.Tag is string tag)
             {
                 // Находим PasswordBox по Tag
-                var passwordBox = FindChild<PasswordBox>(toggleButton.Parent as StackPanel, tag);
+                var passwordBox = FindChild<PasswordBox>((StackPanel)toggleButton.Parent, tag);
                 if (passwordBox != null)
                 {
                     passwordBox.PasswordRevealMode = PasswordRevealMode.Visible; // Показываем пароль
@@ -54,7 +54,7 @@ namespace PSB.Views.Settings.Account
             if (sender is ToggleButton toggleButton && toggleButton.Tag is string tag)
             {
                 // Находим PasswordBox по Tag
-                var passwordBox = FindChild<PasswordBox>(toggleButton.Parent as StackPanel, tag);
+                var passwordBox = FindChild<PasswordBox>((StackPanel)toggleButton.Parent, tag);
                 if (passwordBox != null)
                 {
                     passwordBox.PasswordRevealMode = PasswordRevealMode.Hidden; // Скрываем пароль
@@ -63,7 +63,7 @@ namespace PSB.Views.Settings.Account
         }
 
         // Вспомогательный метод для поиска дочернего элемента по Tag
-        private T FindChild<T>(DependencyObject parent, string tag) where T : FrameworkElement
+        private T? FindChild<T>(DependencyObject parent, string tag) where T : FrameworkElement
         {
             if (parent == null) return null;
 

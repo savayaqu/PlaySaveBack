@@ -16,7 +16,6 @@ namespace PSB.Views
     public sealed partial class GamePage : Page
     {
         public GameViewModel? GameViewModel { get; set; }
-
         public GamePage()
         {
             this.InitializeComponent();
@@ -40,71 +39,25 @@ namespace PSB.Views
         {
             if (GameViewModel?.Game != null)
             {
-                // Очищаем предыдущий контент
-                GameContentGrid.Children.Clear();
-
-                // Создаем новый контент в зависимости от типа
-                if (GameViewModel.Game is Game game)
-                {
-                    CreateGameContent(game);
-                }
-                else if (GameViewModel.Game is SideGame sideGame)
-                {
-                    CreateSideGameContent(sideGame);
-                }
                 App.MainWindow!.HeaderTextBlock.Text = GameViewModel.Game.Name;
-                App.NavigationService!.SyncNavigationViewSelection(App.NavigationService.GetCurrentPage());
+                App.NavigationService!.SyncNavigationViewSelection(App.NavigationService.GetCurrentPage()!);
             }
-        }
-
-        private void CreateGameContent(Game game)
-        {
-            // Основное изображение игры (фон)
-            var image = new Image
-            {
-                Source = new BitmapImage(new Uri(game.Header!)),
-                Stretch = Stretch.UniformToFill,
-                HorizontalAlignment = HorizontalAlignment.Stretch,
-                VerticalAlignment = VerticalAlignment.Stretch
-            };
-
-            // Логотип игры (смещен влево и немного вниз)
-            var logo = new Image
-            {
-                Source = new BitmapImage(new Uri(game.LogoImg!)),
-                Stretch = Stretch.Uniform,
-                HorizontalAlignment = HorizontalAlignment.Left,
-                VerticalAlignment = VerticalAlignment.Center,
-                Margin = new Thickness(20, 80, 0, 0),
-                Width = 300,
-            };
-
-            GameContentGrid.Children.Add(image);
-            GameContentGrid.Children.Add(logo);
-        }
-
-        private void CreateSideGameContent(SideGame sideGame)
-        {
-            // Создаем TextBlock для SideGame
-            var textBlock = new TextBlock
-            {
-                Text = sideGame.Name,
-                Padding = new Thickness(24, 0, 0, 100),
-                HorizontalAlignment = HorizontalAlignment.Left,
-                VerticalAlignment = VerticalAlignment.Bottom,
-                Style = (Style)Application.Current.Resources["DisplayTextBlockStyle"],
-                TextWrapping = TextWrapping.Wrap,
-                TextAlignment = TextAlignment.Center
-            };
-            GameContentGrid.Background = (Brush)Application.Current.Resources["AcrylicBackgroundFillColorDefaultBrush"];
-            GameContentGrid.Children.Add(textBlock);
         }
 
         private void TextBox_Loaded(object sender, RoutedEventArgs e)
         {
             if (sender is TextBox textBox)
             {
-                textBox.Focus(FocusState.Programmatic);
+                textBox.AllowFocusOnInteraction = true;
+            }
+        }
+        private void Flyout_Opening(object sender, object e)
+        {
+            if (sender is Flyout flyout &&
+                flyout.Target is FrameworkElement element &&
+                element.DataContext is Save save)
+            {
+                GameViewModel!.PrepareOverwrite(save);
             }
         }
     }
