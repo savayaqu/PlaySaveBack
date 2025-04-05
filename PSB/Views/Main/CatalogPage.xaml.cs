@@ -16,6 +16,7 @@ namespace PSB.Views
         {
             CatalogViewModel = App.MainWindow!.CatalogViewModel;
             this.InitializeComponent();
+            this.DataContext = CatalogViewModel;
             this.Loaded += OnPageLoaded; // Восстанавливаем обработчик
         }
 

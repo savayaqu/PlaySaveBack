@@ -6,17 +6,17 @@ namespace PSB.Api.Response
     public class PaginatedResponse<T>
     {
         [JsonPropertyName("data")] public List<T> Data { get; set; } = new();
-        //[JsonPropertyName("links")] public PaginationLinks Links { get; set; } = new();
+        [JsonPropertyName("links")] public PaginationLinks Links { get; set; } = new();
         [JsonPropertyName("meta")] public PaginationMeta Meta { get; set; } = new();
     }
 
-    //public class PaginationLinks
-    //{
-    //    [JsonPropertyName("first")] public string? First { get; set; }
-    //    [JsonPropertyName("last")]  public string? Last { get; set; }
-    //    [JsonPropertyName("prev")]  public string? Prev { get; set; }
-    //    [JsonPropertyName("next")]  public string? Next { get; set; }
-    //}
+    public class PaginationLinks
+    {
+        [JsonPropertyName("first")] public string? First { get; set; }
+        [JsonPropertyName("last")]  public string? Last { get; set; }
+        [JsonPropertyName("prev")]  public string? Prev { get; set; }
+        [JsonPropertyName("next")]  public string? Next { get; set; }
+    }
 
     public class PaginationMeta
     {

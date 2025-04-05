@@ -6,10 +6,12 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
     xmlns:models="using:PSB.Models"
+    xmlns:vm="using:PSB.ViewModels"
+    x:Name="PageRoot"
     mc:Ignorable="d"
     Background="Transparent">
 
-    <ScrollViewer>
+    <ScrollViewer DataContext="{x:Bind CatalogViewModel}">
         <Grid Padding="20" RowDefinitions="Auto,*,Auto">
             <ItemsRepeater ItemsSource="{x:Bind CatalogViewModel.Games, Mode=OneWay}"
                    HorizontalAlignment="Stretch">
@@ -53,28 +55,43 @@
             </ItemsRepeater>
 
         <!-- Пагинация -->
-        <StackPanel Grid.Row="2" Orientation="Vertical" Spacing="10" Margin="0,20,0,0">
-            <StackPanel Orientation="Horizontal" Spacing="6" HorizontalAlignment="Center">
-                <Button Command="{x:Bind CatalogViewModel.PreviousPageCommand}" >
-                    <SymbolIcon Symbol="Previous"/>
-                </Button>
-                <TextBlock Text="{x:Bind CatalogViewModel.CurrentPage, Mode=OneWay}" 
-                       VerticalAlignment="Center"/>
-                <TextBlock Text="/" 
-                       VerticalAlignment="Center"/>
-                <TextBlock Text="{x:Bind CatalogViewModel.TotalPages, Mode=OneWay}" 
-                       VerticalAlignment="Center"/>
-                <Button Command="{x:Bind CatalogViewModel.NextPageCommand}" >
-                    <SymbolIcon Symbol="Next"/>
-                </Button>
-            </StackPanel>
+            <Grid Grid.Row="2" Margin="0,20,0,0">
+                <TextBlock TextAlignment="Center" HorizontalAlignment="Left">
+        <Run Text="{x:Bind CatalogViewModel.Total, Mode=OneWay}"/>
+        <Run Text="результатов"/>
+                </TextBlock>
 
-            <TextBlock TextAlignment="Center" HorizontalAlignment="Center">
-            <Run Text="Всего: " FontWeight="SemiBold"/>
-            <Run Text="{x:Bind CatalogViewModel.Total, Mode=OneWay}"/>
-            </TextBlock>
-        </StackPanel>
-    </Grid>
+                <StackPanel Orientation="Horizontal" Spacing="6" HorizontalAlignment="Center">
+                    <Button Command="{x:Bind CatalogViewModel.PreviousPageCommand}">
+                        <FontIcon Glyph="&#xE973;"/>
+                    </Button>
+
+                    <ItemsControl ItemsSource="{x:Bind CatalogViewModel.PageNumbers, Mode=OneWay}">
+                        <ItemsControl.ItemsPanel>
+                            <ItemsPanelTemplate>
+                                <StackPanel Orientation="Horizontal" Spacing="6"/>
+                            </ItemsPanelTemplate>
+                        </ItemsControl.ItemsPanel>
+
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate x:DataType="x:Int32">
+                                <Button
+                        Content="{x:Bind}"
+                                    MinHeight="30"
+                                    MinWidth="30"
+                        Command="{Binding ElementName=PageRoot, Path=DataContext.NavigateToPageCommand}"
+                        CommandParameter="{x:Bind}"
+                                    Background="{StaticResource AccentAAFillColorSecondaryBrush}"/>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+
+                    <Button Command="{x:Bind CatalogViewModel.NextPageCommand}">
+                        <FontIcon Glyph="&#xE974;"/>
+                    </Button>
+                </StackPanel>
+            </Grid>
+        </Grid>
     </ScrollViewer>
 
 </Page>

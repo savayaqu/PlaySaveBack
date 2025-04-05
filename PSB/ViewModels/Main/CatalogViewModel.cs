@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Diagnostics;
@@ -26,6 +27,7 @@ namespace PSB.ViewModels
 
         [ObservableProperty]
         public partial int? CurrentPage { get; set; } = 1;
+        public bool IsCurrentPage(int? page) => page == CurrentPage;
 
         [ObservableProperty]
         public partial int? TotalPages { get; set; } = 1;
@@ -36,11 +38,69 @@ namespace PSB.ViewModels
         [ObservableProperty]
         public partial string? Name { get; set; }
 
-        [ObservableProperty]
-        public partial string? PageInput { get; set; }
-
         private bool _isLoading;
         private CancellationTokenSource? _searchTokenSource;
+
+        [ObservableProperty]
+        public partial ObservableCollection<int?> PageNumbers { get; set; } = new();
+
+        [RelayCommand]
+        private void NavigateToPage(int? page)
+        {
+            Debug.WriteLine("нажата");
+            if (page != null && page != CurrentPage)
+            {
+                CurrentPage = page;
+                LoadGamesAsync(page);
+            }
+        }
+
+        public void UpdatePageNumbers()
+        {
+            var pages = new List<int?>();
+            int current = CurrentPage ?? 1;
+            int total = TotalPages ?? 1;
+
+            // Всегда добавляем первую страницу
+            pages.Add(1);
+
+            // Добавляем многоточие, если текущая страница далеко от начала
+            if (current > 3)
+            {
+                pages.Add(null); // null будет обозначать многоточие
+            }
+
+            // Добавляем страницы вокруг текущей
+            int start = Math.Max(2, current - 1);
+            int end = Math.Min(total - 1, current + 1);
+
+            for (int i = start; i <= end; i++)
+            {
+                if (i > 1 && i < total)
+                {
+                    pages.Add(i);
+                }
+            }
+
+            // Добавляем многоточие, если текущая страница далеко от конца
+            if (current < total - 2)
+            {
+                pages.Add(null);
+            }
+
+            // Всегда добавляем последнюю страницу, если она не первая
+            if (total > 1)
+            {
+                pages.Add(total);
+            }
+
+            // Обновляем коллекцию для UI
+            PageNumbers.Clear();
+            foreach (var page in pages)
+            {
+                PageNumbers.Add(page);
+            }
+        }
 
         [RelayCommand]
         public async Task LoadGamesAsync(int? page = null)
@@ -67,7 +127,6 @@ namespace PSB.ViewModels
                     var currentPage = body.Meta.CurrentPage;
                     var totalPages = body.Meta.LastPage;
                     var total = body.Meta.Total;
-
                     // Обновляем UI через Dispatcher
                     await UpdateUIAsync(() =>
                     {
@@ -89,7 +148,7 @@ namespace PSB.ViewModels
             }
         }
 
-        private static async Task UpdateUIAsync(Action updateAction)
+        private async Task UpdateUIAsync(Action updateAction)
         {
             try
             {
@@ -107,6 +166,8 @@ namespace PSB.ViewModels
                 if (dispatcherQueue.HasThreadAccess)
                 {
                     updateAction();
+                    UpdatePageNumbers(); // Обновляем номера страниц после загрузки данных
+
                     return;
                 }
 
@@ -119,6 +180,7 @@ namespace PSB.ViewModels
                     try
                     {
                         updateAction();
+                        UpdatePageNumbers(); // Обновляем номера страниц после загрузки данных
                         tcs.SetResult(true);
                     }
                     catch (Exception ex)
@@ -164,26 +226,31 @@ namespace PSB.ViewModels
                 Debug.WriteLine("Search was canceled");
             }
         }
-
-        [RelayCommand]
-        private Task PreviousPageAsync() => CurrentPage > 1
-            ? LoadGamesAsync(CurrentPage - 1)
-            : Task.CompletedTask;
-
-        [RelayCommand]
-        private Task NextPageAsync() => CurrentPage < TotalPages
-            ? LoadGamesAsync(CurrentPage + 1)
-            : Task.CompletedTask;
-
-        [RelayCommand]
-        private Task JumpToPageAsync()
+        
+        private bool CanGoToPreviousPage() => CurrentPage > 1;
+        private bool CanGoToNextPage() => CurrentPage < TotalPages;
+        partial void OnCurrentPageChanged(int? value)
         {
-            if (int.TryParse(PageInput, out int page))
-            {
-                page = Math.Clamp(page, 1, (byte)TotalPages);
-                return LoadGamesAsync(page);
-            }
-            return Task.CompletedTask;
+            PreviousPageCommand.NotifyCanExecuteChanged();
+            NextPageCommand.NotifyCanExecuteChanged();
+        }
+
+        partial void OnTotalPagesChanged(int? value)
+        {
+            PreviousPageCommand.NotifyCanExecuteChanged();
+            NextPageCommand.NotifyCanExecuteChanged();
+        }
+
+        [RelayCommand(CanExecute = nameof(CanGoToPreviousPage))]
+        private async Task PreviousPageAsync()
+        {
+            await LoadGamesAsync(CurrentPage - 1);
+        }
+
+        [RelayCommand(CanExecute = nameof(CanGoToNextPage))]
+        private async Task NextPageAsync()
+        {
+            await LoadGamesAsync(CurrentPage + 1);
         }
 
         private string _lastProcessedName = string.Empty;

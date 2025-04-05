@@ -22,7 +22,8 @@ class GameController extends Controller
             ->when($name, function ($query, $name) {
                 return $query->where('name', 'like', '%' . $name . '%');
             })
-            ->paginate(20);
+            ->simplePaginate(20)
+        ->appends(['name' => $name]);
         return GameResource::collection($games)->response();
     }
     public function getGame(Game $game): JsonResponse
