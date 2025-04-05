@@ -21,7 +21,7 @@ namespace PSB.Selectors
             }
             if(item is IGame game)
             {
-                if(game.Type == "sideGame")
+                if(game.Type == "sidegame")
                     return SideGameTemplate!;
                 else if(game.Type == "game")
                     return MainGameTemplate!;

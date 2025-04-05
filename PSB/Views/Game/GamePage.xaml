@@ -17,37 +17,26 @@
     <Page.Resources>
         <!-- Шаблон для основного Game -->
         <DataTemplate x:Key="GameContentTemplate" x:DataType="models:Game">
-            <Grid Background="{StaticResource AcrylicBackgroundFillColorDefaultBrush}">
-                <!-- Фоновое изображение -->
-                <controls:ConstrainedBox VerticalAlignment="Top"
-                      AspectRatio="3:1">
-                    <Image VerticalAlignment="Center"
-                           Height="420"
-                    Source="{x:Bind Header, Mode=OneWay}" 
-                    Stretch="UniformToFill" />
-                </controls:ConstrainedBox>
-
-                <!-- Логотип -->
-                <Image Source="{x:Bind LogoImg}"
-                   Stretch="Uniform"
-                   HorizontalAlignment="Left"
-                   VerticalAlignment="Center"
-                   Margin="20,80,0,0"
-                   Width="300" />
+            <Grid  Background="{StaticResource SolidBackgroundFillColorSecondaryBrush}">
+                <Image Source="{x:Bind Header}" Stretch="UniformToFill" VerticalAlignment="Center"/>
+                <Image Source="{x:Bind LogoImg}" Stretch="Uniform" 
+                       HorizontalAlignment="Left" VerticalAlignment="Center"
+                       Margin="20,80,0,0" Width="300"/>
             </Grid>
         </DataTemplate>
 
         <!-- Шаблон для SideGame -->
         <DataTemplate x:Key="SideGameContentTemplate" x:DataType="models:SideGame">
-            <Grid Height="420" Background="{StaticResource AcrylicBackgroundFillColorDefaultBrush}">
+            <Grid  Background="{StaticResource SolidBackgroundFillColorSecondaryBrush}" HorizontalAlignment="Stretch">
                 <!-- Текст SideGame -->
                 <TextBlock Text="{x:Bind Name}"
-                       Padding="24,0,0,100"
                        HorizontalAlignment="Left"
+                           TextAlignment="DetectFromContent"
+                       Padding="36"
                        VerticalAlignment="Bottom"
                        Style="{StaticResource DisplayTextBlockStyle}"
-                       TextWrapping="Wrap"
-                       TextAlignment="Center" />
+                       TextWrapping="WrapWholeWords"
+                           FontFamily="Centaur"/>
             </Grid>
         </DataTemplate>
         <!-- Селектор шаблонов -->
@@ -57,15 +46,17 @@
     </Page.Resources>
     <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
         <StackPanel>
-            <Grid>
+            <StackPanel MaxHeight="420">
                 <!-- Картинка или название -->
                 <ContentControl
-              
                         Content="{x:Bind GameViewModel.Game, Mode=OneWay}"
-                    ContentTemplateSelector="{StaticResource GameTemplateSelector}"/>
-                <!-- Блок с информацией  Background="#CC000000" -->
-                <controls:ConstrainedBox VerticalAlignment="Bottom" Background="{StaticResource AcrylicBackgroundFillColorDefaultBrush}">
-                    <Grid>
+                    ContentTemplateSelector="{StaticResource GameTemplateSelector}" Height="350"
+                    HorizontalContentAlignment="Stretch"
+                    VerticalContentAlignment="Stretch"
+                  />
+                <!-- Блок с информацией  -->
+                <StackPanel VerticalAlignment="Center" Background="{StaticResource AcrylicBackgroundFillColorDefaultBrush}" Height="70">
+                    <Grid VerticalAlignment="Center">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="*" />
                             <ColumnDefinition Width="Auto"/>
@@ -92,21 +83,24 @@
                             </StackPanel>
                         </StackPanel>
                         <!-- Иконки справа -->
-                        <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="16" Padding="24">
+                        <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="16" Padding="24,0" VerticalAlignment="Center">
                             <!-- Добавить в библиотеку -->
-                            <Button Content="Добавить в библиотеку" Command="{x:Bind GameViewModel.AddToLibraryCommand}" Visibility="{x:Bind GameViewModel.InLibrary, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}, ConverterParameter=True}"/>
-                            <!-- Настройки -->
-                            <Button Command="{x:Bind GameViewModel.OpenGameSettingsCommand, Mode=OneTime}" Visibility="{x:Bind GameViewModel.InLibrary, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}, ConverterParameter=False}">
-                                <FontIcon Glyph="&#xE713;" FontSize="16"/>
-                            </Button>
+                            <Button VerticalAlignment="Center" Content="Добавить в библиотеку" Command="{x:Bind GameViewModel.AddToLibraryCommand}" Visibility="{x:Bind GameViewModel.InLibrary, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}, ConverterParameter=True}"/>
                             <!-- Избранное -->
-                            <Button Command="{x:Bind GameViewModel.ToggleFavoriteCommand, Mode=OneWay}" Visibility="{x:Bind GameViewModel.InLibrary, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}, ConverterParameter=False}">
+                            <Button VerticalAlignment="Center" Height="40" Width="50" Command="{x:Bind GameViewModel.ToggleFavoriteCommand, Mode=OneWay}" Visibility="{x:Bind GameViewModel.InLibrary, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}, ConverterParameter=False}">
                                 <FontIcon Glyph="{x:Bind GameViewModel.FavoriteIcon, Mode=OneWay}" FontSize="16"/>
+                            </Button>
+                            <!-- Настройки -->
+                            <Button Height="40" VerticalAlignment="Center" Command="{x:Bind GameViewModel.OpenGameSettingsCommand, Mode=OneTime}" Visibility="{x:Bind GameViewModel.InLibrary, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}, ConverterParameter=False}">
+                                <StackPanel Orientation="Horizontal" Spacing="12">
+                                    <FontIcon Glyph="&#xE713;" FontSize="16"/>
+                                    <TextBlock Text="Настройки"/>
+                                </StackPanel>
                             </Button>
                         </StackPanel>
                     </Grid>
-                </controls:ConstrainedBox>
-            </Grid>
+                </StackPanel>
+            </StackPanel>
             <StackPanel Margin="16,0">
                 <StackPanel Orientation="Vertical" Spacing="12">
                     <StackPanel Orientation="Horizontal">
