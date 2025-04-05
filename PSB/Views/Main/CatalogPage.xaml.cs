@@ -1,8 +1,10 @@
 using System;
 using System.Linq;
+using System.Threading.Tasks;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Media.Animation;
+using Microsoft.UI.Xaml.Navigation;
 using PSB.Models;
 using PSB.ViewModels;
 
@@ -19,16 +21,66 @@ namespace PSB.Views
             this.DataContext = CatalogViewModel;
             this.Loaded += OnPageLoaded; // Восстанавливаем обработчик
         }
+        private bool _isFirstLoad = true;
 
         private void OnPageLoaded(object sender, RoutedEventArgs e)
         {
             // Загружаем данные только если коллекция пуста и поиск не задействован
             if (!CatalogViewModel.Games.Any() && string.IsNullOrEmpty(CatalogViewModel.Name))
             {
+                _isFirstLoad = true;
+
                 CatalogViewModel.LoadGamesCommand.ExecuteAsync(null);
             }
         }
+        private void Games_CollectionChanged(object sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
+        {
+            // Прокручиваем вверх только если это не первая загрузка
+            if (!_isFirstLoad)
+            {
+                DispatcherQueue.TryEnqueue(() =>
+                {
+                    ScrollToTopSmoothly();
+                });
+            }
+            _isFirstLoad = false;
+        }
+        private async void ScrollToTopSmoothly()
+        {
+            var scrollViewer = MainScrollViewer;
+            double currentOffset = scrollViewer.VerticalOffset;
+            double duration = 300; // milliseconds
+            double startTime = DateTime.Now.Ticks / TimeSpan.TicksPerMillisecond;
 
+            while (true)
+            {
+                double now = DateTime.Now.Ticks / TimeSpan.TicksPerMillisecond;
+                double elapsed = now - startTime;
+
+                if (elapsed >= duration)
+                {
+                    scrollViewer.ChangeView(null, 0, null, true);
+                    break;
+                }
+
+                double progress = elapsed / duration;
+                double newOffset = currentOffset * (1 - EaseOutQuad(progress));
+
+                scrollViewer.ChangeView(null, newOffset, null, true);
+                await Task.Delay(16); // ~60 FPS
+            }
+        }
+
+        private static double EaseOutQuad(double t)
+        {
+            return t * (2 - t);
+        }
+        protected override void OnNavigatedFrom(NavigationEventArgs e)
+        {
+            // Отписываемся от события при уходе со страницы
+            CatalogViewModel.Games.CollectionChanged -= Games_CollectionChanged;
+            base.OnNavigatedFrom(e);
+        }
         private void OnContainerContentChanging(ListViewBase sender, ContainerContentChangingEventArgs args)
         {
             if (args.ItemContainer.ContentTemplateRoot is Grid root &&

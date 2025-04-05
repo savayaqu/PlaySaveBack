@@ -55,7 +55,7 @@ namespace PSB.ViewModels
             }
         }
 
-        public void UpdatePageNumbers()
+        public async Task UpdatePageNumbers()
         {
             var items = new List<PageNumberItem>();
             var pages = new List<int?>();
