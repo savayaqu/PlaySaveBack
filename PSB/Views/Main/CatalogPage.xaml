@@ -81,7 +81,8 @@
                                     MinWidth="30"
                         Command="{Binding ElementName=PageRoot, Path=DataContext.NavigateToPageCommand}"
                         CommandParameter="{x:Bind}"
-                                    Background="{StaticResource AccentAAFillColorSecondaryBrush}"/>
+                                    Background="{StaticResource AccentAAFillColorSecondaryBrush}"
+                                 />
                             </DataTemplate>
                         </ItemsControl.ItemTemplate>
                     </ItemsControl>

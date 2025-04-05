@@ -9,17 +9,62 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:models="using:PSB.Models"
     xmlns:utils="using:PSB.Utils"
+    xmlns:selectors="using:PSB.Selectors"
+    xmlns:controls="using:CommunityToolkit.WinUI.Controls"
     mc:Ignorable="d"
     Background="{ThemeResource ApplicationPageBackgroundThemeBrush}"
     Name="{x:Bind GameViewModel.Game.Name, Mode=OneWay}">
+    <Page.Resources>
+        <!-- Шаблон для основного Game -->
+        <DataTemplate x:Key="GameContentTemplate" x:DataType="models:Game">
+            <Grid Background="{StaticResource AcrylicBackgroundFillColorDefaultBrush}">
+                <!-- Фоновое изображение -->
+                <controls:ConstrainedBox VerticalAlignment="Top"
+                      AspectRatio="3:1">
+                    <Image VerticalAlignment="Center"
+                           Height="420"
+                    Source="{x:Bind Header, Mode=OneWay}" 
+                    Stretch="UniformToFill" />
+                </controls:ConstrainedBox>
 
+                <!-- Логотип -->
+                <Image Source="{x:Bind LogoImg}"
+                   Stretch="Uniform"
+                   HorizontalAlignment="Left"
+                   VerticalAlignment="Center"
+                   Margin="20,80,0,0"
+                   Width="300" />
+            </Grid>
+        </DataTemplate>
+
+        <!-- Шаблон для SideGame -->
+        <DataTemplate x:Key="SideGameContentTemplate" x:DataType="models:SideGame">
+            <Grid Height="420" Background="{StaticResource AcrylicBackgroundFillColorDefaultBrush}">
+                <!-- Текст SideGame -->
+                <TextBlock Text="{x:Bind Name}"
+                       Padding="24,0,0,100"
+                       HorizontalAlignment="Left"
+                       VerticalAlignment="Bottom"
+                       Style="{StaticResource DisplayTextBlockStyle}"
+                       TextWrapping="Wrap"
+                       TextAlignment="Center" />
+            </Grid>
+        </DataTemplate>
+        <!-- Селектор шаблонов -->
+        <selectors:GameTemplateSelector x:Key="GameTemplateSelector"
+                            MainGameTemplate="{StaticResource GameContentTemplate}"
+                            SideGameTemplate="{StaticResource SideGameContentTemplate}"/>
+    </Page.Resources>
     <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
         <StackPanel>
             <Grid>
                 <!-- Картинка или название -->
-                <Grid x:Name="GameContentGrid" Height="420"/>
+                <ContentControl
+              
+                        Content="{x:Bind GameViewModel.Game, Mode=OneWay}"
+                    ContentTemplateSelector="{StaticResource GameTemplateSelector}"/>
                 <!-- Блок с информацией  Background="#CC000000" -->
-                <StackPanel VerticalAlignment="Bottom" Background="{StaticResource AcrylicBackgroundFillColorDefaultBrush}">
+                <controls:ConstrainedBox VerticalAlignment="Bottom" Background="{StaticResource AcrylicBackgroundFillColorDefaultBrush}">
                     <Grid>
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="*" />
@@ -60,7 +105,7 @@
                             </Button>
                         </StackPanel>
                     </Grid>
-                </StackPanel>
+                </controls:ConstrainedBox>
             </Grid>
             <StackPanel Margin="16,0">
                 <StackPanel Orientation="Vertical" Spacing="12">

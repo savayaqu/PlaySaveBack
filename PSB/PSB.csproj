@@ -57,6 +57,7 @@
     <PackageReference Include="CommunityToolkit.WinUI.Converters" Version="8.2.250402" />
     <PackageReference Include="CommunityToolkit.WinUI.Extensions" Version="8.2.250402" />
 	<PackageReference Include="CommunityToolkit.WinUI.Collections" Version="8.2.250402" />
+	<PackageReference Include="CommunityToolkit.WinUI.Controls.Primitives" Version="8.2.250402" />
 	<PackageReference Include="CommunityToolkit.WinUI.Helpers" Version="8.2.250402" />
     <PackageReference Include="HtmlAgilityPack" Version="1.11.72" />
     <PackageReference Include="Microsoft.Web.WebView2" Version="1.0.2957.106" />

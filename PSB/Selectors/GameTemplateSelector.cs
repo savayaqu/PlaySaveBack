@@ -1,5 +1,6 @@
 ﻿using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
+using PSB.Interfaces;
 using PSB.Models;
 
 namespace PSB.Selectors
@@ -16,6 +17,13 @@ namespace PSB.Selectors
                 if (library.SideGame != null)
                     return SideGameTemplate!;
                 else if (library.Game != null)
+                    return MainGameTemplate!;
+            }
+            if(item is IGame game)
+            {
+                if(game.Type == "sideGame")
+                    return SideGameTemplate!;
+                else if(game.Type == "game")
                     return MainGameTemplate!;
             }
 
