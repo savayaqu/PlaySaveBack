@@ -6,7 +6,7 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
     xmlns:models="using:PSB.Models"
-    xmlns:vm="using:PSB.ViewModels"
+    xmlns:vm="using:PSB.ViewModels" xmlns:helpers="using:PSB.Helpers"
     x:Name="PageRoot"
     mc:Ignorable="d"
     Background="Transparent">
@@ -66,7 +66,7 @@
                         <FontIcon Glyph="&#xE973;"/>
                     </Button>
 
-                    <ItemsControl ItemsSource="{x:Bind CatalogViewModel.PageNumbers, Mode=OneWay}">
+                    <ItemsControl ItemsSource="{x:Bind CatalogViewModel.PageItems, Mode=OneWay}">
                         <ItemsControl.ItemsPanel>
                             <ItemsPanelTemplate>
                                 <StackPanel Orientation="Horizontal" Spacing="6"/>
@@ -74,15 +74,29 @@
                         </ItemsControl.ItemsPanel>
 
                         <ItemsControl.ItemTemplate>
-                            <DataTemplate x:DataType="x:Int32">
-                                <Button
-                        Content="{x:Bind}"
-                                    MinHeight="30"
-                                    MinWidth="30"
-                        Command="{Binding ElementName=PageRoot, Path=DataContext.NavigateToPageCommand}"
-                        CommandParameter="{x:Bind}"
-                                    Background="{StaticResource AccentAAFillColorSecondaryBrush}"
-                                 />
+                            <DataTemplate x:DataType="helpers:PageNumberItem">
+                                <Grid>
+                                    <!-- Кнопка для номеров страниц -->
+                                    <ToggleButton
+                    Visibility="{x:Bind IsEllipsis, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}, ConverterParameter=True}"
+                    Content="{x:Bind Number}"
+                    IsChecked="{x:Bind IsCurrent, Mode=OneWay}"
+                    MinHeight="30"
+                    MinWidth="30"
+                    Command="{Binding ElementName=PageRoot, Path=DataContext.NavigateToPageCommand}"
+                    CommandParameter="{x:Bind Number}"/>
+
+                                    <!-- Многоточие -->
+                                    <TextBlock
+                    Visibility="{x:Bind IsEllipsis, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}, ConverterParameter=False}"
+                    Text="..."
+                                        TextAlignment="Center"
+                                        HorizontalTextAlignment="Center"
+                    VerticalAlignment="Bottom"
+                    HorizontalAlignment="Center"
+                    MinWidth="30"
+                    MinHeight="30"/>
+                                </Grid>
                             </DataTemplate>
                         </ItemsControl.ItemTemplate>
                     </ItemsControl>

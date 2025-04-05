@@ -49,11 +49,10 @@
             <StackPanel MaxHeight="420">
                 <!-- Картинка или название -->
                 <ContentControl
-                        Content="{x:Bind GameViewModel.Game, Mode=OneWay}"
+                    Content="{x:Bind GameViewModel.Game, Mode=OneWay}"
                     ContentTemplateSelector="{StaticResource GameTemplateSelector}" Height="350"
                     HorizontalContentAlignment="Stretch"
-                    VerticalContentAlignment="Stretch"
-                  />
+                    VerticalContentAlignment="Stretch"/>
                 <!-- Блок с информацией  -->
                 <StackPanel VerticalAlignment="Center" Background="{StaticResource AcrylicBackgroundFillColorDefaultBrush}" Height="70">
                     <Grid VerticalAlignment="Center">

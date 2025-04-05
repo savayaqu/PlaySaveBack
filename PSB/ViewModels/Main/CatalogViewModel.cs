@@ -13,6 +13,7 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Microsoft.UI.Dispatching;
 using PSB.Api.Response;
+using PSB.Helpers;
 using PSB.Models;
 using PSB.Views;
 using static PSB.Utils.Fetch;
@@ -27,8 +28,6 @@ namespace PSB.ViewModels
 
         [ObservableProperty]
         public partial int? CurrentPage { get; set; } = 1;
-        public bool IsCurrentPage(int? page) => page == CurrentPage;
-
         [ObservableProperty]
         public partial int? TotalPages { get; set; } = 1;
 
@@ -42,7 +41,7 @@ namespace PSB.ViewModels
         private CancellationTokenSource? _searchTokenSource;
 
         [ObservableProperty]
-        public partial ObservableCollection<int?> PageNumbers { get; set; } = new();
+        public partial ObservableCollection<PageNumberItem> PageItems { get; set; } = new();
 
         [RelayCommand]
         private void NavigateToPage(int? page)
@@ -51,12 +50,14 @@ namespace PSB.ViewModels
             if (page != null && page != CurrentPage)
             {
                 CurrentPage = page;
+                UpdatePageNumbers();
                 LoadGamesAsync(page);
             }
         }
 
         public void UpdatePageNumbers()
         {
+            var items = new List<PageNumberItem>();
             var pages = new List<int?>();
             int current = CurrentPage ?? 1;
             int total = TotalPages ?? 1;
@@ -94,11 +95,21 @@ namespace PSB.ViewModels
                 pages.Add(total);
             }
 
-            // Обновляем коллекцию для UI
-            PageNumbers.Clear();
             foreach (var page in pages)
             {
-                PageNumbers.Add(page);
+                items.Add(new PageNumberItem
+                {
+                    Number = page ?? -1,
+                    IsCurrent = page == CurrentPage,
+                    IsEllipsis = page == null
+
+                });
+            }
+
+            PageItems.Clear();
+            foreach (var item in items)
+            {
+                PageItems.Add(item);
             }
         }
 
