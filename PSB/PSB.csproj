@@ -18,8 +18,9 @@
     <None Remove="Styles\ButtonStyles.xaml" />
     <None Remove="ViewModels\Auth\PinContentDialog.xaml" />
     <None Remove="Views\Auth\KeyContentDialog.xaml" />
-    <None Remove="Views\Auth\LoginWindow.xaml" />
+    <None Remove="Views\Auth\LoginPage.xaml" />
     <None Remove="Views\Auth\RegistrationWindow.xaml" />
+    <None Remove="Views\Auth\RestoreFromKeyPage.xaml" />
     <None Remove="Views\CatalogPage.xaml" />
     <None Remove="Views\GamePage.xaml" />
     <None Remove="Views\HomePage.xaml" />
@@ -72,6 +73,16 @@
     <Folder Include="Views\Main\" />
   </ItemGroup>
   <ItemGroup>
+    <Page Update="Views\Auth\LoginPage.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+  </ItemGroup>
+  <ItemGroup>
+    <Page Update="Views\Auth\RestoreFromKeyPage.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+  </ItemGroup>
+  <ItemGroup>
     <Page Update="Views\Auth\KeyContentDialog.xaml">
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -92,7 +103,7 @@
     </Page>
   </ItemGroup>
   <ItemGroup>
-    <Page Update="Views\Auth\LoginWindow.xaml">
+    <Page Update="Views\Auth\AuthWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
     </Page>
   </ItemGroup>

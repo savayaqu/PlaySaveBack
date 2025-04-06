@@ -14,9 +14,10 @@ namespace PSB
     {
         public static DialogService? DialogService { get; private set; }
         public static MainWindow? MainWindow { get; private set; }
-        public static LoginWindow? LoginWindow { get; private set; }
+        public static AuthWindow? AuthWindow { get; private set; }
         public static RegistrationWindow? RegistrationWindow { get; private set; }
         public static NavigationService? NavigationService { get; private set; }
+        public static AuthNavigationService? AuthNavigationService { get; private set; }
         public static LibraryService? LibraryService { get; private set; }
         public static ZipHelper? ZipHelper { get; private set; }
         public static CloudFileUploader? CloudFileUploader { get; private set; }
@@ -50,7 +51,7 @@ namespace PSB
             }
             else
             {
-                InitializeLoginWindow();
+                InitializeAuthWindow();
             }
             
         }
@@ -100,13 +101,14 @@ namespace PSB
 
             MainWindow.Activate();
         }
-        private static void InitializeLoginWindow()
+        private static void InitializeAuthWindow()
         {
-            LoginWindow = new LoginWindow
+            AuthWindow = new AuthWindow
             {
                 ExtendsContentIntoTitleBar = true
             };
-            LoginWindow.Activate();
+            AuthNavigationService = new AuthNavigationService(AuthWindow.ContentFrame);
+            AuthWindow.Activate();
         }
         private static void InitializeRegistrationWindow()
         {
@@ -119,10 +121,10 @@ namespace PSB
         public static void SwitchToMain()
         {
             InitializeMainWindow();
-            if (LoginWindow != null)
+            if (AuthWindow != null)
             {
-                LoginWindow.Close();
-                LoginWindow = null;
+                AuthWindow.Close();
+                AuthWindow = null;
             }
             if(RegistrationWindow != null)
             {
@@ -132,7 +134,7 @@ namespace PSB
         }
         public static void SwitchToLoginFromMain()
         {
-            InitializeLoginWindow();
+            InitializeAuthWindow();
             if (MainWindow != null)
             {
                 MainWindow.Close();
@@ -142,15 +144,15 @@ namespace PSB
         public static void SwitchToRegistrationFromLogin()
         {
             InitializeRegistrationWindow();
-            if (LoginWindow != null)
+            if (AuthWindow != null)
             {
-                LoginWindow.Close();
-                LoginWindow = null;
+                AuthWindow.Close();
+                AuthWindow = null;
             }
         }
         public static void SwitchToLoginFromRegistration()
         {
-            InitializeLoginWindow();
+            InitializeAuthWindow();
             if (RegistrationWindow != null)
             {
                 RegistrationWindow.Close();

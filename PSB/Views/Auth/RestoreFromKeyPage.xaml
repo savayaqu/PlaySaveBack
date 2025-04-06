@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Page
+    x:Class="PSB.Views.Auth.RestoreFromKeyPage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:local="using:PSB.Views.Auth"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    mc:Ignorable="d"
+    Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
+    <ScrollView Padding="40" VerticalAlignment="Top" HorizontalAlignment="Center">
+        <StackPanel Spacing="16">
+            <!-- Заголовок -->
+            <TextBlock Text="Восстановление пароля"
+                       Style="{StaticResource TitleTextBlockStyle}"
+                       HorizontalAlignment="Center"
+                       Padding="0,40,0,36"
+                       VerticalAlignment="Top"/>
+            <StackPanel Spacing="6">
+                <TextBox PlaceholderText="Логин" Text="{x:Bind RestoreFromKeyViewModel.Login, Mode=TwoWay}"/>
+
+                <TextBlock Text="{x:Bind RestoreFromKeyViewModel.LoginError, Mode=OneWay}"
+                           Foreground="{StaticResource AccentFillColorSelectedTextBackgroundBrush}"
+                           TextWrapping="WrapWholeWords"
+                           Visibility="{x:Bind RestoreFromKeyViewModel.LoginError, Mode=OneWay, Converter={StaticResource StringToVisibilityConverter}}"/>
+            </StackPanel>
+            <StackPanel Spacing="6">
+                <PasswordBox PlaceholderText="KEY" Password="{x:Bind RestoreFromKeyViewModel.Key, Mode=TwoWay}" PasswordChar="#"/>
+
+                <TextBlock Text="{x:Bind RestoreFromKeyViewModel.KeyError, Mode=OneWay}"
+                           Foreground="{StaticResource AccentFillColorSelectedTextBackgroundBrush}"
+                           TextWrapping="WrapWholeWords"
+                           Visibility="{x:Bind RestoreFromKeyViewModel.KeyError, Mode=OneWay, Converter={StaticResource StringToVisibilityConverter}}"/>
+            </StackPanel>
+
+            <StackPanel Spacing="6">
+                <PasswordBox PlaceholderText="Новый пароль" Password="{x:Bind RestoreFromKeyViewModel.NewPassword, Mode=TwoWay}"/>
+
+                <TextBlock Text="{x:Bind RestoreFromKeyViewModel.NewPasswordError, Mode=OneWay}"
+                           Foreground="{StaticResource AccentFillColorSelectedTextBackgroundBrush}"
+                           TextWrapping="WrapWholeWords"
+                           Visibility="{x:Bind RestoreFromKeyViewModel.NewPasswordError, Mode=OneWay, Converter={StaticResource StringToVisibilityConverter}}"/>
+            </StackPanel>
+
+            <StackPanel Spacing="6">
+                <PasswordBox PlaceholderText="Подтвердите ваш пароль" Password="{x:Bind RestoreFromKeyViewModel.NewPasswordConfirmation, Mode=TwoWay}"/>
+
+                <TextBlock Text="{x:Bind RestoreFromKeyViewModel.NewPasswordConfirmationError, Mode=OneWay}"
+                           TextWrapping="WrapWholeWords"
+                           Foreground="{StaticResource AccentFillColorSelectedTextBackgroundBrush}"
+                           Visibility="{x:Bind RestoreFromKeyViewModel.NewPasswordConfirmationError, Mode=OneWay, Converter={StaticResource StringToVisibilityConverter}}"/>
+            </StackPanel>
+            
+            <CheckBox Content="Отключить предыдущие сессии" IsChecked="{x:Bind RestoreFromKeyViewModel.LogoutBool, Mode=TwoWay}"/>
+            
+            <TextBlock Text="{x:Bind RestoreFromKeyViewModel.Error, Mode=OneWay}"
+                       TextWrapping="WrapWholeWords"
+                       Foreground="{StaticResource AccentFillColorSelectedTextBackgroundBrush}"
+                       Visibility="{x:Bind RestoreFromKeyViewModel.Error, Mode=OneWay, Converter={StaticResource StringToVisibilityConverter}}"/>
+
+            <Button Content="Восстановить пароль" Command="{x:Bind RestoreFromKeyViewModel.RestoreCommand}" HorizontalAlignment="Center"/>
+
+            <Button Margin="15" Padding="10" Command="{x:Bind RestoreFromKeyViewModel.NavigateToLoginCommand}" HorizontalAlignment="Center" Style="{StaticResource AccentButtonStyle}">
+                <StackPanel Orientation="Horizontal" Spacing="6">
+                    <FontIcon Glyph="&#xE80F;" />
+                    <TextBlock Text="Вернуться ко входу"/>
+                </StackPanel>
+            </Button>
+        </StackPanel>
+    </ScrollView>
+</Page>

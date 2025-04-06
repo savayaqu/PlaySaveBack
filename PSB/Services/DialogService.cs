@@ -48,6 +48,7 @@ namespace PSB.Services
                 Content = message,
                 PrimaryButtonText = "Да",
                 CloseButtonText = "Отмена",
+                DefaultButton = ContentDialogButton.Primary,
                 XamlRoot = _xamlRoot
             };
             var result = await dialog.ShowAsync();

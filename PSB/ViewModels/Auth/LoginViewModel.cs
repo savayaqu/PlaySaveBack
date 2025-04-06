@@ -69,5 +69,10 @@ namespace PSB.ViewModels
         {
             App.SwitchToRegistrationFromLogin();
         }
+        [RelayCommand]
+        public void Navigate(string tag)
+        {
+            App.AuthNavigationService!.Navigate(tag);
+        }
     }
 }
