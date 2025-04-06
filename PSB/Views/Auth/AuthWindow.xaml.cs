@@ -1,20 +1,27 @@
 using Microsoft.UI;
 using Microsoft.UI.Windowing;
 using Microsoft.UI.Xaml;
+using Microsoft.UI.Xaml.Controls;
+using Microsoft.UI.Xaml.Controls.Primitives;
+using Microsoft.UI.Xaml.Media.Animation;
+using PSB.Services;
 using PSB.ViewModels;
+using PSB.Views.Settings;
 using Windows.Graphics;
 
 
 namespace PSB.Views.Auth
 {
-    public sealed partial class LoginWindow : Window
+    public sealed partial class AuthWindow : Window
     {
         public LoginViewModel LoginViewModel { get; }
-        public LoginWindow()
+        public Frame ContentFrame => AuthContentFrame;
+
+        public AuthWindow()
         {
             LoginViewModel = new LoginViewModel();
             this.InitializeComponent();
-            //RecoverPanel.Visibility = Visibility.Collapsed;
+            AuthContentFrame.Navigate(typeof(LoginPage));
             // Получаем AppWindow
             var hwnd = WinRT.Interop.WindowNative.GetWindowHandle(this);
             var windowId = Win32Interop.GetWindowIdFromWindow(hwnd);
@@ -22,7 +29,6 @@ namespace PSB.Views.Auth
 
             // Устанавливаем фиксированный размер
             appWindow.Resize(new SizeInt32(500, 600));
-
             // Получаем текущий Presenter или создаем новый
             if (appWindow.Presenter is OverlappedPresenter overlappedPresenter)
             {

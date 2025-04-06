@@ -9,7 +9,7 @@
     mc:Ignorable="d"
     Background="{ThemeResource ApplicationPageBackgroundThemeBrush}"
     Title="Обновление почты">
-    <StackPanel>
+    <StackPanel Spacing="16">
         <Button BorderThickness="0" Background="Transparent" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,-40,0,0" Click="Button_Click">
             <FontIcon HorizontalAlignment="Center" VerticalAlignment="Center" Glyph="&#xE711;" />
         </Button>
@@ -21,10 +21,14 @@
             </StackPanel>
         </StackPanel>
         <HyperlinkButton x:Name="nav" Click="Nav_Click" Content="Хотите обновить пароль?"/>
-        <TextBlock Text="Текущая почта:"/>
-        <TextBlock Text="{x:Bind UpdateEmailViewModel.User.Email, Mode=OneWay}"/>
-        <TextBox PlaceholderText="Новая почта" Text="{x:Bind UpdateEmailViewModel.Email, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
-        <TextBlock Text="{x:Bind UpdateEmailViewModel.ErrorEmail, Mode=OneWay}" Visibility="{x:Bind Converter={StaticResource EmptyToVisibilityConverter}}" Foreground="{StaticResource SystemFillColorAttentionBrush}"/>
-        <Button Content="Обновить почту" Command="{x:Bind UpdateEmailViewModel.UpdateEmailCommand, Mode=OneTime}"/>
+        <StackPanel Spacing="6">
+            <TextBlock Text="Текущая почта:"/>
+            <TextBlock Text="{x:Bind UpdateEmailViewModel.User.Email, Mode=OneWay}"/>
+            <TextBox PlaceholderText="Новая почта" Text="{x:Bind UpdateEmailViewModel.Email, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
+            <TextBlock Text="{x:Bind UpdateEmailViewModel.ErrorEmail, Mode=OneWay}"
+                       Visibility="{x:Bind UpdateEmailViewModel.ErrorEmail, Converter={StaticResource StringToVisibilityConverter}}"
+                       Foreground="{StaticResource SystemFillColorAttentionBrush}"/>
+        </StackPanel>
+        <Button HorizontalAlignment="Center" Content="Обновить почту" Command="{x:Bind UpdateEmailViewModel.UpdateEmailCommand, Mode=OneTime}"/>
     </StackPanel>
 </ContentDialog>

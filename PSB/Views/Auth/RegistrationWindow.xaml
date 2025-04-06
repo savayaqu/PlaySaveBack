@@ -79,14 +79,6 @@
             <Button Content="Войти"
                     HorizontalAlignment="Stretch"
                     Command="{x:Bind RegistrationViewModel.GoToLoginCommand}"/>
-
-            <!-- Условия использования -->
-            <TextBlock Text="Нажимая «Зарегистрироваться», вы соглашаетесь с нашими Условиями использования и Политикой конфиденциальности."
-                       Style="{StaticResource CaptionTextBlockStyle}"
-                       HorizontalAlignment="Center"
-                       TextAlignment="Center"
-                       TextWrapping="WrapWholeWords"
-                       Margin="0,8,0,0"/>
         </StackPanel>
     </ScrollViewer>
 </Window>
