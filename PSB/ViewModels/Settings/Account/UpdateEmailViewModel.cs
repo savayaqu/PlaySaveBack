@@ -8,6 +8,7 @@ using Microsoft.UI.Xaml.Controls;
 using PSB.Api.Request;
 using PSB.Api.Response;
 using PSB.Models;
+using PSB.Services;
 using PSB.Utils;
 using static PSB.Utils.Fetch;
 namespace PSB.ViewModels
@@ -18,17 +19,12 @@ namespace PSB.ViewModels
         //TODO: валидацию отображать
 
         [ObservableProperty] public partial User? User { get; set; } = AuthData.User;
-        [ObservableProperty] public partial ContentDialog? ContentDialog { get; set; }
         [ObservableProperty] public partial string? ErrorEmail { get; set; } = null;
 
         [ObservableProperty]
         [NotifyCanExecuteChangedFor(nameof(UpdateEmailCommand))]
         public partial string? Email { get; set; } = "";
         private bool CanUpdate() => !string.IsNullOrEmpty(Email);
-        public UpdateEmailViewModel(ContentDialog contentDialog)
-        {
-            ContentDialog = contentDialog;
-        }
 
         [RelayCommand(CanExecute = nameof(CanUpdate))]
         public async Task UpdateEmail()
@@ -41,8 +37,13 @@ namespace PSB.ViewModels
             if (res.IsSuccessStatusCode)
             {
                 AuthData.User = body;
-                App.MainWindow.ProfileViewModel.User = body;
+                App.MainWindow!.ProfileViewModel.User = body;
+                App.DialogService!.HideDialog();
+                NotificationService.ShowSuccess("Почта обновлена");
             }
+
+            //TODO: взять на заметку, с валидацией в других местах также можно
+
             else if (res.StatusCode == HttpStatusCode.UnprocessableContent)
             {
                 // Получаем содержимое ответа как строку
@@ -56,7 +57,6 @@ namespace PSB.ViewModels
                 return;
             }
 
-            ContentDialog.Hide();
         }
     }
 }

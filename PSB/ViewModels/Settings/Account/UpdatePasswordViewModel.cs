@@ -5,6 +5,7 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using PSB.Api.Request;
 using PSB.Models;
+using PSB.Services;
 using PSB.Utils;
 using static PSB.Utils.Fetch;
 namespace PSB.ViewModels
@@ -33,7 +34,8 @@ namespace PSB.ViewModels
                 serialize: true);
             if (res.IsSuccessStatusCode)
             {
-                Debug.WriteLine("Обновление пароля успешно");
+                App.DialogService!.HideDialog();
+                NotificationService.ShowSuccess("Пароль обновлён");
             }
         }
     }

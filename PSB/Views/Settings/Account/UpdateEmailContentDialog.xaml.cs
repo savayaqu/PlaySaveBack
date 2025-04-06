@@ -2,34 +2,26 @@ using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using PSB.ViewModels;
 
-// To learn more about WinUI, the WinUI project structure,
-// and more about our project templates, see: http://aka.ms/winui-project-info.
-
 namespace PSB.Views.Settings.Account
 {
-    /// <summary>
-    /// An empty page that can be used on its own or navigated to within a Frame.
-    /// </summary>
     public sealed partial class UpdateEmailContentDialog : ContentDialog
     {
-        public UpdateEmailViewModel UpdateEmailViewModel { get; set; }
+        public UpdateEmailViewModel UpdateEmailViewModel { get;  private set; }
         public UpdateEmailContentDialog()
         {
+            UpdateEmailViewModel = new UpdateEmailViewModel(); // РџРµСЂРµРґР°РµРј СЃСЃС‹Р»РєСѓ РЅР° С‚РµРєСѓС‰РёР№ РґРёР°Р»РѕРі
+
             this.InitializeComponent();
-            UpdateEmailViewModel = new UpdateEmailViewModel(this); // Передаем ссылку на текущий диалог
 
             DataContext = UpdateEmailViewModel;
-            nav.Click += Nav_Click; // Обработчик клика на гиперссылку
+            nav.Click += Nav_Click; // РћР±СЂР°Р±РѕС‚С‡РёРє РєР»РёРєР° РЅР° РіРёРїРµСЂСЃСЃС‹Р»РєСѓ
         }
 
         private void Nav_Click(object sender, RoutedEventArgs e)
         {
-            // Меняем контент на форму для обновления пароля
-            var updatePasswordDialog = new UpdatePasswordContentDialog();
-            this.Hide(); // Скрыть текущий диалог
-
-            // Показываем новый диалог
-            _ = App.DialogService.ShowDialogAsync(updatePasswordDialog);
+            this.Hide(); // РЎРєСЂС‹С‚СЊ С‚РµРєСѓС‰РёР№ РґРёР°Р»РѕРі
+            // РџРѕРєР°Р·С‹РІР°РµРј РЅРѕРІС‹Р№ РґРёР°Р»РѕРі
+            _ = App.DialogService!.ShowDialogAsync(new UpdatePasswordContentDialog());
         }
 
         public void Button_Click(object sender, RoutedEventArgs e)
