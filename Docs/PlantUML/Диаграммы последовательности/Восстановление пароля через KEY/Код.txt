@@ -1,0 +1,55 @@
+@startuml
+actor "Пользователь" as user
+participant "Клиент (WinUI)" as client
+participant "Сервер (Laravel)" as server
+participant "База Данных" as db
+
+== Инициация восстановления ==
+
+user -> client : Нажимает "Забыли пароль?"
+client -> user : Показывает модальное окно\nс выбором способа
+user -> client : Выбирает "Восстановить с помощью KEY"
+client -> user : Открывает страницу восстановления\nс формой ввода
+
+== Процесс восстановления ==
+
+user -> client : Вводит:\n- Логин\n- KEY\n- Новый пароль\n- Подтверждение\n- Logout (true/false)
+client -> server : Запрос восстановления пароля через KEY {\n  login: "user123",\n  key: "XXXX-XXXX-XXXX",\n  password: "new_pass",\n  password_confirmation: "new_pass",\n  logout: true\n}
+
+activate server #LightBlue
+note right: (Общее: валид)
+
+server -> db : Поиск пользователя по логину
+activate db
+db --> server : Данные пользователя (id, stored_key)
+deactivate db
+
+alt Ключ неверный
+    server --> client : 401 Unauthorized {"error": "Неверный KEY"}
+else Пароли не совпадают
+    server --> client : 422 Unprocessable {"errors": {"password": ["Пароли не совпадают"]}}
+else Успешная проверка
+    server -> db : Обновление пароля пользователя
+    activate db
+    db --> server : OK
+    deactivate db
+    
+    server -> db : Инвалидация KEY (если одноразовый)
+    activate db
+    db --> server : OK
+    deactivate db
+    
+    alt logout == true
+        server -> db : Удаление всех токенов пользователя
+        activate db
+        db --> server : OK
+        deactivate db
+    end
+    
+    server --> client : 200 OK {"message": "Пароль успешно изменен"}
+end
+
+deactivate server
+
+client -> user : Показывает уведомление:\n"Пароль успешно изменен" (при успехе)
+@enduml

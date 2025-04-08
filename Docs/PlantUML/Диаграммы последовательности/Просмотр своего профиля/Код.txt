@@ -1,0 +1,23 @@
+@startuml
+actor "Пользователь" as user
+participant "Клиент (WinUI)" as client
+participant "Сервер (Laravel)" as server
+participant "База Данных" as db
+
+== Запрос профиля ==
+
+user -> client : Нажимает "Мой профиль"
+client -> server : Запрос данных профиля\nGET /api/profile
+activate server #LightGreen
+note right: (Общее: токен)
+
+server -> db : Получение данных пользователя\nпо ID из токена
+activate db
+db --> server : Данные профиля {\n  id: 123,\n  username: "user123",\n  email: "user@example.com",\n  created_at: "...",\n  ...\n}
+deactivate db
+
+server --> client : 200 OK {\n  "profile": {\n    "username": "user123",\n    "email": "user@example.com",\n    "registration_date": "2023-01-01",\n    ...\n  }\n}
+deactivate server
+
+client -> user : Отображает профиль\nс полученными данными
+@enduml

@@ -1,0 +1,94 @@
+@startuml
+actor "Пользователь" as user
+participant "Клиент (WinUI)" as client
+participant "Сервер (Laravel)" as server
+participant "База Данных" as db
+participant "Файловое хранилище" as storage
+
+== Сценарий 1: Обновление аватара, хедера и ника ==
+
+user -> client : Выбирает "Изменить аватар/хедер"
+client -> user : Покажет форму с полями:\n- Никнейм\n- Аватар (файл/URL)\n- Хедер (файл/URL)
+user -> client : Заполняет данные
+client -> server : Запрос обновления профиля\nPATCH /api/profile {\n  nickname?: "new_nick",\n  avatar?: "url_or_null",\n  avatar_file?: file,\n  header?: "url_or_null",\n  header_file?: file\n}
+
+activate server #LightGreen
+note right: (Общее: токен)
+
+server -> db : Проверка уникальности ника
+activate db
+db --> server : Результат
+deactivate db
+
+alt Передан avatar_file
+    server -> storage : Загрузка avatar_file
+    activate storage
+    storage --> server : URL нового аватара
+    deactivate storage
+end
+
+alt Передан header_file
+    server -> storage : Загрузка header_file
+    activate storage
+    storage --> server : URL нового хедера
+    deactivate storage
+end
+
+server -> db : Обновление данных
+activate db
+db --> server : Обновленный профиль
+deactivate db
+
+server --> client : 200 OK {\n  "avatar": "new_url",\n  "header": "new_url",\n  "nickname": "new_nick"\n}
+deactivate server
+
+== Сценарий 2: Обновление email ==
+
+user -> client : Выбирает "Изменить email"
+client -> user : Покажет поле для email
+user -> client : Вводит новый email
+client -> server : Запрос обновления email\nPATCH /api/profile {\n  email: "new@example.com"\n}
+
+activate server #LightBlue
+note right: (Общее: валид)
+activate server #LightGreen
+note right: (Общее: токен)
+
+server -> db : Проверка уникальности email
+activate db
+db --> server : Результат
+deactivate db
+
+server -> db : Обновление email
+activate db
+db --> server : Подтверждение
+deactivate db
+
+server --> client : 200 OK {\n  "message": "Email обновлен",\n  "new_email": "new@example.com"\n}
+deactivate server
+
+== Сценарий 3: Обновление пароля ==
+
+user -> client : Выбирает "Изменить пароль"
+client -> user : Покажет форму:\n- Текущий пароль\n- Новый пароль\n- Подтверждение
+user -> client : Заполняет данные
+client -> server : Запрос смены пароля\nPATCH /api/profile {\n  current_password: "****",\n  new_password: "******",\n  new_password_confirmation: "******"\n}
+
+activate server #LightBlue
+note right: (Общее: валид)
+activate server #LightGreen
+note right: (Общее: токен)
+
+server -> db : Проверка текущего пароля
+activate db
+db --> server : Результат проверки
+deactivate db
+
+server -> db : Обновление пароля
+activate db
+db --> server : Подтверждение
+deactivate db
+
+server --> client : 200 OK {\n  "message": "Пароль изменен"\n}
+deactivate server
+@enduml
