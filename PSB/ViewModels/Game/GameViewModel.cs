@@ -299,7 +299,7 @@ namespace PSB.ViewModels
                     return;
                 }
 
-                var res = await FetchAsync(HttpMethod.Get, $"saves/{save.Id}google-drive/download");
+                var res = await FetchAsync(HttpMethod.Get, $"saves/{save.Id}/google-drive/download");
                 if (res != null && res.IsSuccessStatusCode)
                 {
                     // Асинхронно сохраняем содержимое
