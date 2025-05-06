@@ -210,7 +210,7 @@ class GoogleDriveController extends Controller
         $googleDriveService = new GoogleDriveService($service);
         $url = $googleDriveService->shareFile($fileId);
 
-        return response()->json(['url' => $url], 200);
+        return response()->json(['url' => $url]);
     }
 
     public function deleteFile(Save $save)

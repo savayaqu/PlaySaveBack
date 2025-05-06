@@ -11,12 +11,15 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using PSB.Api.Request;
 using PSB.Api.Response;
+using PSB.Api.Response.GoogleDrive.Save;
 using PSB.ContentDialogs;
 using PSB.Interfaces;
 using PSB.Models;
 using PSB.Services;
 using PSB.Utils;
 using PSB.Utils.Game;
+using static System.Net.Mime.MediaTypeNames;
+using Windows.ApplicationModel.DataTransfer;
 using static PSB.Utils.Fetch;
 
 namespace PSB.ViewModels
@@ -285,6 +288,7 @@ namespace PSB.ViewModels
                 return;
             }
             string zipFilePath = Path.Combine(Path.GetTempPath(), "game_saves_restore", "saves_backup.zip");
+            Debug.WriteLine($"{zipFilePath}");
 
             try
             {
@@ -484,6 +488,31 @@ namespace PSB.ViewModels
             {
                 Debug.WriteLine($"Ошибка: {ex.Message}");
                 NotificationService.ShowError($"Ошибка: {ex.Message}");
+            }
+        }
+        [RelayCommand]
+        public async Task ShareSave(Save save)
+        {
+            if (save.IsSynced == true)
+            {
+                try
+                {
+                    (var res, var body) = await FetchAsync<ShareSaveResponse>(HttpMethod.Get, $"saves/{save.Id}/google-drive/share");
+                    if (res.IsSuccessStatusCode)
+                    {
+                        if(body != null)
+                        {
+                            var dataPackage = new DataPackage();
+                            dataPackage.SetText(body.Url);
+                            Clipboard.SetContent(dataPackage);
+                            NotificationService.ShowSuccess($"Ссылка сохранена {save.FileName} {save.Version} в буффер обмена.");
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+                    NotificationService.ShowError($"Ошибка: {ex.Message}");
+                }
             }
         }
         [RelayCommand]

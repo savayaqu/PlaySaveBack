@@ -82,9 +82,9 @@
                             </StackPanel>
                         </StackPanel>
                         <!-- Иконки справа -->
-                        <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="16" Padding="24,0" VerticalAlignment="Center">
+                        <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="16" Padding="24,15" VerticalAlignment="Center">
                             <!-- Добавить в библиотеку -->
-                            <Button VerticalAlignment="Center" Content="Добавить в библиотеку" Command="{x:Bind GameViewModel.AddToLibraryCommand}" Visibility="{x:Bind GameViewModel.InLibrary, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}, ConverterParameter=True}"/>
+                            <Button Height="40" VerticalAlignment="Center" Content="Добавить в библиотеку" Command="{x:Bind GameViewModel.AddToLibraryCommand}" Visibility="{x:Bind GameViewModel.InLibrary, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}, ConverterParameter=True}"/>
                             <!-- Избранное -->
                             <Button VerticalAlignment="Center" Height="40" Width="50" Command="{x:Bind GameViewModel.ToggleFavoriteCommand, Mode=OneWay}" Visibility="{x:Bind GameViewModel.InLibrary, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}, ConverterParameter=False}">
                                 <FontIcon Glyph="{x:Bind GameViewModel.FavoriteIcon, Mode=OneWay}" FontSize="16"/>
@@ -244,6 +244,13 @@ Padding="0">
                                             <AppBarButton Icon="Delete" Label="Удалить"
       Command="{x:Bind vm:GameViewModel.Instance.DeleteSaveCommand}"
       CommandParameter="{x:Bind}"/>
+                                            <CommandBar.SecondaryCommands>
+                                                <!-- TODO: -->
+                                                <AppBarButton Icon="Share" Label="Поделиться"
+                                                              Command="{x:Bind vm:GameViewModel.Instance.ShareSaveCommand}"
+                                                              CommandParameter="{x:Bind}"/>
+                                            </CommandBar.SecondaryCommands>
+                                           
                                         </CommandBar>
                                     </Grid>
                                 </Expander>

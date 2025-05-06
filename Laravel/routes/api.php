@@ -44,18 +44,6 @@ Route::middleware('auth:sanctum')->group(function () {
             });
         });
     });
-    Route::controller(SavePostController::class)->group(function () {
-        Route::prefix('posts')->group(function () {
-
-            Route::prefix('create/{save}')->group(function () {
-                Route::post('', 'createPost'); //Создать пост к сохранению
-            });
-            //TODO: do this
-            Route::get('', 'getPosts'); // Просмотр всех постов
-            Route::get('{savePost}', 'showPost'); // Просмотр конкретного поста
-            Route::get('game/{game}', 'showPostToGame'); // Просмотр постов к игре
-        });
-    });
     Route::controller(SaveController::class)->group(function () {
         Route::prefix('saves')->group(function () {
             // Просмотр своих сохранений
