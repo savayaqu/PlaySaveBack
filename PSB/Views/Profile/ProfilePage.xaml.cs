@@ -20,21 +20,5 @@ namespace PSB.Views
             this.InitializeComponent();
             ProfileViewModel = App.MainWindow!.ProfileViewModel;
         }
-        private void OnGameTapped(object sender, TappedRoutedEventArgs e)
-        {
-            if (sender is FrameworkElement element && element.DataContext is Library library)
-            {
-                if (library.Game != null)
-                {
-                    string gameTag = $"Game_{library.Game.Id}|{library.Game.Name}";
-                    App.NavigationService!.Navigate(gameTag);
-                }
-                if (library.SideGame != null)
-                {
-                    string gameTag = $"SideGame_{library.SideGame.Id}|{library.SideGame.Name}";
-                    App.NavigationService!.Navigate(gameTag);
-                }
-            }
-        }
     }
 }

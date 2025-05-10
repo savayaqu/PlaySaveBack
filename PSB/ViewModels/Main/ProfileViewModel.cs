@@ -1,12 +1,14 @@
 ﻿using System;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
+using System.Globalization;
 using System.IO;
 using System.Net.Http;
 using System.Threading.Tasks;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using PSB.Api.Request;
+using PSB.Api.Response;
 using PSB.Helpers;
 using PSB.Interfaces;
 using PSB.Models;
@@ -24,11 +26,13 @@ namespace PSB.ViewModels
         // Профиль и библиотека берутся из AuthData
         [ObservableProperty] public partial User? User { get; set; } = AuthData.User;
         public ObservableCollection<Library> Libraries => AuthData.Libraries;
-
+        public ObservableCollection<RecentlyPlayed> GamesRecentlyPlayed = [];
+        [ObservableProperty] public partial uint TotalPlayed { get; set; }
         public ProfileViewModel()
         {
             _ = LoadProfileAsync();
             _ = LoadLibraryAsync();
+            _ = LoadStatistic();
         }
 
         [RelayCommand]
@@ -55,7 +59,27 @@ namespace PSB.ViewModels
         {
             _ = AuthData.ExitAndNavigate();
         }
+        [RelayCommand]
+        private void SelectGame(IGame game)
+        {
+            if (game != null)
+            {
+                string type = game.Type == "game" ? "Game" : "SideGame";
+                string gameTag = $"{type}_{game.Id}|{game.Name}";
+                App.NavigationService!.Navigate(gameTag);
+            }
+        }
+        [RelayCommand]
+        public async Task LoadStatistic()
+        {
+            (var res, var body) = await FetchAsync<StatisticResponse>(HttpMethod.Get, "profile/statistic");
+            if (res.IsSuccessStatusCode && body != null)
+            {
+                TotalPlayed = body.TotalPlayed;
+                GamesRecentlyPlayed = [.. body.RecentlyPlayed];
+            }
 
+        }
         [RelayCommand]
         public async Task AddSideGame()
         {

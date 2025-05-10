@@ -7,7 +7,6 @@ use App\Http\Controllers\Api\UserController;
 use App\Http\Controllers\Api\LibraryController;
 use App\Http\Controllers\Api\SideGameController;
 use App\Http\Controllers\GoogleDriveController;
-use App\Http\Controllers\Api\SavePostController;
 use Illuminate\Support\Facades\Route;
 
 Route::controller(AuthController::class)->group(function () {
@@ -22,6 +21,7 @@ Route::controller(AuthController::class)->group(function () {
 Route::middleware('auth:sanctum')->group(function () {
     Route::controller(UserController::class)->group(function () {
         Route::prefix('profile')->group(function () {
+            Route::get('statistic', 'getStatistic'); // Статистика
             Route::get('', 'getProfile');            // Просмотр своего профиля
             Route::get('services', 'getCloudServices'); //Просмотр своих подключенных облачных сервисов
             Route::post('', 'updateProfile');        // Обновление профиля

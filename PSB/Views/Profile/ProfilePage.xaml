@@ -1,49 +1,86 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Page
     x:Class="PSB.Views.ProfilePage"
+    x:Name="profilePage"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:local="using:PSB.Views"
     xmlns:utils="using:PSB.Utils"
     xmlns:rescol="using:PSB.Api.Response"
+    xmlns:vm="using:PSB.ViewModels"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
-    xmlns:selectors="using:PSB.Selectors"
+    xmlns:selectors="using:PSB.Selectors" xmlns:models="using:PSB.Models"
     mc:Ignorable="d"
     Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
 
     <Page.Resources>
         <!-- Шаблон для основной игры -->
         <DataTemplate x:Key="MainGameTemplate">
-            <Grid Width="150" Height="225"
-                        HorizontalAlignment="Center"
-                        Tapped="OnGameTapped">
-                <Image Source="{Binding Game.LibraryImg}" 
-                       Width="150" Height="225" Stretch="UniformToFill"/>
-                <Grid ColumnDefinitions="Auto,Auto"  VerticalAlignment="Top" Background="{ThemeResource SystemControlAltMediumLowAcrylicWindowMediumBrush}" Margin="8" Padding="4" BorderBrush="{StaticResource ControlStrongStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="6" ColumnSpacing="6">
-                    <FontIcon VerticalAlignment="Top" Glyph="&#xE823;"/>
-                    <TextBlock Grid.Column="1" Text="{Binding TimePlayed, Converter={StaticResource TimePlayedConverter}}"/>
+            <Button Command="{Binding ElementName=profilePage, Path=ProfileViewModel.SelectGameCommand, Mode=OneWay}" CommandParameter="{Binding Game}" Background="Transparent">
+                <Grid Width="200" Height="300"
+      MinWidth="134" MinHeight="201"
+      MaxWidth="230" MaxHeight="345">
+                    <Image Source="{Binding Game.LibraryImg}" 
+           Stretch="UniformToFill"/>
+
+                    <!-- Блок часов с автоматической шириной -->
+                    <Grid VerticalAlignment="Top" 
+          HorizontalAlignment="Left"
+          Margin="8"
+          Background="{ThemeResource SystemControlAltMediumLowAcrylicWindowMediumBrush}"
+          Padding="6,4" 
+          CornerRadius="6"
+          BorderThickness="1"
+          BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+                        <FontIcon Glyph="&#xE823;" VerticalAlignment="Center"/>
+                        <TextBlock Grid.Column="1" 
+                   Text="{Binding TimePlayed, Converter={StaticResource TimePlayedConverter}}"
+                   Margin="4,0,0,0"
+                   MinWidth="40"/>
+                    </Grid>
                 </Grid>
-            </Grid>
+            </Button>
+            
         </DataTemplate>
 
         <!-- Шаблон для сторонней игры -->
         <DataTemplate x:Key="SideGameTemplate">
-            <Grid Width="150" Height="225"
-                        HorizontalAlignment="Center"
-                        Tapped="OnGameTapped" Background="{StaticResource AcrylicBackgroundFillColorDefaultBrush}">
-                <TextBlock Text="{Binding SideGame.Name, Converter={StaticResource CamelCaseTextConverter}}" 
-                          HorizontalAlignment="Center"
-                           Padding="0,49,0,0"
-                           VerticalAlignment="Top"
+            <Button Command="{Binding ElementName=profilePage, Path=ProfileViewModel.SelectGameCommand, Mode=OneWay}" CommandParameter="{Binding SideGame}" Background="Transparent">
+                <Grid Width="200" Height="300"
+                  Background="{StaticResource AcrylicBackgroundFillColorDefaultBrush}">
+                    <TextBlock Text="{Binding SideGame.Name, Converter={StaticResource CamelCaseTextConverter}}" 
+                           HorizontalAlignment="Center"
+                           VerticalAlignment="Center"
                            TextWrapping="Wrap"
                            TextAlignment="Center"
                            Style="{StaticResource SubtitleTextBlockStyle}"/>
-                <Grid ColumnDefinitions="Auto,Auto"  VerticalAlignment="Top" Background="{ThemeResource SystemControlAltMediumLowAcrylicWindowMediumBrush}" Margin="8" Padding="4" BorderBrush="{StaticResource ControlStrongStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="6" ColumnSpacing="6">
-                    <FontIcon VerticalAlignment="Top" Glyph="&#xE823;"/>
-                    <TextBlock Grid.Column="1" Text="{Binding TimePlayed, Converter={StaticResource TimePlayedConverter}}"/>
+
+                    <!-- Блок часов с автоматической шириной -->
+                    <Grid VerticalAlignment="Top" 
+                      HorizontalAlignment="Left"
+                      Margin="8"
+                      Background="{ThemeResource SystemControlAltMediumLowAcrylicWindowMediumBrush}"
+                      Padding="6,4" 
+                      CornerRadius="6"
+                      BorderThickness="1"
+                      BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+                        <FontIcon Glyph="&#xE823;" VerticalAlignment="Center"/>
+                        <TextBlock Grid.Column="1" 
+                               Text="{Binding TimePlayed, Converter={StaticResource TimePlayedConverter}}"
+                               Margin="4,0,0,0"
+                               MinWidth="40"/>
+                    </Grid>
                 </Grid>
-            </Grid>
+            </Button>
         </DataTemplate>
 
         <!-- Селектор шаблонов -->
@@ -53,87 +90,139 @@
     </Page.Resources>
 
     <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
-        <Grid RowDefinitions="280,*">
-            <!-- Контент (аватарка и ник) -->
-            <Grid VerticalAlignment="Stretch" HorizontalAlignment="Stretch" Padding="36,0,0,0" Grid.Row="0">
-                <!-- Фоновое изображение (растянуто на весь Grid) -->
-                <Image 
-                    Margin="-36,0,0,0"
-        Source="{x:Bind ProfileViewModel.User.Header, Mode=OneWay}"
-        Stretch="UniformToFill" 
-        HorizontalAlignment="Stretch"
-        VerticalAlignment="Stretch"
-                    MinHeight="200"
-                    MinWidth="200"/>
+        <StackPanel>
+            <!-- Шапка профиля -->
+            <Grid Height="280" Margin="0,0,0,16">
+                <!-- Фоновое изображение -->
+                <Image Source="{x:Bind ProfileViewModel.User.Header, Mode=OneWay}"
+                   Stretch="UniformToFill"
+                   MinHeight="200"/>
 
-                    <!-- Контент поверх фона -->
-                    <StackPanel 
-        Orientation="Horizontal" 
-        VerticalAlignment="Center"
-        Spacing="12">
+                <!-- Основной контент шапки -->
+                <Grid VerticalAlignment="Bottom"
+                  Background="{StaticResource AcrylicBackgroundFillColorDefaultBrush}"
+                  Padding="36,16,16,16">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
 
-                        <!-- Аватарка -->
-                        <Image 
-            VerticalAlignment="Center" 
-            Stretch="Fill" 
-            Height="95" 
-            Width="95" 
-            Source="{x:Bind ProfileViewModel.User.Avatar, Mode=OneWay}"/>
+                    <!-- Аватарка и ник -->
+                    <StackPanel Orientation="Horizontal" Spacing="12" VerticalAlignment="Center">
+                        <Image VerticalAlignment="Center" 
+                           Stretch="Fill" 
+                           Height="95" 
+                           Width="95" 
+                           Source="{x:Bind ProfileViewModel.User.Avatar, Mode=OneWay}"/>
 
-                        <!-- Никнейм -->
-                        <TextBlock 
-            Text="{x:Bind ProfileViewModel.User.Nickname}" 
-            FontWeight="SemiBold" 
-            FontSize="28" 
-            VerticalAlignment="Center"/>
+                        <TextBlock Text="{x:Bind ProfileViewModel.User.Nickname}" 
+                               FontWeight="SemiBold" 
+                               FontSize="28" 
+                               VerticalAlignment="Center"/>
                     </StackPanel>
-            </Grid>
 
-            <Grid Grid.Row="0" 
-      Background="{StaticResource AcrylicBackgroundFillColorDefaultBrush}"
-      VerticalAlignment="Bottom"
-      Padding="16">
-
-                <!-- Основная сетка с колонками -->
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="*"/>
-                    <!-- Растягивающееся пространство слева -->
-                    <ColumnDefinition Width="Auto"/>
-                    <!-- Место под кнопки -->
-                </Grid.ColumnDefinitions>
-
-                <!-- Кнопки (группируем в StackPanel) -->
-                <StackPanel Grid.Column="1"
-                Orientation="Horizontal"
-                Spacing="8">
-                    <Button Command="{x:Bind ProfileViewModel.UpdateProfileCommand}" Height="40">
-                        <StackPanel Orientation="Horizontal" Spacing="6">
-                            <FontIcon Glyph="&#xE70F;" />
-                            <TextBlock Text="Редактировать профиль"/>
-                        </StackPanel>
-                    </Button>
-                    <Button Command="{x:Bind ProfileViewModel.LogoutCommand}" 
+                    <!-- Кнопки (выравниваем по правому краю) -->
+                    <StackPanel Grid.Column="1"
+                            HorizontalAlignment="Right"
+                            Orientation="Horizontal"
+                            Spacing="8">
+                        <Button Command="{x:Bind ProfileViewModel.UpdateProfileCommand}" Height="40">
+                            <StackPanel Orientation="Horizontal" Spacing="6">
+                                <FontIcon Glyph="&#xE70F;" />
+                                <TextBlock Text="Редактировать профиль"/>
+                            </StackPanel>
+                        </Button>
+                        <Button Command="{x:Bind ProfileViewModel.LogoutCommand}" 
                             Content="Выйти" 
                             Height="40" 
                             Style="{StaticResource DangerButton}"
                             Width="130"/>
-                </StackPanel>
+                    </StackPanel>
+                </Grid>
             </Grid>
 
-            <GridView ItemsSource="{x:Bind ProfileViewModel.Libraries, Mode=OneWay}"
-                      ItemTemplateSelector="{StaticResource GameTemplateSelector}"
-                      HorizontalAlignment="Stretch"
-                      VerticalAlignment="Stretch"
-                      ScrollViewer.HorizontalScrollMode="Disabled"
-                      ScrollViewer.VerticalScrollMode="Enabled"
-                      ScrollViewer.VerticalScrollBarVisibility="Auto" Grid.Row="1">
+            <!-- Основной контент -->
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
 
-                <GridView.ItemsPanel>
-                    <ItemsPanelTemplate>
-                        <ItemsWrapGrid Orientation="Horizontal" MaximumRowsOrColumns="5"/>
-                    </ItemsPanelTemplate>
-                </GridView.ItemsPanel>
-            </GridView>
-        </Grid>
+                <!-- Список игр -->
+                <ItemsRepeater Grid.Column="0"
+              ItemsSource="{x:Bind ProfileViewModel.Libraries, Mode=OneWay}"
+              HorizontalAlignment="Stretch"
+              Margin="10">
+                    <ItemsRepeater.ItemTemplate>
+                        <DataTemplate>
+                            <ContentControl Content="{Binding}"
+                                            Tag="{Binding}"
+                          HorizontalAlignment="Stretch"
+                          VerticalAlignment="Stretch"
+                          ContentTemplateSelector="{StaticResource GameTemplateSelector}"/>
+                        </DataTemplate>
+                    </ItemsRepeater.ItemTemplate>
+
+                    <ItemsRepeater.Layout>
+                        <UniformGridLayout ItemsStretch="Fill"
+              MinItemWidth="190"
+              MinRowSpacing="10"
+              MinColumnSpacing="10"/>
+                    </ItemsRepeater.Layout>
+                </ItemsRepeater>
+
+                <!-- Фиксированная правая панель -->
+                <StackPanel Grid.Column="1" 
+       Width="400"
+       Margin="16,0,16,0">
+                    <TextBlock Text="Статистика" 
+                         Style="{StaticResource SubtitleTextBlockStyle}"
+                         Margin="0,0,0,16"/>
+                    <StackPanel BorderBrush="Blue" BorderThickness="2" Padding="25" Spacing="10">
+                        <TextBlock Text="Всего сыграно"/>
+                        <StackPanel Orientation="Horizontal" Spacing="4">
+                            <FontIcon Glyph="&#xE823;" />
+                            <TextBlock Text="{x:Bind ProfileViewModel.TotalPlayed, Converter={StaticResource TimePlayedConverter}}"/>
+                        </StackPanel>
+                    </StackPanel>
+                    <TextBlock Text="Недавняя активность" 
+                        Style="{StaticResource SubtitleTextBlockStyle}"
+                        Margin="0,0,0,16"/>
+                    <StackPanel BorderBrush="Blue" BorderThickness="2" Padding="20" Spacing="10">
+                        <ListView ItemsSource="{x:Bind ProfileViewModel.GamesRecentlyPlayed, Mode=OneWay}" SelectionMode="None">
+                            <ListView.ItemContainerStyle>
+                                <Style TargetType="ListViewItem">
+                                    <Setter Property="Margin" Value="0,0,0,10"/>
+                                    <!-- Отступ снизу 10px -->
+                                    <Setter Property="Padding" Value="0"/>
+                                    <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+                                    <Setter Property="Background" Value="Transparent"/>
+                                </Style>
+                            </ListView.ItemContainerStyle>
+                            <ListView.ItemTemplate>
+                                <DataTemplate x:DataType="models:RecentlyPlayed">
+                                    <Button HorizontalContentAlignment="Left" HorizontalAlignment="Stretch" Command="{Binding ElementName=profilePage, Path=ProfileViewModel.SelectGameCommand, Mode=OneWay}" CommandParameter="{Binding UnifiedGame}" Background="Transparent">
+                                        <StackPanel  Orientation="Horizontal" Spacing="15" Padding="0,10,10,10">
+                                            <Viewbox Height="32" Width="32">
+                                                <ContentControl Content="{Binding UnifiedImage}" 
+                                                                HorizontalAlignment="Center"
+                                                                VerticalAlignment="Center"/>
+                                            </Viewbox>
+                                            <StackPanel Spacing="5">
+                                                <TextBlock Text="{Binding UnifiedGame.Name}"/>
+                                                <StackPanel Spacing="4" Orientation="Horizontal">
+                                                    <FontIcon Glyph="&#xE823;" VerticalAlignment="Center" HorizontalAlignment="Center"/>
+                                                    <TextBlock Text="{Binding TimePlayed, Converter={StaticResource TimePlayedConverter}}"/>
+                                                </StackPanel>
+                                            </StackPanel>
+                                        </StackPanel>
+                                    </Button>
+                                </DataTemplate>
+                            </ListView.ItemTemplate>
+                        </ListView>
+                    </StackPanel>
+                </StackPanel>
+            </Grid>
+        </StackPanel>
     </ScrollViewer>
 </Page>

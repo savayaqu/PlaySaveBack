@@ -7,7 +7,9 @@ use App\Exceptions\ForbiddenException;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Api\User\UpdateProfileRequest;
 use App\Http\Resources\CloudServiceResource;
+use App\Http\Resources\GameResource;
 use App\Http\Resources\LibraryResource;
+use App\Http\Resources\SideGameResource;
 use App\Http\Resources\UserResource;
 use App\Models\CloudService;
 use App\Models\User;
@@ -93,5 +95,30 @@ class UserController extends Controller
     {
         $services = CloudService::all();
         return response()->json(CloudServiceResource::collection($services));
+    }
+    public function getStatistic()
+    {
+        $user = auth()->user();
+        $totalPlayed = $user->libraries()->get()->sum('time_played');
+
+        $recentlyPlayed = $user->libraries()
+            ->get()
+            ->sortByDesc('last_played_at')
+            ->take(6)
+            ->map(function ($item) {
+                $gameData = $item->game_id
+                    ? ['game' => GameResource::make($item->game)]
+                    : ['sideGame' => SideGameResource::make($item->sideGame)];
+
+                return array_merge($gameData, [
+                    'time_played' => $item->time_played
+                ]);
+            })
+            ->values();
+
+        return response()->json([
+            'totalPlayed' => $totalPlayed,
+            'recentlyPlayed' => $recentlyPlayed,
+        ]);
     }
 }
