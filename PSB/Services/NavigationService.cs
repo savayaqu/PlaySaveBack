@@ -22,6 +22,14 @@ namespace PSB.Services
             { "ProfilePage", typeof(ProfilePage) },
             { "SavePage", typeof(SavePage) },
         };
+        private readonly Dictionary<string, string> _pageTitles = new()
+        {
+            { "HomePage", "Главная" },
+            { "CatalogPage", "Каталог" },
+            { "SettingsPage", "Настройки" },
+            { "ProfilePage", "Профиль" },
+            { "SavePage", "Сохранения" }
+        };
         public Page? GetCurrentPage()
         {
             return _frame.Content as Page;
@@ -73,7 +81,9 @@ namespace PSB.Services
                 if (_pages.TryGetValue(pageTag, out var pageType))
                 {
                     _frame.Navigate(pageType);
-                    _headerText.Text = pageTag;
+                    _headerText.Text = _pageTitles.TryGetValue(pageTag, out var title)
+                                   ? title
+                                   : pageTag; // fallback на оригинальное название
                 }
                 else
                 {
