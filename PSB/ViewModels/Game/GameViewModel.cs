@@ -505,7 +505,7 @@ namespace PSB.ViewModels
                             var dataPackage = new DataPackage();
                             dataPackage.SetText(body.Url);
                             Clipboard.SetContent(dataPackage);
-                            NotificationService.ShowSuccess($"Ссылка сохранена {save.FileName} {save.Version} в буффер обмена.");
+                            NotificationService.ShowSuccess($"Ссылка для {save.FileName} {save.Version} сохранена в буфер обмена.");
                         }
                     }
                 }
