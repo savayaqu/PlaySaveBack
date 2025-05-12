@@ -101,8 +101,8 @@ namespace PSB.Utils
             Token = null;
             User = null;
             Libraries.Clear();
+            ApplicationData.Current.LocalSettings.Values.Clear();
             App.SwitchToLoginFromMain();
-            //ApplicationData.Current.LocalSettings.Values.Clear();
         }
 
         // Загрузка профиля

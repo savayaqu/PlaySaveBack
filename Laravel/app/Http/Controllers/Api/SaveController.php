@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Enums\CloudStatus;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Api\Save\OverwriteSaveRequest;
 use App\Http\Resources\SaveResource;
@@ -18,13 +19,25 @@ class SaveController extends Controller
     public function getMySavesGame(Game $game)
     {
         $user = auth()->user();
-        $saves = $user->saves()->where('game_id', $game->id)->get();
+        $saves = $user->saves()
+            ->where('game_id', $game->id)
+            ->whereHas('userCloudService', function ($query) {
+                $query->where('status', CloudStatus::Active);
+            })
+            ->with('userCloudService')
+            ->get();
         return response()->json(['saves' => SaveResource::collection($saves)]);
     }
     public function getMySavesSideGame(SideGame $sideGame)
     {
         $user = auth()->user();
-        $saves = $user->saves()->where('side_game_id', $sideGame->id)->get();
+        $saves = $user->saves()
+            ->where('side_game_id', $sideGame->id)
+            ->whereHas('userCloudService', function ($query) {
+                $query->where('status', CloudStatus::Active);
+            })
+            ->with('userCloudService')
+            ->get();
         return response()->json(['saves' => SaveResource::collection($saves)]);
     }
     public function getHash(Request $request)

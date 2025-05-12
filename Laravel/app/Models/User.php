@@ -2,7 +2,6 @@
 
 namespace App\Models;
 
-use App\Enums\UserVisibility;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
@@ -25,7 +24,6 @@ class User extends Authenticatable
         'login',
         'header',
         'key',
-        'visibility'
     ];
 
     /**
@@ -37,10 +35,6 @@ class User extends Authenticatable
         'password',
         'remember_token',
         'key'
-    ];
-    // Установка по умолчанию
-    protected $attributes = [
-        'visibility' => UserVisibility::Private,
     ];
     /**
      * Get the attributes that should be cast.

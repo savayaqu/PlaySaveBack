@@ -93,9 +93,7 @@ Spacing="12">
                 </NavigationViewItem.Content>
             </NavigationViewItem>
 
-
             <NavigationViewItem Content="Главная" Tag="HomePage" Icon="Home" IsSelected="True"/>
-            <NavigationViewItem Content="Сохранения" Tag="SavePage" Icon="Save"/>
             <NavigationViewItem Content="Каталог" Tag="CatalogPage">
                 <NavigationViewItem.Icon>
                     <FontIcon Glyph="&#xF0E2;"/>

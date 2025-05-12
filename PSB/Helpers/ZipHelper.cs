@@ -126,9 +126,11 @@ namespace PSB.Helpers
         }
         public static async Task<string> CreateBackup(string folderPath, string gameName, string saveVersion)
         {
+            // Получаем путь к месту сохранения
+            string UserPath = SettingsData.PathToLocalSaves;
 
-            // Папка temp
-            string zipFilePath = Path.Combine(Path.GetTempPath(), $"PlaySaveBack/Backups/{gameName}/{saveVersion}");
+            // Папка backups
+            string zipFilePath = Path.Combine($"{UserPath}/PlaySaveBack/Backups/{gameName}/{saveVersion}");
 
             // Создаём ZIP-архив
             await ZipFolder(folderPath, zipFilePath);

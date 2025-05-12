@@ -89,7 +89,7 @@ Route::middleware('auth:sanctum')->group(function () {
             // Аутентификация
             Route::get('auth-url', 'getAuthUrl');
             Route::get('callback', 'callback')->withoutMiddleware('auth:sanctum');
-
+            Route::delete('disconnect/{userCloudService}', 'disconnect'); // Отключение
             // Новая система загрузки
             Route::post('generate-upload-url', 'generateUploadUrl'); // Генерация URL для загрузки
             Route::post('confirm-upload/{save}', 'confirmUpload'); // Подтверждение загрузки

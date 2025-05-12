@@ -21,6 +21,7 @@ using PSB.Utils.Game;
 using static System.Net.Mime.MediaTypeNames;
 using Windows.ApplicationModel.DataTransfer;
 using static PSB.Utils.Fetch;
+using System.Text.Encodings.Web;
 
 namespace PSB.ViewModels
 {
@@ -107,25 +108,35 @@ namespace PSB.ViewModels
             if (FolderPath == null)
                 return;
             Debug.WriteLine("Folder Path " + FolderPath);
-
-            var (folderName, zipPath, hash, size) = await Helpers.ZipHelper.CreateZip(FolderPath, Game.Name, SaveVersion);
-
-            var newSave = new Save
+            try
             {
-                FileId = folderName,
-                FileName = $"{folderName}.zip",
-                Version = SaveVersion,
-                LastSyncAt = null,
-                GameId = GameId,
-                Description = SaveDescription,
-                Hash = hash,
-                Size = size,
-                IsSynced = false,
-                ZipPath = zipPath,
-                CreatedAt = DateTime.Now,
-            };
-            Saves.Add(newSave);
-            SavesDataManager<IGame>.SaveSaves(Game, [.. Saves]);
+                IsUploading = true;
+                var (folderName, zipPath, hash, size) = await Helpers.ZipHelper.CreateZip(FolderPath, Game.Name, SaveVersion);
+
+                var newSave = new Save
+                {
+                    FileId = folderName,
+                    FileName = $"{folderName}.zip",
+                    Version = SaveVersion,
+                    LastSyncAt = null,
+                    GameId = GameId,
+                    Description = SaveDescription,
+                    Hash = hash,
+                    Size = size,
+                    ZipPath = zipPath,
+                    CreatedAt = DateTime.Now,
+                };
+                Saves.Add(newSave);
+                SavesDataManager<IGame>.SaveSaves(Game, [.. Saves]);
+            }
+            catch (Exception ex)
+            {
+                NotificationService.ShowError($"Ошибка: {ex.Message}");
+            }
+            finally
+            {
+                IsUploading = false;
+            }
         }
         [RelayCommand(CanExecute = nameof(CanCreateOverwriteSave))]
         private async Task OverwriteSave(Save existingSave)
@@ -134,6 +145,7 @@ namespace PSB.ViewModels
             {
                 try
                 {
+                    IsUploading = true;
                     // Создаем бэкап перед перезаписью
                     string backupPath = await Helpers.ZipHelper.CreateBackup(
                         FolderPath,
@@ -174,6 +186,7 @@ namespace PSB.ViewModels
                 {
                     SaveVersion = "";
                     SaveDescription = "";
+                    IsUploading = false;
                 }
             }
             if (existingSave.IsSynced)
@@ -185,7 +198,7 @@ namespace PSB.ViewModels
                     if (connectedService != null)
                     {
                         SelectedCloudService = connectedService;
-
+                        IsUploading = true;
                         // Создаем бэкап перед перезаписью
                         string backupPath = await Helpers.ZipHelper.CreateBackup(
                             FolderPath,
@@ -216,6 +229,10 @@ namespace PSB.ViewModels
                 catch (Exception ex)
                 {
                     NotificationService.ShowError($"Ошибка перезаписи: {ex.Message}");
+                }
+                finally
+                {
+                    IsUploading = false;
                 }
             }
         }
@@ -274,7 +291,6 @@ namespace PSB.ViewModels
         {
             SaveDescription = save.Description;
             SaveVersion = save.Version;
-            // Другие инициализации
         }
         [RelayCommand(CanExecute = nameof(FolderSavesExists))]
         public async Task RestoreSave(Save save)
@@ -292,6 +308,7 @@ namespace PSB.ViewModels
 
             try
             {
+                IsUploading = true;
                 Directory.CreateDirectory(Path.GetDirectoryName(zipFilePath));
 
                 // 1. Загрузка с повторными попытками
@@ -339,6 +356,7 @@ namespace PSB.ViewModels
             {
                 if (File.Exists(zipFilePath))
                     File.Delete(zipFilePath);
+                IsUploading = false;
             }
         }
         [RelayCommand(CanExecute = nameof(ExeExists))]
@@ -464,6 +482,7 @@ namespace PSB.ViewModels
             }
             try
             {
+                IsUploading = true;
                 // Отправляем запрос на удаление файла
                 var res = await FetchAsync(HttpMethod.Delete,$"saves/{save.Id}/google-drive/delete");
 
@@ -475,6 +494,7 @@ namespace PSB.ViewModels
                     {
                         Helpers.ZipHelper.DeleteFile(save.ZipPath);
                     }
+                    SavesDataManager<IGame>.SaveSaves(Game, [.. Saves]);
                     Debug.WriteLine($"Сохранение {save.FileName} удалено.");
                     NotificationService.ShowSuccess($"Сохранение {save.FileName} {save.Version} удалено.");
 
@@ -488,6 +508,10 @@ namespace PSB.ViewModels
             {
                 Debug.WriteLine($"Ошибка: {ex.Message}");
                 NotificationService.ShowError($"Ошибка: {ex.Message}");
+            }
+            finally
+            {
+                IsUploading = false;
             }
         }
         [RelayCommand]
@@ -549,17 +573,17 @@ namespace PSB.ViewModels
 
             if (!res.IsSuccessStatusCode || body == null)
                 return;
-
+          
             // Сохраняем локальные несинхронизированные сохранения
             var localSaves = Saves?.Where(s => !s.IsSynced).ToList() ?? [];
 
+           
             // Очистка коллекции
             Saves.Clear();
-
+            
             // Добавление сохранений с сервера
             foreach (var item in body.Save)
             {
-                item.IsSynced = true;
                 Saves.Add(item);
             }
 
@@ -568,7 +592,7 @@ namespace PSB.ViewModels
             {
                 Saves.Add(localSave);
             }
-
+           
             // Сохраняем сохранения с использованием нового менеджера
             SavesDataManager<IGame>.SaveSaves(Game, [.. Saves]);
         }
@@ -642,10 +666,6 @@ namespace PSB.ViewModels
                     // Обработка сохранений
                     if (body.Saves != null)
                     {
-                        foreach (var save in body.Saves)
-                        {
-                            save.IsSynced = true;
-                        }
                         Saves = [.. body.Saves ?? []];
                         SavesDataManager<IGame>.SaveSaves(Game, [.. Saves]);
                     }

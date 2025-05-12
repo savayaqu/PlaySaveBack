@@ -2,13 +2,10 @@
 
 namespace App\Http\Controllers\Api;
 
-use App\Enums\UserVisibility;
-use App\Exceptions\ForbiddenException;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Api\User\UpdateProfileRequest;
 use App\Http\Resources\CloudServiceResource;
 use App\Http\Resources\GameResource;
-use App\Http\Resources\LibraryResource;
 use App\Http\Resources\SideGameResource;
 use App\Http\Resources\UserResource;
 use App\Models\CloudService;
@@ -76,20 +73,6 @@ class UserController extends Controller
 
         $user->update($data);
         return response()->json(UserResource::make($user));
-    }
-    public function getOtherProfile(User $user): JsonResponse
-    {
-        if($user->visibility == UserVisibility::Private->value)
-            throw new ForbiddenException;
-        $user->loadCount('saves');
-
-        // Загружаем библиотеки с пагинацией и связанной игрой
-        $libraries = $user->libraries()->with('game')->simplePaginate(10);
-
-        return response()->json([
-            'user' => UserResource::make($user),
-            'library' => LibraryResource::collection($libraries)->response()->getData(true),
-        ]);
     }
     public function getCloudServices(): JsonResponse
     {

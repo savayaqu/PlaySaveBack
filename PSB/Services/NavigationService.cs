@@ -20,7 +20,6 @@ namespace PSB.Services
             { "CatalogPage", typeof(CatalogPage) },
             { "SettingsPage", typeof(SettingsPage) },
             { "ProfilePage", typeof(ProfilePage) },
-            { "SavePage", typeof(SavePage) },
         };
         private readonly Dictionary<string, string> _pageTitles = new()
         {
@@ -28,7 +27,6 @@ namespace PSB.Services
             { "CatalogPage", "Каталог" },
             { "SettingsPage", "Настройки" },
             { "ProfilePage", "Профиль" },
-            { "SavePage", "Сохранения" }
         };
         public Page? GetCurrentPage()
         {

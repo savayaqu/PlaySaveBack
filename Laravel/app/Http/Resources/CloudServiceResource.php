@@ -2,7 +2,7 @@
 
 namespace App\Http\Resources;
 
-use Illuminate\Http\Request;
+use App\Enums\CloudStatus;
 use Illuminate\Http\Resources\Json\JsonResource;
 
 class CloudServiceResource extends JsonResource
@@ -14,6 +14,7 @@ class CloudServiceResource extends JsonResource
         // Проверяем, подключен ли сервис
         $userCloudService = $user->userCloudService()
             ->where('cloud_service_id', $this->id)
+            ->where('status', CloudStatus::Active)
             ->first();
 
         $isConnected = (bool) $userCloudService;

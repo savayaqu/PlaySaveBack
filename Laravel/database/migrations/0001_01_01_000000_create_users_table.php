@@ -20,7 +20,6 @@ return new class extends Migration
             $table->string('header')->nullable();
             $table->string('password');
             $table->string('key');
-            $table->tinyInteger('visibility');
             $table->timestamps();
         });
     }

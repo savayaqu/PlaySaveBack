@@ -2,7 +2,9 @@
 
 namespace App\Http\Controllers;
 
+use App\Enums\CloudStatus;
 use App\Exceptions\ConflictException;
+use App\Exceptions\ForbiddenException;
 use App\Http\Requests\Api\Save\OverwriteSaveRequest;
 use App\Http\Requests\Api\Save\UploadSaveRequest;
 use App\Http\Resources\SaveResource;
@@ -26,6 +28,27 @@ use Symfony\Component\HttpKernel\Exception\ConflictHttpException;
 
 class GoogleDriveController extends Controller
 {
+    public static function getSubFromIdToken(string $idToken): ?string
+    {
+        $parts = explode('.', $idToken);
+        if (count($parts) < 2) {
+            return null;
+        }
+
+        $payload = $parts[1];
+
+        // Добавим padding для base64 (если не кратно 4)
+        $payload .= str_repeat('=', 4 - strlen($payload) % 4);
+
+        $json = base64_decode(strtr($payload, '-_', '+/'));
+        if (!$json) {
+            return null;
+        }
+
+        $data = json_decode($json, true);
+        return $data['sub'] ?? null;
+    }
+
     public function getAuthUrl(Request $request): JsonResponse
     {
         $user = $request->user();
@@ -33,6 +56,7 @@ class GoogleDriveController extends Controller
         $client->setClientId(env('GOOGLE_DRIVE_CLIENT_ID'));
         $client->setClientSecret(env('GOOGLE_DRIVE_CLIENT_SECRET'));
         $client->setRedirectUri(env('GOOGLE_DRIVE_REDIRECT_URI'));
+        $client->addScope("openid");
         $client->addScope("https://www.googleapis.com/auth/drive.file");
         $client->setAccessType('offline');
         $client->setPrompt('consent');
@@ -57,22 +81,30 @@ class GoogleDriveController extends Controller
         $client->setClientSecret(env('GOOGLE_DRIVE_CLIENT_SECRET'));
         $client->setRedirectUri(env('GOOGLE_DRIVE_REDIRECT_URI'));
 
-        $cloudService = CloudService::query()->where('name', 'Google Drive')->first();
         $token = $client->fetchAccessTokenWithAuthCode($request->get('code'));
+        $idToken = $token['id_token'] ?? null;
+        $externalUserId = $idToken ? GoogleDriveController::getSubFromIdToken($idToken) : null;
+
+        $cloudService = CloudService::query()->where('name', 'Google Drive')->first();
 
         $userCloudService = UserCloudService::query()->updateOrCreate(
             [
-                'user_id' => $userId,
                 'cloud_service_id' => $cloudService->id,
+                'external_user_id' => $externalUserId,
             ],
             [
+                'user_id' => $userId,
                 'access_token' => Crypt::encryptString($token['access_token']),
-                'refresh_token' => Crypt::encryptString($token['refresh_token'] ?? null),
+                'refresh_token' => isset($token['refresh_token']) ? Crypt::encryptString($token['refresh_token']) : null,
                 'expires_at' => now()->addSeconds($token['expires_in']),
+                'external_user_id' => $externalUserId,
+                'status' => CloudStatus::Active
             ]
         );
+
         return redirect('auth/success');
     }
+
     /**
      * Генерирует URL для прямой загрузки файла в Google Drive
      */
@@ -226,5 +258,20 @@ class GoogleDriveController extends Controller
         Save::query()->where('file_id', $fileId)->where('user_id', $user->id)->delete();
 
         return response()->json(['message' => 'File deleted successfully'], 200);
+    }
+    public function disconnect(UserCloudService $userCloudService)
+    {
+        $user = auth()->user();
+
+        if ($userCloudService->user_id != $user->id)
+            throw new ForbiddenException();
+
+        $userCloudService->update([
+            'access_token' => null,
+            'refresh_token' => null,
+            'expires_at' => null,
+            'status' => CloudStatus::Inactive,
+        ]);
+        return response()->json(null, 204);
     }
 }

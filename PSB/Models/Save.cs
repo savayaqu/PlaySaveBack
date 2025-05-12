@@ -23,21 +23,13 @@ namespace PSB.Models
         [JsonPropertyName("created_at")]
         [JsonConverter(typeof(CustomDateTimeConverter))]
         public DateTime CreatedAt { get; set; }
+        [JsonIgnore]
+        public bool IsSynced => !string.IsNullOrEmpty(LastSyncAt);
 
         [JsonPropertyName("updated_at")]
         [JsonConverter(typeof(CustomDateTimeConverter))]
         public DateTime UpdatedAt { get; set; }
 
-        private bool? _isSynced; // backing field для ручного управления статусом
-        [JsonIgnore]
-        public bool IsSynced
-        {
-            get => _isSynced ?? !string.IsNullOrEmpty(LastSyncAt) || !string.IsNullOrEmpty(FileId);
-            set
-            {
-                _isSynced = value;
-            }
-        }
         [JsonIgnore] public string? ZipPath { get; set; }
         [JsonIgnore] public string? Backup { get; set; }
         public DateTime? LastRestored { get; set; }
@@ -50,6 +42,6 @@ namespace PSB.Models
             }
         }
         [JsonIgnore]
-        public string SyncIconColor => IsSynced ? "#FF4CAF50" : "#FFFFC107"; // Зеленый для синхронизированного, желтый для ожидания
+        public string SyncIconColor => LastSyncAt != null ? "#FF4CAF50" : "#FFFFC107"; // Зеленый для синхронизированного, желтый для ожидания
     }
 }

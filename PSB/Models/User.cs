@@ -10,7 +10,5 @@ namespace PSB.Models
         [JsonPropertyName("avatar")] public required string Avatar { get; set; }
         [JsonPropertyName("login")] public string? Login { get; set; }
         [JsonPropertyName("email")] public string? Email { get; set; }
-        [JsonPropertyName("visibility")] public int Visibility { get; set; }
-
     }
 }

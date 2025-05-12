@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Enums\CloudStatus;
 use Illuminate\Database\Eloquent\Model;
 
 class UserCloudService extends Model
@@ -13,9 +14,14 @@ class UserCloudService extends Model
         'expires_at',
         'cloud_service_id',
         'user_id',
+        'status',
+        'external_user_id',
     ];
     protected $casts = [
       'expires_at' => 'datetime',
+    ];
+    protected $attributes = [
+        'status' => CloudStatus::Inactive,
     ];
     public function user()
     {
