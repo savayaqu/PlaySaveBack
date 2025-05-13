@@ -18,7 +18,7 @@ namespace PSB.Utils.Game
         // Удаление из локального хранилища сохранений, принадлежавшим конкретному UserCloudService
         public static void RemoveAllSavesByCloudServiceId(ulong? cloudServiceId)
         {
-            var prefix = $"{AuthData.User.Id}_";
+            var prefix = $"{AuthData.User!.Id}_";
             var savesSuffix = "_Saves";
 
             var keysToProcess = ApplicationData.Current.LocalSettings.Values
@@ -49,6 +49,62 @@ namespace PSB.Utils.Game
                 }
             }
         }
+
+        // Получение всех локальных сохранений
+        public static Dictionary<string, List<Save>> GetAllLocalSaves()
+        {
+            var result = new Dictionary<string, List<Save>>();
+            var prefix = $"{AuthData.User!.Id}_";
+            var savesSuffix = "_Saves";
+
+            var keysToProcess = ApplicationData.Current.LocalSettings.Values
+                .Where(kvp => kvp.Key.StartsWith(prefix) && kvp.Key.EndsWith(savesSuffix))
+                .Select(kvp => kvp.Key)
+                .ToList();
+
+            foreach (var key in keysToProcess)
+            {
+                if (ApplicationData.Current.LocalSettings.Values[key] is string json)
+                {
+                    try
+                    {
+                        var saves = JsonSerializer.Deserialize<List<Save>>(json, new JsonSerializerOptions { TypeInfoResolver = GameJsonContext.Default });
+                        if (saves == null) continue;
+
+                        var localSaves = saves.Where(s => !s.IsSynced).ToList();
+                        if (!localSaves.Any()) continue;
+
+                        var parts = key.Split('_');
+                        if (parts.Length < 4) continue;
+
+                        string type = parts[1];
+                        if (!ulong.TryParse(parts[2], out ulong gameId)) continue;
+
+                        var game = GameDataManager.LoadGame(type, gameId);
+                        if (game == null || string.IsNullOrWhiteSpace(game.Name)) continue;
+
+                        string gameName = game.Name;
+
+                        // Если уже есть такая игра, добавляем к существующим
+                        if (result.TryGetValue(gameName, out var existingList))
+                        {
+                            existingList.AddRange(localSaves);
+                        }
+                        else
+                        {
+                            result.Add(gameName, localSaves);
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        Debug.WriteLine($"Ошибка при обработке ключа {key}: {ex.Message}");
+                    }
+                }
+            }
+
+            return result;
+        }
+
 
     }
 }
