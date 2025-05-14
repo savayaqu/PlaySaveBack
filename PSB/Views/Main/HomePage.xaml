@@ -25,6 +25,7 @@
               Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
               BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
               BorderThickness="0,0,0,1"
+              Visibility="{x:Bind HomeViewModel.LastPlayedGameExists, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}"
               CornerRadius="8">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="Auto"/>
@@ -39,7 +40,7 @@
                     Background="{ThemeResource CardBackgroundFillColorSecondaryBrush}"
                     CornerRadius="4"
                     Margin="0,0,16,0">
-                <ContentControl Content="{x:Bind HomeViewModel.LastPlayedGame.GameIcon, Mode=OneWay}"/>
+                <ContentControl Content="{x:Bind HomeViewModel.GameIcon, Mode=OneWay}"/>
             </Border>
 
             <!-- Информация о последней игре -->
@@ -66,7 +67,7 @@
                 </StackPanel>
             </StackPanel>
 
-            <StackPanel Grid.Column="2" Padding="16,8" VerticalAlignment="Center" Orientation="Horizontal" Spacing="12">
+            <StackPanel Visibility="{x:Bind HomeViewModel.LastPlayedGameExists, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}" Grid.Column="2" Padding="16,8" VerticalAlignment="Center" Orientation="Horizontal" Spacing="12">
                 <Button Style="{StaticResource AccentButtonStyle}" Content="Перейти к игре"  Command="{x:Bind HomeViewModel.SelectGameCommand, Mode=OneWay}" CommandParameter="{x:Bind HomeViewModel.LastPlayedGame.Game}"/>
                 <!-- Кнопка "Играть" -->
                 <Button Width="150" Height="40" Style="{StaticResource PlayButtonStyle}"  Command="{x:Bind GameViewModel.LaunchGameCommand, Mode=OneTime}" Visibility="{x:Bind GameViewModel.InLibrary, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}, ConverterParameter=False}">
@@ -88,13 +89,16 @@
             </Grid.RowDefinitions>
 
             <!-- Заголовок раздела -->
-            <StackPanel Grid.Row="0" Orientation="Horizontal" Spacing="12" Margin="0,0,0,16">
+            <StackPanel Grid.Row="0" Orientation="Vertical" Spacing="12" Margin="0,0,0,16">
                 <TextBlock Text="Локальные сохранения"
                            Style="{StaticResource TitleTextBlockStyle}"/>
+                <TextBlock Style="{StaticResource SubtitleTextBlockStyle}" 
+                           Text="У вас нет несинхронизированных сохранений"
+                           Visibility="{x:Bind HomeViewModel.LocalSavesExists, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}, ConverterParameter=True}"/>
             </StackPanel>
 
             <!-- Список сохранений -->
-            <ScrollViewer Grid.Row="1">
+            <ScrollViewer Grid.Row="1" Visibility="{x:Bind HomeViewModel.LocalSavesExists, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}">
                 <ItemsControl ItemsSource="{x:Bind HomeViewModel.LocalSaves, Mode=OneWay}">
                     <ItemsControl.ItemTemplate>
                         <DataTemplate x:DataType="models:GroupedSaves">

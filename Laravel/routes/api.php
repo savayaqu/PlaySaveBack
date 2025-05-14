@@ -25,7 +25,6 @@ Route::middleware('auth:sanctum')->group(function () {
             Route::get('', 'getProfile');            // Просмотр своего профиля
             Route::get('services', 'getCloudServices'); //Просмотр своих подключенных облачных сервисов
             Route::post('', 'updateProfile');        // Обновление профиля
-            Route::get('{user}', 'getOtherProfile'); // Просмотр чужого профиля
         });
     });
     Route::controller(LibraryController::class)->group(function () {
@@ -39,7 +38,6 @@ Route::middleware('auth:sanctum')->group(function () {
             });
             Route::prefix('sidegame/{sideGame}')->group(function () {
                 Route::patch('', 'toggleSideGameFavorite');          // Добавить/убрать стороннюю игру в Избранное
-                Route::delete('', 'removeSideGameFromLibrary');      // Удалить стороннюю игру из библиотеки
                 Route::patch('update', 'updateSideGameLibrary'); // Изменить данные сторонней игры в библиотеке
             });
         });
@@ -49,7 +47,6 @@ Route::middleware('auth:sanctum')->group(function () {
             // Просмотр своих сохранений
            Route::get('game/{game}/my', 'getMySavesGame');
            Route::get('sidegame/{sideGame}/my', 'getMySavesSideGame');
-
            Route::prefix('{save}')->group(function () {
                Route::patch('', 'updateSave');
                Route::controller(GoogleDriveController::class)->group(function () {
@@ -69,31 +66,27 @@ Route::middleware('auth:sanctum')->group(function () {
             Route::get('', 'getGames');      // Просмотр всех игр
             Route::prefix('{game}')->group(function () {
                 Route::get('', 'getGame'); // Просмотр игры
-                //TODO: это сделай
-                Route::get('paths', 'getPaths'); // Просмотр путей до сохранения
-                Route::post('', 'addPath'); // Добавить путь до сохранения
+                Route::get('path', 'getPath')->withoutMiddleware('auth:sanctum'); // Просмотр путей до сохранения
             });
         });
     });
     Route::controller(SideGameController::class)->group(function () {
-       Route::prefix('sidegames')->group(function () {
-           Route::get('', 'getSideGames');      // Просмотр всех игр
-           Route::get('{sideGame}', 'getSideGame'); // Просмотр игры
-           Route::post('', 'addSideGame'); // Добавить стороннюю игру
-           Route::patch('', 'updateSideGame'); // Редактировать стороннюю игру
-           Route::delete('', 'removeSideGame'); // Удалить стороннюю игру
-       });
+        Route::prefix('sidegames')->group(function () {
+            Route::post('', 'addSideGame'); // Добавить стороннюю игру
+            Route::get('', 'getSideGames');      // Просмотр всех игр
+            Route::prefix('{sideGame}')->group(function () {
+                Route::get('', 'getSideGame'); // Просмотр игры
+                Route::delete('', 'removeSideGame'); // Удалить стороннюю игру
+            });
+        });
     });
     Route::controller(GoogleDriveController::class)->group(function () {
         Route::prefix('google-drive')->group(function () {
-            // Аутентификация
             Route::get('auth-url', 'getAuthUrl');
             Route::get('callback', 'callback')->withoutMiddleware('auth:sanctum');
             Route::delete('disconnect/{userCloudService}', 'disconnect'); // Отключение
-            // Новая система загрузки
             Route::post('generate-upload-url', 'generateUploadUrl'); // Генерация URL для загрузки
             Route::post('confirm-upload/{save}', 'confirmUpload'); // Подтверждение загрузки
-
         });
     });
 });

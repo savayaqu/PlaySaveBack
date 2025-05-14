@@ -61,15 +61,9 @@ class SideGameController extends Controller
         return response()->json(LibraryResource::make($library), 201);
 
     }
-
-    /**
-     * Удалить стороннюю игру.
-     */
     public function removeSideGame(SideGame $sideGame): JsonResponse
     {
         $sideGame->delete();
-        // Удалить все сохранения к этой игре
-        Save::query()->where('side_game_id', $sideGame->id)->delete();
         return response()->json(null, 204);
     }
 }

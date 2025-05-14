@@ -3,8 +3,6 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
-use App\Http\Requests\Api\Game\AddGameRequest;
-use App\Http\Requests\Api\Game\EditGameRequest;
 use App\Http\Resources\GameResource;
 use App\Http\Resources\LibraryResource;
 use App\Http\Resources\SaveResource;
@@ -37,10 +35,9 @@ class GameController extends Controller
             'saves' => $saves->isEmpty() ? null : SaveResource::collection($saves),
         ]);
     }
-    //public function addCustomGame(AddGameRequest $request): JsonResponse
-    //{
-    //    $user = auth()->user();
-    //    $games = Game::all();
-    //
-    //}
+    public function getPath(Game $game): JsonResponse
+    {
+        $path = $game->path()->firstOrFail();
+        return response()->json($path->only('path'));
+    }
 }

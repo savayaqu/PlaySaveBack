@@ -5,9 +5,9 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use App\Enums\CloudStatus;
 
-class GamePath extends Model
+class Path extends Model
 {
-    protected $table = 'game_paths';
+    protected $table = 'paths';
     protected $fillable = [ 'game_id', 'path'];
     public function game()
     {

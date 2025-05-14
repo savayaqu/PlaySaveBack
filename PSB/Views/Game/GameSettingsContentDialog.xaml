@@ -25,7 +25,7 @@
         <TextBlock 
             Text="Файл" 
             Style="{StaticResource SubtitleTextBlockStyle}"/>
-        <TextBlock Text="Путь к файлу, который будет запущен при нажатии на 'Играть'" TextWrapping="Wrap"/>
+        <TextBlock Foreground="{StaticResource AccentAAFillColorDefaultBrush}" Text="Путь к исполняемому файлу игры" TextWrapping="Wrap"/>
 
         <Grid ColumnDefinitions="*,Auto,Auto" ColumnSpacing="8">
             <TextBox 
@@ -47,8 +47,7 @@
         <TextBlock 
             Text="Сохранения" 
             Style="{StaticResource SubtitleTextBlockStyle}"/>
-        <TextBlock Text="Путь к папке сохранений, на основе которого будут создаваться сохранения" TextWrapping="Wrap"/>
-        <TextBlock Foreground="{StaticResource AccentAAFillColorDefaultBrush}" Text="Рекомендуется выбрать корневую папку с сохранениями, а не отдельную" TextWrapping="Wrap"/>
+        <TextBlock Foreground="{StaticResource AccentAAFillColorDefaultBrush}" Text="Корневая папка сохранений" TextWrapping="Wrap"/>
         <Grid ColumnDefinitions="*,Auto,Auto" ColumnSpacing="8">
             <TextBox 
                 Grid.Column="0" 
@@ -79,20 +78,8 @@
                 <Button.Flyout>
                     <Flyout>
                         <StackPanel>
-                            <TextBlock Text="Точно удалить?"/>
+                            <TextBlock Text="Вы уверены, что хотите удалить?"/>
                             <Button Content="Да" Command="{x:Bind GameSettingsContentViewModel.RemoveFromLibraryCommand}"/>
-                        </StackPanel>
-                    </Flyout>
-                </Button.Flyout>
-            </Button>
-            <Button 
-                Content="Удалить все сохранения" 
-                Style="{StaticResource DangerButton}">
-                <Button.Flyout>
-                    <Flyout>
-                        <StackPanel>
-                            <TextBlock Text="Точно удалить?"/>
-                            <Button Content="Да" Command="{x:Bind GameSettingsContentViewModel.RemoveAllSavesCommand}"/>
                         </StackPanel>
                     </Flyout>
                 </Button.Flyout>

@@ -1,5 +1,7 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using Microsoft.UI.Xaml.Controls;
+using PSB.Helpers;
 using PSB.Interfaces;
 using PSB.Models;
 using PSB.Utils.Game;
@@ -8,21 +10,39 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.Linq;
+using Windows.Devices.Enumeration;
 
 namespace PSB.ViewModels
 {
     public partial class HomeViewModel : ObservableObject
     {
         [ObservableProperty]
+        [NotifyPropertyChangedFor(nameof(LocalSavesExists))]
         public partial ObservableCollection<GroupedSaves> LocalSaves { get; set; } = [];
-        public LastPlayedGame LastPlayedGame { get; set; }
+        [ObservableProperty]
+        [NotifyPropertyChangedFor(nameof(LastPlayedGameExists))]
+        public partial LastPlayedGame LastPlayedGame { get; set; }
         [ObservableProperty]
         public partial bool IsLoading { get; set; }
-
+        public IconElement GameIcon { get; set; }
+        public bool LastPlayedGameExists => LastPlayedGame != null;
+        public bool LocalSavesExists => LocalSaves?.Any() == true;
         public HomeViewModel()
         {
             LoadLocalSaves();
             LastPlayedGame = LastPlayedGameManager.LoadLastPlayedGame();
+            if(LastPlayedGame != null)
+            {
+                var icon = IconFromExe.GetIconElement(PathDataManager<IGame>.GetFilePath(LastPlayedGame.Game));
+                if (icon != null) 
+                {
+                    GameIcon = icon;
+                }
+                else
+                {
+                    GameIcon = new FontIcon { Glyph = "\uE7FC" };
+                }
+            }
         }
         public void LoadLocalSaves()
         {
@@ -63,8 +83,6 @@ namespace PSB.ViewModels
         [RelayCommand]
         private void SelectGame(IGame game)
         {
-            Debug.WriteLine("нажата кнопка");
-            Debug.WriteLine("нажата кнопка + game " + game.Name + game.Type);
             if (game != null)
             {
                 string type = game.Type == "game" ? "Game" : "SideGame";

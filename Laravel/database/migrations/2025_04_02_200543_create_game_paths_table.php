@@ -11,9 +11,8 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('game_paths', function (Blueprint $table) {
+        Schema::create('paths', function (Blueprint $table) {
             $table->id();
-            $table->tinyInteger('status');
             $table->string('path');
             $table->foreignId('game_id')->constrained('games');
             $table->timestamps();
@@ -25,6 +24,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('game_paths');
+        Schema::dropIfExists('paths');
     }
 };

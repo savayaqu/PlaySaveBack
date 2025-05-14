@@ -70,7 +70,7 @@ namespace PSB.ViewModels
         [RelayCommand]
         private async Task ChooseFolderSaves()
         {
-            var openPicker = new Windows.Storage.Pickers.FolderPicker();
+            var openPicker = new FolderPicker();
 
             // Получаем HWND текущего окна
             var hWnd = WinRT.Interop.WindowNative.GetWindowHandle(App.MainWindow);
@@ -109,12 +109,7 @@ namespace PSB.ViewModels
         [RelayCommand]
         private async Task ChooseFile()
         {
-            //if(SelectedFile != string.Empty)
-            //{
-            //    SelectedSavesFolder = null;
-            //    GameViewModel.FolderPath = null;
-            //}
-            var openPicker = new Windows.Storage.Pickers.FileOpenPicker();
+            var openPicker = new FileOpenPicker();
             var hWnd = WinRT.Interop.WindowNative.GetWindowHandle(App.MainWindow);
             WinRT.Interop.InitializeWithWindow.Initialize(openPicker, hWnd);
 
@@ -141,7 +136,8 @@ namespace PSB.ViewModels
                 }
                 else
                 {
-                    Debug.WriteLine("Папка Saves не найдена.");
+                    SelectedSavesFolder = await FindSaves.GetValidGamePath(Game);
+                    PathDataManager<IGame>.SetSavesFolderPath(Game, SelectedSavesFolder);
                 }
 
                 GameViewModel.ExeExists = true;
@@ -217,7 +213,7 @@ namespace PSB.ViewModels
             }
             if (Game.Type == "sidegame")
             {
-                var res = await FetchAsync(HttpMethod.Delete, $"library/sidegame/{Game.Id}");
+                var res = await FetchAsync(HttpMethod.Delete, $"sidegames/{Game.Id}");
 
                 if (res.IsSuccessStatusCode)
                 {
@@ -230,6 +226,9 @@ namespace PSB.ViewModels
                         GameViewModel.InLibrary = false;
                         GameViewModel.IsFavorite = false;
                         LibraryDataManager<IGame>.RemoveLibrary(Game.Type, Game.Id);
+                        PathDataManager<IGame>.SetFilePath(Game, string.Empty);
+                        PathDataManager<IGame>.SetSavesFolderPath(Game, string.Empty);
+                        SavesDataManager<IGame>.RemoveSaves(Game.Type, Game.Id);
                         App.DialogService!.HideDialog();
                         NotificationService.ShowSuccess("Игра удалена из библиотеки");
 
@@ -242,13 +241,6 @@ namespace PSB.ViewModels
                 }
             }
 
-        }
-
-
-        [RelayCommand]
-        private async Task RemoveAllSaves()
-        {
-            // Логика удаления всех сохранений
         }
     }
 }

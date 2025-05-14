@@ -40,7 +40,6 @@
                     Click="BackButton_Click"
                     Grid.Column="0"/>
                         <TextBlock x:Name="HeaderText" 
-                       Text="HomePage" 
                        VerticalAlignment="Center" 
                        Style="{StaticResource SubtitleTextBlockStyle}"
                        Grid.Column="1"/>

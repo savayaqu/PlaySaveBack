@@ -84,12 +84,4 @@ class LibraryController extends Controller
         $library->delete();
         return response()->json(null, 204);
     }
-
-    public function removeSideGameFromLibrary(SideGame $sideGame): JsonResponse
-    {
-        $user = auth()->user();
-        $library = $user->libraries()->where('side_game_id', $sideGame->id)->firstOrFail();
-        $library->delete();
-        return response()->json(null, 204);
-    }
 }

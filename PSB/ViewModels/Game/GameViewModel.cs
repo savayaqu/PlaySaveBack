@@ -394,7 +394,6 @@ namespace PSB.ViewModels
                     }
                     UpdateLibraryDetails(Library);
                     LastPlayedGameManager.SaveLastPlayedGame(Game, Library);
-
                     await FetchAsync(
                         HttpMethod.Patch,
                         $"library/{Type}/{GameId}/update",
