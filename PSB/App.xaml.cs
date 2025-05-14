@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using Microsoft.UI.Xaml;
 using Microsoft.Windows.AppLifecycle;
 using PSB.Helpers;
+using PSB.Interfaces;
 using PSB.Services;
 using PSB.Utils;
 using PSB.Views.Auth;
@@ -17,6 +18,7 @@ namespace PSB
         public static AuthWindow? AuthWindow { get; private set; }
         public static RegistrationWindow? RegistrationWindow { get; private set; }
         public static NavigationService? NavigationService { get; private set; }
+        public static IGameLaunchService? GameLaunchService { get; private set; }
         public static AuthNavigationService? AuthNavigationService { get; private set; }
         public static LibraryService? LibraryService { get; private set; }
         public static ZipHelper? ZipHelper { get; private set; }
@@ -26,6 +28,7 @@ namespace PSB
         {
             InitializeComponent();
             DialogService = new DialogService();
+            GameLaunchService = new GameLaunchService();
             ZipHelper = new ZipHelper();
             CloudFileUploader = new CloudFileUploader();
         }

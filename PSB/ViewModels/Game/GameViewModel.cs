@@ -59,6 +59,7 @@ namespace PSB.ViewModels
         [NotifyCanExecuteChangedFor(nameof(OverwriteSaveCommand))]
         [NotifyCanExecuteChangedFor(nameof(CreateSaveCommand))]
         public partial Boolean VersionExists { get; set; } = false;
+        public bool CanLaunchGame() => ExeExists && !App.GameLaunchService!.IsGameLaunched;
 
         partial void OnFolderPathChanged(string value)
         {
@@ -359,7 +360,8 @@ namespace PSB.ViewModels
                 IsUploading = false;
             }
         }
-        [RelayCommand(CanExecute = nameof(ExeExists))]
+
+        [RelayCommand(CanExecute = nameof(CanLaunchGame))]
         public async Task LaunchGame()
         {
             try
@@ -370,58 +372,20 @@ namespace PSB.ViewModels
                     return;
                 }
 
-                using Process gameProcess = new();
-                ProcessStartInfo startInfo = new()
-                {
-                    FileName = FilePath,
-                    UseShellExecute = true,
-                    WorkingDirectory = Path.GetDirectoryName(FilePath), // Рабочая папка
-                    CreateNoWindow = false,
-                    RedirectStandardOutput = false,
-                    RedirectStandardError = false
-                };
+                var result = await App.GameLaunchService!.LaunchGameAsync(FilePath);
 
-                gameProcess.StartInfo = startInfo;
-                gameProcess.EnableRaisingEvents = true;
-
-                var tcs = new TaskCompletionSource<bool>();
-                gameProcess.Exited += (sender, e) => tcs.TrySetResult(true);
-                DateTime startTime = DateTime.Now;
-
-                try
-                {
-                    gameProcess.Start();
-                }
-                catch (System.ComponentModel.Win32Exception ex)
-                {
-                    Debug.WriteLine("Ошибка запуска: " + ex.Message);
-                    NotificationService.ShowError("Ошибка запуска: " + ex.Message);
+                if (!result.Launched)
                     return;
-                }
 
-                Debug.WriteLine($"Игра запущена: {FilePath}");
-                await tcs.Task;
-
-                DateTime endTime = DateTime.Now;
-                TimeSpan playTime = endTime - startTime;
+                TimeSpan playTime = result.EndTime - result.StartTime;
                 uint secondsPlayed = (uint)playTime.TotalSeconds;
 
-
-
                 Library.TimePlayed = (Library.TimePlayed ?? 0) + secondsPlayed;
-                Library.LastPlayedAt = endTime;
+                Library.LastPlayedAt = result.EndTime;
                 OnPropertyChanged(nameof(Library));
-
 
                 try
                 {
-                    var res = await FetchAsync(
-                        HttpMethod.Patch,
-                        $"library/{Type}/{GameId}/update",
-                        new UpdateLibraryGameRequest(Library.TimePlayed, endTime.ToString("yyyy-MM-dd HH:mm:ss")),
-                        serialize: true
-                    );
-
                     GameDataManager.SaveGame(Game);
                     LibraryDataManager<IGame>.SaveLibrary(Game, Library);
                     if (Saves != null)
@@ -429,6 +393,14 @@ namespace PSB.ViewModels
                         SavesDataManager<IGame>.SaveSaves(Game, [.. Saves]);
                     }
                     UpdateLibraryDetails(Library);
+                    LastPlayedGameManager.SaveLastPlayedGame(Game, Library);
+
+                    await FetchAsync(
+                        HttpMethod.Patch,
+                        $"library/{Type}/{GameId}/update",
+                        new UpdateLibraryGameRequest(Library.TimePlayed, result.EndTime.ToString("yyyy-MM-dd HH:mm:ss")),
+                        serialize: true
+                    );
                 }
                 catch (HttpRequestException ex)
                 {
@@ -440,6 +412,7 @@ namespace PSB.ViewModels
                 Debug.WriteLine($"Ошибка: {ex.Message}");
             }
         }
+
         [RelayCommand]
         public async Task OpenGameSettings()
         {

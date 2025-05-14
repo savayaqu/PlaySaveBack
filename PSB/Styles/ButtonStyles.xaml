@@ -3,15 +3,15 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
 
     <!-- Основные цвета -->
-    <SolidColorBrush x:Key="PrimaryButtonColor" Color="#c21c14"/>
-    <SolidColorBrush x:Key="PrimaryButtonHoverColor" Color="#801d1e"/>
-    <SolidColorBrush x:Key="PrimaryButtonPressedColor" Color="#b3203f"/>
-    <SolidColorBrush x:Key="PrimaryButtonForeground" Color="White"/>
+    <SolidColorBrush x:Key="DangerButtonColor" Color="#c21c14"/>
+    <SolidColorBrush x:Key="DangerButtonHoverColor" Color="#801d1e"/>
+    <SolidColorBrush x:Key="DangerButtonPressedColor" Color="#b3203f"/>
+    <SolidColorBrush x:Key="DangerButtonForeground" Color="White"/>
 
-    <!-- Стиль PrimaryButton -->
+    <!-- Стиль DangerButton -->
     <Style x:Key="DangerButton" TargetType="Button" BasedOn="{StaticResource DefaultButtonStyle}">
-        <Setter Property="Background" Value="{StaticResource PrimaryButtonColor}"/>
-        <Setter Property="Foreground" Value="{StaticResource PrimaryButtonForeground}"/>
+        <Setter Property="Background" Value="{StaticResource DangerButtonColor}"/>
+        <Setter Property="Foreground" Value="{StaticResource DangerButtonForeground}"/>
         <Setter Property="BorderBrush" Value="Transparent"/>
         <Setter Property="CornerRadius" Value="4"/>
         <Setter Property="Padding" Value="16,8"/>
@@ -26,14 +26,14 @@
                                 <VisualState x:Name="PointerOver">
                                     <Storyboard>
                                         <ObjectAnimationUsingKeyFrames Storyboard.TargetName="ButtonBorder" Storyboard.TargetProperty="Background">
-                                            <DiscreteObjectKeyFrame KeyTime="0" Value="{StaticResource PrimaryButtonHoverColor}"/>
+                                            <DiscreteObjectKeyFrame KeyTime="0" Value="{StaticResource DangerButtonHoverColor}"/>
                                         </ObjectAnimationUsingKeyFrames>
                                     </Storyboard>
                                 </VisualState>
                                 <VisualState x:Name="Pressed">
                                     <Storyboard>
                                         <ObjectAnimationUsingKeyFrames Storyboard.TargetName="ButtonBorder" Storyboard.TargetProperty="Background">
-                                            <DiscreteObjectKeyFrame KeyTime="0" Value="{StaticResource PrimaryButtonPressedColor}"/>
+                                            <DiscreteObjectKeyFrame KeyTime="0" Value="{StaticResource DangerButtonPressedColor}"/>
                                         </ObjectAnimationUsingKeyFrames>
                                     </Storyboard>
                                 </VisualState>
@@ -52,6 +52,85 @@
                                 BorderBrush="{TemplateBinding BorderBrush}"
                                 BorderThickness="{TemplateBinding BorderThickness}"
                                 CornerRadius="{TemplateBinding CornerRadius}">
+                            <ContentPresenter x:Name="ContentPresenter"
+                                            Content="{TemplateBinding Content}"
+                                            ContentTemplate="{TemplateBinding ContentTemplate}"
+                                            Margin="{TemplateBinding Padding}"
+                                            HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
+                                            VerticalAlignment="{TemplateBinding VerticalContentAlignment}"/>
+                        </Border>
+                    </Grid>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <!-- Цвета для зеленой кнопки -->
+    <SolidColorBrush x:Key="PlayButtonColor" Color="#2E7D32"/>
+    <!-- Основной зеленый -->
+    <SolidColorBrush x:Key="PlayButtonHoverColor" Color="#1B5E20"/>
+    <!-- Темнее на 15% -->
+    <SolidColorBrush x:Key="PlayButtonPressedColor" Color="#0D3E13"/>
+    <!-- Темнее на 30% -->
+    <SolidColorBrush x:Key="PlayButtonForeground" Color="White"/>
+
+    <!-- Стиль PlayButton -->
+    <Style x:Key="PlayButtonStyle" TargetType="Button" BasedOn="{StaticResource DefaultButtonStyle}">
+        <Setter Property="Background" Value="{StaticResource PlayButtonColor}"/>
+        <Setter Property="Foreground" Value="{StaticResource PlayButtonForeground}"/>
+        <Setter Property="BorderBrush" Value="Transparent"/>
+        <Setter Property="CornerRadius" Value="4"/>
+        <Setter Property="Padding" Value="16,8"/>
+        <Setter Property="FontWeight" Value="SemiBold"/>
+
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="Button">
+                    <Grid x:Name="LayoutRoot">
+                        <VisualStateManager.VisualStateGroups>
+                            <VisualStateGroup x:Name="CommonStates">
+                                <VisualState x:Name="Normal"/>
+                                <VisualState x:Name="PointerOver">
+                                    <Storyboard>
+                                        <ObjectAnimationUsingKeyFrames Storyboard.TargetName="ButtonBorder" Storyboard.TargetProperty="Background">
+                                            <DiscreteObjectKeyFrame KeyTime="0" Value="{StaticResource PlayButtonHoverColor}"/>
+                                        </ObjectAnimationUsingKeyFrames>
+                                        <ObjectAnimationUsingKeyFrames Storyboard.TargetName="ButtonBorder" Storyboard.TargetProperty="Opacity">
+                                            <DiscreteObjectKeyFrame KeyTime="0" Value="0.9"/>
+                                        </ObjectAnimationUsingKeyFrames>
+                                    </Storyboard>
+                                </VisualState>
+                                <VisualState x:Name="Pressed">
+                                    <Storyboard>
+                                        <ObjectAnimationUsingKeyFrames Storyboard.TargetName="ButtonBorder" Storyboard.TargetProperty="Background">
+                                            <DiscreteObjectKeyFrame KeyTime="0" Value="{StaticResource PlayButtonPressedColor}"/>
+                                        </ObjectAnimationUsingKeyFrames>
+                                        <DoubleAnimation Duration="0" To="0.95" Storyboard.TargetProperty="(UIElement.RenderTransform).(CompositeTransform.ScaleX)" Storyboard.TargetName="ButtonBorder"/>
+                                        <DoubleAnimation Duration="0" To="0.95" Storyboard.TargetProperty="(UIElement.RenderTransform).(CompositeTransform.ScaleY)" Storyboard.TargetName="ButtonBorder"/>
+                                    </Storyboard>
+                                </VisualState>
+                                <VisualState x:Name="Disabled">
+                                    <Storyboard>
+                                        <ObjectAnimationUsingKeyFrames Storyboard.TargetName="ButtonBorder" Storyboard.TargetProperty="Background">
+                                            <DiscreteObjectKeyFrame KeyTime="0" Value="{ThemeResource SystemControlDisabledBaseLowBrush}"/>
+                                        </ObjectAnimationUsingKeyFrames>
+                                        <ObjectAnimationUsingKeyFrames Storyboard.TargetName="ContentPresenter" Storyboard.TargetProperty="Foreground">
+                                            <DiscreteObjectKeyFrame KeyTime="0" Value="{ThemeResource SystemControlDisabledBaseMediumLowBrush}"/>
+                                        </ObjectAnimationUsingKeyFrames>
+                                    </Storyboard>
+                                </VisualState>
+                            </VisualStateGroup>
+                        </VisualStateManager.VisualStateGroups>
+
+                        <Border x:Name="ButtonBorder"
+                                Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                CornerRadius="{TemplateBinding CornerRadius}"
+                                RenderTransformOrigin="0.5,0.5">
+                            <Border.RenderTransform>
+                                <CompositeTransform/>
+                            </Border.RenderTransform>
                             <ContentPresenter x:Name="ContentPresenter"
                                             Content="{TemplateBinding Content}"
                                             ContentTemplate="{TemplateBinding ContentTemplate}"

@@ -15,15 +15,15 @@ namespace PSB.ViewModels
     {
         [ObservableProperty]
         public partial ObservableCollection<GroupedSaves> LocalSaves { get; set; } = [];
-
+        public LastPlayedGame LastPlayedGame { get; set; }
         [ObservableProperty]
         public partial bool IsLoading { get; set; }
 
         public HomeViewModel()
         {
             LoadLocalSaves();
+            LastPlayedGame = LastPlayedGameManager.LoadLastPlayedGame();
         }
-        [RelayCommand]
         public void LoadLocalSaves()
         {
             IsLoading = true;
@@ -35,14 +35,14 @@ namespace PSB.ViewModels
 
                 foreach (var group in grouped)
                 {
-                    var gameName = group.Key; // можно извлечь ID и преобразовать в читаемое имя, если нужно
+                    var game = group.Key; // можно извлечь ID и преобразовать в читаемое имя, если нужно
                     var unsyncedSaves = group.Value;
 
                     if (unsyncedSaves.Any())
                     {
                         LocalSaves.Add(new GroupedSaves
                         {
-                            GameName = gameName,
+                            Game = game,
                             Saves = unsyncedSaves
                         });
                     }
@@ -60,6 +60,17 @@ namespace PSB.ViewModels
             }
         }
 
-
+        [RelayCommand]
+        private void SelectGame(IGame game)
+        {
+            Debug.WriteLine("нажата кнопка");
+            Debug.WriteLine("нажата кнопка + game " + game.Name + game.Type);
+            if (game != null)
+            {
+                string type = game.Type == "game" ? "Game" : "SideGame";
+                string gameTag = $"{type}_{game.Id}|{game.Name}";
+                App.NavigationService!.Navigate(gameTag);
+            }
+        }
     }
 }

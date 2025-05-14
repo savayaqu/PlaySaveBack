@@ -51,9 +51,9 @@ namespace PSB.Utils.Game
         }
 
         // Получение всех локальных сохранений
-        public static Dictionary<string, List<Save>> GetAllLocalSaves()
+        public static Dictionary<IGame, List<Save>> GetAllLocalSaves()
         {
-            var result = new Dictionary<string, List<Save>>();
+            var result = new Dictionary<IGame, List<Save>>();
             var prefix = $"{AuthData.User!.Id}_";
             var savesSuffix = "_Saves";
 
@@ -83,16 +83,15 @@ namespace PSB.Utils.Game
                         var game = GameDataManager.LoadGame(type, gameId);
                         if (game == null || string.IsNullOrWhiteSpace(game.Name)) continue;
 
-                        string gameName = game.Name;
 
                         // Если уже есть такая игра, добавляем к существующим
-                        if (result.TryGetValue(gameName, out var existingList))
+                        if (result.TryGetValue(game, out var existingList))
                         {
                             existingList.AddRange(localSaves);
                         }
                         else
                         {
-                            result.Add(gameName, localSaves);
+                            result.Add(game, localSaves);
                         }
                     }
                     catch (Exception ex)
