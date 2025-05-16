@@ -23,6 +23,7 @@ class AuthController extends Controller
     /**
      * @throws RandomException
      */
+    // Регистрация
     public function signUp(SignUpRequest $request): JsonResponse
     {
         $key = random_int(100000, 999999);
@@ -34,6 +35,7 @@ class AuthController extends Controller
         $token = $user->createToken(Str::random(100))->plainTextToken;
         return response()->json(['user' => UserResource::make($user), 'token' => $token, 'key' => $key], 201);
     }
+    // Авторизация
     public function signIn(SignInRequest $request): JsonResponse
     {
         $identifier = $request->input('identifier'); // Может быть email или login
@@ -55,6 +57,7 @@ class AuthController extends Controller
             'token' => $token,
         ]);
     }
+    // Восстановление через ключ
     public function restoreFromKey(RestoreFromKeyRequest $request): JsonResponse
     {
         $user = User::query()->where('login', $request->login)->firstOrFail();
@@ -68,14 +71,10 @@ class AuthController extends Controller
         }
         return response()->json(UserResource::make($user), 200);
     }
+    // Выход
     public function logout(Request $request): JsonResponse
     {
         $request->user()->currentAccessToken()->delete();
-        return response()->json(null, 204);
-    }
-    public function logoutAll(Request $request): JsonResponse
-    {
-        $request->user()->tokens()->delete();
         return response()->json(null, 204);
     }
 }

@@ -17,33 +17,7 @@ use Illuminate\Support\Facades\Http;
 
 class SideGameController extends Controller
 {
-    /**
-     * Получить все сторонние игры.
-     */
-    public function getSideGames(): JsonResponse
-    {
-        $sideGames = SideGame::all();
-        return response()->json($sideGames);
-    }
-
-    /**
-     * Получить конкретную стороннюю игру.
-     */
-    public function getSideGame(SideGame $sideGame): JsonResponse
-    {
-        $user = auth()->user();
-        $library = Library::query()->where('side_game_id', $sideGame->id)->where('user_id', $user->id)->first();
-        $saves = $user->saves()->where('side_game_id',$sideGame->id)->get();
-        return response()->json([
-            'side_game' => SideGameResource::make($sideGame),
-            'library' => $library ? LibraryResource::make($library) : null,
-            'saves' => $saves->isEmpty() ? null : SaveResource::collection($saves),
-        ]);
-    }
-
-    /**
-     * Добавить стороннюю игру и сразу в библиотеку.
-     */
+    // Добавление сторонней игры
     public function addSideGame(Request $request): JsonResponse
     {
         $user = auth()->user();
@@ -61,6 +35,22 @@ class SideGameController extends Controller
         return response()->json(LibraryResource::make($library), 201);
 
     }
+    /**
+     * Получить конкретную стороннюю игру.
+     */
+    public function getSideGame(SideGame $sideGame): JsonResponse
+    {
+        $user = auth()->user();
+        $library = Library::query()->where('side_game_id', $sideGame->id)->where('user_id', $user->id)->first();
+        $saves = $user->saves()->where('side_game_id',$sideGame->id)->get();
+        return response()->json([
+            'side_game' => SideGameResource::make($sideGame),
+            'library' => $library ? LibraryResource::make($library) : null,
+            'saves' => $saves->isEmpty() ? null : SaveResource::collection($saves),
+        ]);
+    }
+
+
     public function removeSideGame(SideGame $sideGame): JsonResponse
     {
         $sideGame->delete();

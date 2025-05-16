@@ -16,6 +16,7 @@ use Illuminate\Http\Request;
 
 class SaveController extends Controller
 {
+    // Получение сохранений к игре
     public function getMySavesGame(Game $game)
     {
         $user = auth()->user();
@@ -28,6 +29,7 @@ class SaveController extends Controller
             ->get();
         return response()->json(['saves' => SaveResource::collection($saves)]);
     }
+    // Получение сохранений к сторонней игре
     public function getMySavesSideGame(SideGame $sideGame)
     {
         $user = auth()->user();
@@ -40,22 +42,24 @@ class SaveController extends Controller
             ->get();
         return response()->json(['saves' => SaveResource::collection($saves)]);
     }
-    public function getHash(Request $request)
-    {
-        $user = auth()->user();
-        $file = $request->file('file');
-        $hash = hash('sha256', file_get_contents($file)); // Вычисление хеша
-        dd($hash);
-    }
+    // Перезапись сохранения
     public function updateSave(Save $save, OverwriteSaveRequest $request)
     {
         $user = auth()->user();
-        $cloudService = CloudService::query()->where('name', 'Google Drive')->first();
+        $cloudService = CloudService::query()
+            ->where('name', 'Google Drive')
+            ->first();
 
-        if($save->userCloudService()->where('cloud_service_id', $cloudService->id)->exists())
+        if($save->userCloudService()
+            ->where('cloud_service_id', $cloudService->id)
+            ->where('status', CloudStatus::Active)
+            ->exists())
         {
             $fileId = $save->file_id;
-            $service = UserCloudService::query()->where('user_id', $user->id)->where('cloud_service_id', $cloudService->id)->first();
+            $service = $user->userCloudService()
+                ->where('cloud_service_id', $cloudService->id)
+                ->where('status', CloudStatus::Active)
+                ->first();
             $googleDriveService = new GoogleDriveService($service);
             $googleDriveService->getAndRenameParentFolder($fileId, $request->version);
         }

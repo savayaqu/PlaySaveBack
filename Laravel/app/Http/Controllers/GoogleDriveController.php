@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Enums\CloudStatus;
 use App\Exceptions\ConflictException;
 use App\Exceptions\ForbiddenException;
+use App\Http\Requests\Api\Save\ConfirmUploadSave;
 use App\Http\Requests\Api\Save\OverwriteSaveRequest;
 use App\Http\Requests\Api\Save\UploadSaveRequest;
 use App\Http\Resources\SaveResource;
@@ -14,17 +15,11 @@ use App\Models\Save;
 use App\Models\SideGame;
 use App\Models\UserCloudService;
 use App\Services\GoogleDriveService;
-use Carbon\Carbon;
 use Google\Client;
-use Google\Service\Drive;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Crypt;
-use Illuminate\Support\Facades\Log;
-use phpseclib3\Exception\TimeoutException;
-use Symfony\Component\HttpKernel\Exception\ConflictHttpException;
 
 class GoogleDriveController extends Controller
 {
@@ -108,7 +103,7 @@ class GoogleDriveController extends Controller
     /**
      * Генерирует URL для прямой загрузки файла в Google Drive
      */
-    public function generateUploadUrl(Request $request): JsonResponse
+    public function generateUploadUrl(UploadSaveRequest $request): JsonResponse
     {
         $user = auth()->user();
         $game = $this->resolveGame($request);
@@ -131,9 +126,8 @@ class GoogleDriveController extends Controller
             'version' => $request->version,
             'description' => $request->description,
             'user_id' => $user->id,
-            'status' => 'uploading',
-            'file_name' => $request->input('file_name'),
-            'size' => $request->input('file_size'),
+            'file_name' => $request->file_name,
+            'size' => $request->file_size,
         ];
 
         $game instanceof Game
@@ -144,9 +138,10 @@ class GoogleDriveController extends Controller
 
         // Генерируем URL для загрузки
         $cloudService = CloudService::where('name', 'Google Drive')->first();
-        $service = UserCloudService::where('user_id', $user->id)
+        $service = $user->userCloudService()
             ->where('cloud_service_id', $cloudService->id)
-            ->first();
+            ->where('status', CloudStatus::Active)
+            ->firstOrFail();
 
         $googleDriveService = new GoogleDriveService($service);
 
@@ -165,7 +160,7 @@ class GoogleDriveController extends Controller
     /**
      * Подтверждает успешную загрузку файла
      */
-    public function confirmUpload(Request $request, Save $save): JsonResponse
+    public function confirmUpload(ConfirmUploadSave $request, Save $save): JsonResponse
     {
         $request->validate([
             'file_id' => 'required|string',
@@ -174,9 +169,10 @@ class GoogleDriveController extends Controller
 
         $user = auth()->user();
         $cloudService = CloudService::where('name', 'Google Drive')->first();
-        $service = UserCloudService::where('user_id', $user->id)
+        $service = $user->userCloudService()
             ->where('cloud_service_id', $cloudService->id)
-            ->first();
+            ->where('status', CloudStatus::Active)
+            ->firstOrFail();
 
         $save->update([
             'file_id' => $request->file_id,
@@ -187,13 +183,15 @@ class GoogleDriveController extends Controller
 
         return response()->json(SaveResource::make($save));
     }
+    // Узнать тип игры
     private function resolveGame(Request $request)
     {
         if ($request->has('side_game_id') && $request->side_game_id != null) {
-            return SideGame::findOrFail($request->side_game_id);
+            return SideGame::query()->findOrFail($request->side_game_id);
         }
-        return Game::findOrFail($request->game_id);
+        return Game::query()->findOrFail($request->game_id);
     }
+    // Генерация ссылки на перезапись сохранения
     public function generateOverwriteUrl(Save $save, Request $request)
     {
         $request->validate([
@@ -203,9 +201,10 @@ class GoogleDriveController extends Controller
 
         $user = auth()->user();
         $cloudService = CloudService::where('name', 'Google Drive')->first();
-        $service = UserCloudService::where('user_id', $user->id)
+        $service = $user->userCloudService()
             ->where('cloud_service_id', $cloudService->id)
-            ->first();
+            ->where('status', CloudStatus::Active)
+            ->firstOrFail();
         $googleDriveService = new GoogleDriveService($service);
 
         return response()->json([
@@ -216,12 +215,18 @@ class GoogleDriveController extends Controller
             'expires_at' => now()->addHours(1)->toIso8601String()
         ]);
     }
+    // Скаичвание сохранения
     public function downloadFile(Save $save)
     {
         $user = auth()->user();
+        if($save->user_id != $user->id)
+            throw new ForbiddenException();
         $fileId = $save->file_id;
         $cloudService = CloudService::query()->where('name', 'Google Drive')->first();
-        $service = UserCloudService::query()->where('user_id', $user->id)->where('cloud_service_id', $cloudService->id)->first();
+        $service = $user->userCloudService()
+            ->where('cloud_service_id', $cloudService->id)
+            ->where('status', CloudStatus::Active)
+            ->firstOrFail();
 
         $googleDriveService = new GoogleDriveService($service);
         $fileData = $googleDriveService->downloadFile($fileId);
@@ -231,34 +236,43 @@ class GoogleDriveController extends Controller
             'Content-Disposition' => 'attachment; filename="' . $fileData['fileName'] . '"',
         ]);
     }
-
+    // Поделиться сохранением
     public function shareFile(Save $save)
     {
         $user = auth()->user();
+        if($save->user_id != $user->id)
+            throw new ForbiddenException();
         $fileId = $save->file_id;
         $cloudService = CloudService::query()->where('name', 'Google Drive')->first();
-        $service = UserCloudService::query()->where('user_id', $user->id)->where('cloud_service_id', $cloudService->id)->first();
-
+        $service = $user->userCloudService()
+            ->where('cloud_service_id', $cloudService->id)
+            ->where('status', CloudStatus::Active)
+            ->firstOrFail();
         $googleDriveService = new GoogleDriveService($service);
         $url = $googleDriveService->shareFile($fileId);
 
         return response()->json(['url' => $url]);
     }
-
+    // Удаление сохранения
     public function deleteFile(Save $save)
     {
         $user = auth()->user();
+        if($save->user_id != $user->id)
+            throw new ForbiddenException();
         $fileId = $save->file_id;
         $cloudService = CloudService::query()->where('name', 'Google Drive')->first();
-        $service = UserCloudService::query()->where('user_id', $user->id)->where('cloud_service_id', $cloudService->id)->first();
-
+        $service = $user->userCloudService()
+            ->where('cloud_service_id', $cloudService->id)
+            ->where('status', CloudStatus::Active)
+            ->firstOrFail();
         $googleDriveService = new GoogleDriveService($service);
         $googleDriveService->deleteFile($fileId);
 
-        Save::query()->where('file_id', $fileId)->where('user_id', $user->id)->delete();
+        $save->delete();
 
         return response()->json(['message' => 'File deleted successfully'], 200);
     }
+    // Отключение GoogleDrive
     public function disconnect(UserCloudService $userCloudService)
     {
         $user = auth()->user();

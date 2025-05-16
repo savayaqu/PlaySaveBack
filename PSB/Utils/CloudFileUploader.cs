@@ -51,41 +51,50 @@ namespace PSB.Utils
             string version,
             string description)
         {
-            // 1. Get upload URL
-            (var resUploadUrl, var bodyUploadUrl) = await 
-                FetchAsync<UploadUrlResponse>(
-                    HttpMethod.Post,
-                    "google-drive/generate-upload-url",
-                    new
+            try
             {
-                file_name = Path.GetFileName(save.ZipPath),
-                file_size = new FileInfo(save.ZipPath).Length,
-                version,
-                description,
-                game_id = game is SideGame ? null : game.Id.ToString(),
-                side_game_id = game is SideGame ? game.Id.ToString() : null
-            }, true);
+                // 1. Get upload URL
+                (var resUploadUrl, var bodyUploadUrl) = await
+                    FetchAsync<UploadUrlResponse>(
+                        HttpMethod.Post,
+                        "saves/google-drive/generate-upload-url",
+                        new
+                        {
+                            file_name = Path.GetFileName(save.ZipPath),
+                            file_size = new FileInfo(save.ZipPath).Length,
+                            version,
+                            description,
+                            game_id = game is SideGame ? null : game.Id.ToString(),
+                            side_game_id = game is SideGame ? game.Id.ToString() : null
+                        }, true);
 
-            if (!resUploadUrl.IsSuccessStatusCode)
+                if (!resUploadUrl.IsSuccessStatusCode)
+                    return (false, null);
+
+
+                // 2. Direct upload to Google Drive
+                using var fileStream = File.OpenRead(save.ZipPath);
+                (var fileIdResponse, var fileIdBody) = await FetchAsync<FileIdResponse>(HttpMethod.Post, bodyUploadUrl.UploadUrl, new StreamContent(fileStream));
+
+                if (!fileIdResponse.IsSuccessStatusCode)
+                    return (false, null);
+
+                // 3. Confirm upload
+                var fileHash = ZipHelper.CalculateFileHash(save.ZipPath);
+                (var confirmResponse, var confirmBody) = await
+                    FetchAsync<Save>(
+                    HttpMethod.Post,
+                    $"saves/{bodyUploadUrl.SaveId}/google-drive/confirm-upload",
+                    new ConfirmUploadRequest(fileIdBody!.Id, fileHash), true);
+
+                return (true, confirmBody);
+            }
+            catch (Exception ex)
+            {
+                NotificationService.ShowError($"Overwrite failed: {ex.Message}");
                 return (false, null);
+            }
 
-
-            // 2. Direct upload to Google Drive
-            using var fileStream = File.OpenRead(save.ZipPath);
-            (var fileIdResponse, var fileIdBody) = await FetchAsync<FileIdResponse>(HttpMethod.Post,bodyUploadUrl.UploadUrl, new StreamContent(fileStream));
-
-            if (!fileIdResponse.IsSuccessStatusCode)
-                return (false, null);
-
-            // 3. Confirm upload
-            var fileHash = ZipHelper.CalculateFileHash(save.ZipPath);
-            (var confirmResponse, var confirmBody) = await
-                FetchAsync<Save>(
-                HttpMethod.Post,
-                $"google-drive/confirm-upload/{bodyUploadUrl.SaveId}",
-                new ConfirmUploadRequest(fileIdBody!.Id, fileHash), true);
-
-            return (true, confirmBody);
         }
         public static async Task<(bool Success, Save? UpdatedSave)> OverwriteFileAsync(Save existingSave,string newFilePath,string version,string description)
         {

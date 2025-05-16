@@ -14,6 +14,7 @@ use Illuminate\Http\Request;
 
 class LibraryController extends Controller
 {
+    // Получение библиотеки
     public function getLibrary(Request $request): JsonResponse
     {
         $user = auth()->user();
@@ -33,7 +34,7 @@ class LibraryController extends Controller
 
         return LibraryResource::collection($libraries)->response();
     }
-
+    // Добавление игры в библиотеку
     public function addToLibrary(Game $game): JsonResponse
     {
         $user = auth()->user();
@@ -45,6 +46,7 @@ class LibraryController extends Controller
         return response()->json(LibraryResource::make($library), 201);
     }
 
+    // Изменение статуса избранного для игры
     public function toggleFavorite(Game $game): JsonResponse
     {
         $user = auth()->user();
@@ -52,7 +54,7 @@ class LibraryController extends Controller
         $library->update(['is_favorite' => !$library->is_favorite]);
         return response()->json(null, 204);
     }
-
+    // Изменение статуса избранного для сторонней игры
     public function toggleSideGameFavorite(SideGame $sideGame): JsonResponse
     {
         $user = auth()->user();
@@ -60,7 +62,7 @@ class LibraryController extends Controller
         $library->update(['is_favorite' => !$library->is_favorite]);
         return response()->json(null, 204);
     }
-
+    // Изменение данных библиотеки игры
     public function updateLibraryGame(Game $game, EditLibraryGameRequest $request): JsonResponse
     {
         $user = auth()->user();
@@ -68,7 +70,7 @@ class LibraryController extends Controller
         $library->update($request->validated());
         return response()->json(null, 204);
     }
-
+    // Изменение данных библиотеки сторонней игры
     public function updateSideGameLibrary(SideGame $sideGame, EditLibraryGameRequest $request): JsonResponse
     {
         $user = auth()->user();
@@ -76,7 +78,7 @@ class LibraryController extends Controller
         $library->update($request->validated());
         return response()->json(null, 204);
     }
-
+    // Удаление игры из библиотеки
     public function removeFromLibrary(Game $game): JsonResponse
     {
         $user = auth()->user();

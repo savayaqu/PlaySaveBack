@@ -16,11 +16,13 @@ use Illuminate\Support\Facades\Storage;
 
 class UserController extends Controller
 {
+    // Получение своего профиля
     public function getProfile(): JsonResponse
     {
         $user = auth()->user();
         return response()->json(UserResource::make($user));
     }
+    // Обновление профиля
     public function updateProfile(UpdateProfileRequest $request): JsonResponse
     {
         $user = auth()->user();
@@ -74,6 +76,7 @@ class UserController extends Controller
         $user->update($data);
         return response()->json(UserResource::make($user));
     }
+    // Получение облачных сервисов
     public function getCloudServices(): JsonResponse
     {
         $services = CloudService::all();
