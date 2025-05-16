@@ -1,0 +1,1359 @@
+{
+	"info": {
+		"_postman_id": "cb93db83-a66d-478c-92db-3cafeae5ea60",
+		"name": "PlaySaveBack",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "38992338"
+	},
+	"item": [
+		{
+			"name": "Аутентификация",
+			"item": [
+				{
+					"name": "Регистрация",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.environment.set(\"token\", pm.response.json().token);"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "urlencoded",
+							"urlencoded": [
+								{
+									"key": "email",
+									"value": "zcomn@mail.ru",
+									"type": "text",
+									"disabled": true
+								},
+								{
+									"key": "password",
+									"value": "Admin123!",
+									"type": "text"
+								},
+								{
+									"key": "password_confirmation",
+									"value": "Admin123!",
+									"type": "text"
+								},
+								{
+									"key": "login",
+									"value": "zcomn",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{api}}/register",
+							"host": [
+								"{{api}}"
+							],
+							"path": [
+								"register"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Авторизация",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.environment.set(\"token\", pm.response.json().token);"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "urlencoded",
+							"urlencoded": [
+								{
+									"key": "email",
+									"value": "zcomn@mail.ru",
+									"type": "text",
+									"disabled": true
+								},
+								{
+									"key": "password",
+									"value": "Admin123!",
+									"type": "text"
+								},
+								{
+									"key": "login",
+									"value": "zcomn",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{api}}/login",
+							"host": [
+								"{{api}}"
+							],
+							"path": [
+								"login"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Авторизация администратора",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.environment.set(\"token\", pm.response.json().token);"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "urlencoded",
+							"urlencoded": [
+								{
+									"key": "email",
+									"value": "zcomn@mail.ru",
+									"type": "text",
+									"disabled": true
+								},
+								{
+									"key": "password",
+									"value": "Admin123!",
+									"type": "text"
+								},
+								{
+									"key": "identifier",
+									"value": "admin",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{api}}/login",
+							"host": [
+								"{{api}}"
+							],
+							"path": [
+								"login"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Выход",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "10|NQozQ20PDRbRA7pxnLwqE78gsX4Iwj2YjatONWQd1312cc5f",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "urlencoded",
+							"urlencoded": []
+						},
+						"url": {
+							"raw": "{{api}}/logout",
+							"host": [
+								"{{api}}"
+							],
+							"path": [
+								"logout"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Восстановление с помощью ключа",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "urlencoded",
+							"urlencoded": [
+								{
+									"key": "login",
+									"value": "admin",
+									"type": "text"
+								},
+								{
+									"key": "key",
+									"value": "666666",
+									"type": "text"
+								},
+								{
+									"key": "new_password",
+									"value": "Admin123!",
+									"type": "text"
+								},
+								{
+									"key": "new_password_confirmation",
+									"value": "Admin123!",
+									"type": "text"
+								},
+								{
+									"key": "logout",
+									"value": "1",
+									"type": "text",
+									"disabled": true
+								}
+							]
+						},
+						"url": {
+							"raw": "{{api}}/restore-from-key",
+							"host": [
+								"{{api}}"
+							],
+							"path": [
+								"restore-from-key"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Профиль",
+			"item": [
+				{
+					"name": "Получение статистики",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{api}}/profile/statistic",
+							"host": [
+								"{{api}}"
+							],
+							"path": [
+								"profile",
+								"statistic"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Получение своего профиля",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{api}}/profile",
+							"host": [
+								"{{api}}"
+							],
+							"path": [
+								"profile"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Получение облачных сервисов",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{api}}/profile/services",
+							"host": [
+								"{{api}}"
+							],
+							"path": [
+								"profile",
+								"services"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Обновление своего профиля",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "header_file",
+									"type": "file",
+									"src": "postman-cloud:///1eede4e1-85cb-4bd0-9c5b-0ff92e52b86c",
+									"disabled": true
+								},
+								{
+									"key": "avatar_file",
+									"type": "file",
+									"src": "/C:/Users/Savayaqu/Downloads/asuka-bark.gif",
+									"disabled": true
+								},
+								{
+									"key": "email",
+									"value": "fghfgh@dfg.ru",
+									"type": "text",
+									"disabled": true
+								},
+								{
+									"key": "header",
+									"value": "",
+									"type": "text",
+									"disabled": true
+								},
+								{
+									"key": "avatar",
+									"value": "https://sun9-73.userapi.com/impg/mJFJPwaJOlQ2h69DIhw0uBvBYNClrxIruTqylg/OawM4SxcxX4.jp2g?size=853x1280&quality=95&sign=5999de74e3792572082e5ff94b1a590d&type=album",
+									"type": "text",
+									"disabled": true
+								},
+								{
+									"key": "login",
+									"value": "sdfsdfsdf",
+									"type": "text",
+									"disabled": true
+								},
+								{
+									"key": "visibility",
+									"value": "1",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{api}}/profile",
+							"host": [
+								"{{api}}"
+							],
+							"path": [
+								"profile"
+							]
+						}
+					},
+					"response": []
+				}
+			],
+			"auth": {
+				"type": "bearer",
+				"bearer": [
+					{
+						"key": "token",
+						"value": "{{token}}",
+						"type": "string"
+					}
+				]
+			},
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"type": "text/javascript",
+						"packages": {},
+						"exec": [
+							""
+						]
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"type": "text/javascript",
+						"packages": {},
+						"exec": [
+							""
+						]
+					}
+				}
+			]
+		},
+		{
+			"name": "Библиотека",
+			"item": [
+				{
+					"name": "Игра",
+					"item": [
+						{
+							"name": "Добавление игры в библиотеку",
+							"request": {
+								"method": "POST",
+								"header": [],
+								"url": {
+									"raw": "{{api}}/library/game/2",
+									"host": [
+										"{{api}}"
+									],
+									"path": [
+										"library",
+										"game",
+										"2"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Добавить/убрать игру в избранное",
+							"request": {
+								"method": "PATCH",
+								"header": [],
+								"url": {
+									"raw": "{{api}}/library/game/2",
+									"host": [
+										"{{api}}"
+									],
+									"path": [
+										"library",
+										"game",
+										"2"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Обновить данные игры в библиотеки",
+							"request": {
+								"method": "PATCH",
+								"header": [],
+								"body": {
+									"mode": "urlencoded",
+									"urlencoded": [
+										{
+											"key": "time_played",
+											"value": "454536",
+											"type": "text",
+											"disabled": true
+										},
+										{
+											"key": "last_played_at",
+											"value": "2025-02-28 16:01:45",
+											"type": "text"
+										}
+									]
+								},
+								"url": {
+									"raw": "{{api}}/library/game/44651/update",
+									"host": [
+										"{{api}}"
+									],
+									"path": [
+										"library",
+										"game",
+										"44651",
+										"update"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Удалить игру из библиотеки",
+							"request": {
+								"method": "DELETE",
+								"header": [],
+								"body": {
+									"mode": "urlencoded",
+									"urlencoded": [
+										{
+											"key": "time_played",
+											"value": "454536",
+											"type": "text",
+											"disabled": true
+										},
+										{
+											"key": "last_played_at",
+											"value": "2025-02-28 16:01:45",
+											"type": "text"
+										}
+									]
+								},
+								"url": {
+									"raw": "{{api}}/library/game/2",
+									"host": [
+										"{{api}}"
+									],
+									"path": [
+										"library",
+										"game",
+										"2"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "Сторонняя игра",
+					"item": [
+						{
+							"name": "Добавить/убрать стороннюю игру в избранное",
+							"request": {
+								"method": "PATCH",
+								"header": [],
+								"url": {
+									"raw": "{{api}}/library/sidegame/1",
+									"host": [
+										"{{api}}"
+									],
+									"path": [
+										"library",
+										"sidegame",
+										"1"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Изменить данные сторонней игры в библиотеки",
+							"request": {
+								"method": "PATCH",
+								"header": [],
+								"body": {
+									"mode": "urlencoded",
+									"urlencoded": [
+										{
+											"key": "time_played",
+											"value": "454536",
+											"type": "text",
+											"disabled": true
+										},
+										{
+											"key": "last_played_at",
+											"value": "2025-02-28 16:01:45",
+											"type": "text"
+										}
+									]
+								},
+								"url": {
+									"raw": "{{api}}/library/game/44651/update",
+									"host": [
+										"{{api}}"
+									],
+									"path": [
+										"library",
+										"game",
+										"44651",
+										"update"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "Получение своей библиотеки",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{api}}/library?limit=0",
+							"host": [
+								"{{api}}"
+							],
+							"path": [
+								"library"
+							],
+							"query": [
+								{
+									"key": "limit",
+									"value": "0"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			],
+			"auth": {
+				"type": "bearer",
+				"bearer": [
+					{
+						"key": "token",
+						"value": "{{token}}",
+						"type": "string"
+					}
+				]
+			},
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"type": "text/javascript",
+						"packages": {},
+						"exec": [
+							""
+						]
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"type": "text/javascript",
+						"packages": {},
+						"exec": [
+							""
+						]
+					}
+				}
+			]
+		},
+		{
+			"name": "Сохранения",
+			"item": [
+				{
+					"name": "GoogleDrive",
+					"item": [
+						{
+							"name": "Загрузка сохранения в GoogleDrive",
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "urlencoded",
+									"urlencoded": [
+										{
+											"key": "file_name",
+											"value": "cybbbb",
+											"type": "text"
+										},
+										{
+											"key": "file_size",
+											"value": "245345",
+											"type": "text"
+										},
+										{
+											"key": "version",
+											"value": "543534535",
+											"type": "text"
+										},
+										{
+											"key": "description",
+											"value": "dfgdfgd",
+											"type": "text"
+										},
+										{
+											"key": "game_id",
+											"value": "33356",
+											"type": "text"
+										},
+										{
+											"key": "side_game_id",
+											"value": "",
+											"type": "text",
+											"disabled": true
+										}
+									]
+								},
+								"url": {
+									"raw": "{{api}}/saves/google-drive/generate-upload-url",
+									"host": [
+										"{{api}}"
+									],
+									"path": [
+										"saves",
+										"google-drive",
+										"generate-upload-url"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Скачать сохранение",
+							"protocolProfileBehavior": {
+								"disableBodyPruning": true
+							},
+							"request": {
+								"method": "GET",
+								"header": [],
+								"body": {
+									"mode": "formdata",
+									"formdata": [
+										{
+											"key": "file",
+											"type": "file",
+											"src": []
+										},
+										{
+											"key": "version",
+											"value": "1",
+											"type": "text"
+										},
+										{
+											"key": "game_id",
+											"value": "661",
+											"type": "text"
+										}
+									]
+								},
+								"url": {
+									"raw": "{{api}}/saves/{save}/google-drive/download",
+									"host": [
+										"{{api}}"
+									],
+									"path": [
+										"saves",
+										"{save}",
+										"google-drive",
+										"download"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Поделиться сохранением",
+							"protocolProfileBehavior": {
+								"disableBodyPruning": true
+							},
+							"request": {
+								"method": "GET",
+								"header": [],
+								"body": {
+									"mode": "formdata",
+									"formdata": [
+										{
+											"key": "file",
+											"type": "file",
+											"src": []
+										},
+										{
+											"key": "version",
+											"value": "1",
+											"type": "text"
+										},
+										{
+											"key": "game_id",
+											"value": "661",
+											"type": "text"
+										}
+									]
+								},
+								"url": {
+									"raw": "{{api}}/saves/{save}/google-drive/share",
+									"host": [
+										"{{api}}"
+									],
+									"path": [
+										"saves",
+										"{save}",
+										"google-drive",
+										"share"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Удалить сохранение",
+							"request": {
+								"method": "DELETE",
+								"header": [],
+								"body": {
+									"mode": "formdata",
+									"formdata": [
+										{
+											"key": "file",
+											"type": "file",
+											"src": []
+										},
+										{
+											"key": "version",
+											"value": "1",
+											"type": "text"
+										},
+										{
+											"key": "game_id",
+											"value": "661",
+											"type": "text"
+										}
+									]
+								},
+								"url": {
+									"raw": "{{api}}/saves/{save}/google-drive/delete",
+									"host": [
+										"{{api}}"
+									],
+									"path": [
+										"saves",
+										"{save}",
+										"google-drive",
+										"delete"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Перезапись сохранения",
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "formdata",
+									"formdata": [
+										{
+											"key": "file",
+											"type": "file",
+											"src": []
+										},
+										{
+											"key": "version",
+											"value": "1",
+											"type": "text"
+										},
+										{
+											"key": "game_id",
+											"value": "661",
+											"type": "text"
+										}
+									]
+								},
+								"url": {
+									"raw": "{{api}}/saves/{save}/google-drive/generate-overwrite-url",
+									"host": [
+										"{{api}}"
+									],
+									"path": [
+										"saves",
+										"{save}",
+										"google-drive",
+										"generate-overwrite-url"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "Получение своих сохранений к игре",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{api}}/saves/game/33356/my",
+							"host": [
+								"{{api}}"
+							],
+							"path": [
+								"saves",
+								"game",
+								"33356",
+								"my"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Получение своих сохранений к сторонней игре",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{api}}/saves/sidegame/1/my",
+							"host": [
+								"{{api}}"
+							],
+							"path": [
+								"saves",
+								"sidegame",
+								"1",
+								"my"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Перезапись сохранения",
+					"request": {
+						"method": "PATCH",
+						"header": [],
+						"body": {
+							"mode": "urlencoded",
+							"urlencoded": [
+								{
+									"key": "version",
+									"value": "",
+									"type": "text"
+								},
+								{
+									"key": "description",
+									"value": "",
+									"type": "text"
+								},
+								{
+									"key": "hash",
+									"value": "",
+									"type": "text"
+								},
+								{
+									"key": "last_sync_at",
+									"value": "",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{api}}/saves/1",
+							"host": [
+								"{{api}}"
+							],
+							"path": [
+								"saves",
+								"1"
+							]
+						}
+					},
+					"response": []
+				}
+			],
+			"auth": {
+				"type": "bearer",
+				"bearer": [
+					{
+						"key": "token",
+						"value": "{{token}}",
+						"type": "string"
+					}
+				]
+			},
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"type": "text/javascript",
+						"packages": {},
+						"exec": [
+							""
+						]
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"type": "text/javascript",
+						"packages": {},
+						"exec": [
+							""
+						]
+					}
+				}
+			]
+		},
+		{
+			"name": "GoogleDrive",
+			"item": [
+				{
+					"name": "Авторизация в GoogleDrive",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": []
+						},
+						"url": {
+							"raw": "{{api}}/google-drive/auth-url",
+							"host": [
+								"{{api}}"
+							],
+							"path": [
+								"google-drive",
+								"auth-url"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Генерация URL для загрузки",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": []
+						},
+						"url": {
+							"raw": "{{api}}/google-drive/generate-upload-url",
+							"host": [
+								"{{api}}"
+							],
+							"path": [
+								"google-drive",
+								"generate-upload-url"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Подтверждение загрузки",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": []
+						},
+						"url": {
+							"raw": "{{api}}/google-drive/confirm-upload/{save}",
+							"host": [
+								"{{api}}"
+							],
+							"path": [
+								"google-drive",
+								"confirm-upload",
+								"{save}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Ответ от GoogleDrive",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": []
+						},
+						"url": {
+							"raw": "{{api}}/google-drive/callback",
+							"host": [
+								"{{api}}"
+							],
+							"path": [
+								"google-drive",
+								"callback"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Отключение GoogleDrive",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": []
+						},
+						"url": {
+							"raw": "{{api}}/google-drive/disconnect/{userCloudService}",
+							"host": [
+								"{{api}}"
+							],
+							"path": [
+								"google-drive",
+								"disconnect",
+								"{userCloudService}"
+							]
+						}
+					},
+					"response": []
+				}
+			],
+			"auth": {
+				"type": "bearer",
+				"bearer": [
+					{
+						"key": "token",
+						"value": "{{token}}",
+						"type": "string"
+					}
+				]
+			},
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"type": "text/javascript",
+						"packages": {},
+						"exec": [
+							""
+						]
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"type": "text/javascript",
+						"packages": {},
+						"exec": [
+							""
+						]
+					}
+				}
+			]
+		},
+		{
+			"name": "Игры",
+			"item": [
+				{
+					"name": "Просмотр всех игр",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{api}}/games?name=test",
+							"host": [
+								"{{api}}"
+							],
+							"path": [
+								"games"
+							],
+							"query": [
+								{
+									"key": "name",
+									"value": "test"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Просмотр игры",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{api}}/games/{game}",
+							"host": [
+								"{{api}}"
+							],
+							"path": [
+								"games",
+								"{game}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Просмотр пути до сохранений",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{api}}/games/{game}/paths",
+							"host": [
+								"{{api}}"
+							],
+							"path": [
+								"games",
+								"{game}",
+								"paths"
+							]
+						}
+					},
+					"response": []
+				}
+			],
+			"auth": {
+				"type": "bearer",
+				"bearer": [
+					{
+						"key": "token",
+						"value": "{{token}}",
+						"type": "string"
+					}
+				]
+			},
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"type": "text/javascript",
+						"packages": {},
+						"exec": [
+							""
+						]
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"type": "text/javascript",
+						"packages": {},
+						"exec": [
+							""
+						]
+					}
+				}
+			]
+		},
+		{
+			"name": "Сторонние игры",
+			"item": [
+				{
+					"name": "Добавление сторонней игры",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "urlencoded",
+							"urlencoded": [
+								{
+									"key": "name",
+									"value": "",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{api}}/sidegames",
+							"host": [
+								"{{api}}"
+							],
+							"path": [
+								"sidegames"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Просмотр сторонней игры",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{api}}/sidegames/{sidegame}",
+							"host": [
+								"{{api}}"
+							],
+							"path": [
+								"sidegames",
+								"{sidegame}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Удаление сторонней игры",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{api}}/sidegames/{sidegame}",
+							"host": [
+								"{{api}}"
+							],
+							"path": [
+								"sidegames",
+								"{sidegame}"
+							]
+						}
+					},
+					"response": []
+				}
+			],
+			"auth": {
+				"type": "bearer",
+				"bearer": [
+					{
+						"key": "token",
+						"value": "{{token}}",
+						"type": "string"
+					}
+				]
+			},
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"type": "text/javascript",
+						"packages": {},
+						"exec": [
+							""
+						]
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"type": "text/javascript",
+						"packages": {},
+						"exec": [
+							""
+						]
+					}
+				}
+			]
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"exec": [
+					""
+				]
+			}
+		}
+	]
+}
