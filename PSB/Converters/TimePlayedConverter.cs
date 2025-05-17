@@ -11,7 +11,7 @@ namespace PSB.Converters
             {
                 if (seconds <= 0)
                 {
-                    return "Никогда";
+                    return "0 секунд";
                 }
                 if (seconds < 60)
                 {
