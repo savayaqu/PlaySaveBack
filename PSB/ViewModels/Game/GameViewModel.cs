@@ -137,6 +137,8 @@ namespace PSB.ViewModels
             finally
             {
                 IsUploading = false;
+                SaveDescription = string.Empty;
+                SaveVersion = string.Empty;
             }
         }
         [RelayCommand(CanExecute = nameof(CanCreateOverwriteSave))]
@@ -400,6 +402,10 @@ namespace PSB.ViewModels
                         new UpdateLibraryGameRequest(Library.TimePlayed, result.EndTime.ToString("yyyy-MM-dd HH:mm:ss")),
                         serialize: true
                     );
+                    _ = App.MainWindow!.ProfileViewModel.LoadStatistic();
+                    var libraryToUpdate = AuthData.Libraries.FirstOrDefault(lib => lib.Id == Library.Id);
+                    libraryToUpdate.TimePlayed = Library.TimePlayed;
+                    libraryToUpdate.LastPlayedAt = Library.LastPlayedAt;
                 }
                 catch (HttpRequestException ex)
                 {

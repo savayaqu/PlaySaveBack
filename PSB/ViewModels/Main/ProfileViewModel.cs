@@ -27,12 +27,18 @@ namespace PSB.ViewModels
         [ObservableProperty] public partial User? User { get; set; } = AuthData.User;
         public ObservableCollection<Library> Libraries => AuthData.Libraries;
         public ObservableCollection<RecentlyPlayed> GamesRecentlyPlayed = [];
+
         [ObservableProperty] public partial uint TotalPlayed { get; set; }
         public ProfileViewModel()
         {
             _ = LoadProfileAsync();
             _ = LoadLibraryAsync();
             _ = LoadStatistic();
+            // Подписываемся на события изменения коллекции
+            Libraries.CollectionChanged += (sender, args) =>
+            {
+                _ = LoadStatistic();
+            };
         }
 
         [RelayCommand]
