@@ -15,6 +15,8 @@ class GoogleDriveService
     private $client;
     private $driveService;
     private $userCloudService;
+    private array $folderCache = []; // Кэш: "parentId:name" => id
+
 
     public function __construct($userCloudService)
     {
@@ -66,25 +68,31 @@ class GoogleDriveService
 
     public function generateResumableUploadUrl(string $fileName, string $folderPath): string
     {
-        try {
-            $folderId = $this->createFolderStructure($folderPath);
+        $timing = [];
+        $startOverall = microtime(true);
 
-            // 1. Создаем метаданные файла
+        try {
+            $start = microtime(true);
+            $folderId = $this->createFolderStructure($folderPath);
+            $timing['create_folder_structure'] = round(microtime(true) - $start, 4);
+
+            $start = microtime(true);
             $fileMetadata = new DriveFile([
                 'name' => $fileName,
                 'parents' => [$folderId]
             ]);
+            $timing['build_metadata'] = round(microtime(true) - $start, 4);
 
-            // 2. Получаем авторизованный HTTP-клиент
+            $start = microtime(true);
             $httpClient = $this->driveService->getClient()->authorize();
+            $timing['authorize_client'] = round(microtime(true) - $start, 4);
 
-            // 3. Создаем PSR-7 запрос вручную
+            $start = microtime(true);
             $uri = 'https://www.googleapis.com/upload/drive/v3/files?' . http_build_query([
                     'uploadType' => 'resumable',
                     'fields' => 'id',
                     'supportsAllDrives' => 'true'
                 ]);
-
             $request = new \GuzzleHttp\Psr7\Request(
                 'POST',
                 $uri,
@@ -94,21 +102,29 @@ class GoogleDriveService
                 ],
                 json_encode($fileMetadata)
             );
+            $timing['build_request'] = round(microtime(true) - $start, 4);
 
-            // 4. Отправляем запрос
+            $start = microtime(true);
             $response = $httpClient->send($request);
+            $timing['send_request'] = round(microtime(true) - $start, 4);
 
-            // 5. Получаем URL для загрузки
+            $start = microtime(true);
             $location = $response->getHeaderLine('Location');
             if (empty($location)) {
                 throw new ApiException('Google Drive did not return upload URL');
             }
+            $timing['parse_location'] = round(microtime(true) - $start, 4);
+
+            $timing['generate_upload_url'] = round(microtime(true) - $startOverall, 4);
+
+            //dd($timing);
 
             return $location;
         } catch (\Exception $e) {
             throw new ApiException('Failed to generate upload URL: ' . $e->getMessage());
         }
     }
+
     public function generateResumableOverwriteUrl(string $fileId, string $fileName): string
     {
         try {
@@ -155,44 +171,6 @@ class GoogleDriveService
         } catch (\Exception $e) {
             throw new ApiException('Failed to generate overwrite URL: ' . $e->getMessage());
         }
-    }
-    private function createFolderStructure(string $path): string
-    {
-        $parts = explode('/', $path);
-        $parentId = 'root';
-
-        foreach ($parts as $folderName) {
-            $parentId = $this->getOrCreateFolder($folderName, $parentId);
-        }
-
-        return $parentId;
-    }
-
-    public function getOrCreateFolder($folderName, $parentId = null)
-    {
-        $query = "mimeType='application/vnd.google-apps.folder' and name='{$folderName}' and trashed=false";
-        if ($parentId) {
-            $query .= " and '{$parentId}' in parents";
-        }
-
-        $response = $this->driveService->files->listFiles([
-            'q' => $query,
-            'fields' => 'files(id)',
-            'pageSize' => 1
-        ]);
-
-        if (count($response->getFiles()) > 0) {
-            return $response->getFiles()[0]->getId();
-        }
-
-        $folderMetadata = new DriveFile([
-            'name' => $folderName,
-            'mimeType' => 'application/vnd.google-apps.folder',
-            'parents' => $parentId ? [$parentId] : [],
-        ]);
-
-        $folder = $this->driveService->files->create($folderMetadata, ['fields' => 'id']);
-        return $folder->getId();
     }
 
     public function deleteFile($fileId)
@@ -312,4 +290,65 @@ class GoogleDriveService
 
         return $parentId;
     }
+    private function createFolderStructure(string $path): string
+    {
+        $cacheKey = 'gdrive_folder_' . md5($path);
+        return cache()->rememberForever($cacheKey, function () use ($path) {
+            $parts = explode('/', $path);
+            $parentId = 'root';
+
+            foreach ($parts as $folderName) {
+                $parentId = $this->getOrCreateFolder($folderName, $parentId);
+            }
+
+            return $parentId;
+        });
+    }
+
+
+    public function getOrCreateFolder(string $folderName, string $parentId = 'root'): string
+    {
+        $cacheKey = $parentId . ':' . $folderName;
+        if (isset($this->folderCache[$cacheKey])) {
+            return $this->folderCache[$cacheKey];
+        }
+
+        $escapedName = addcslashes($folderName, "'\\");
+        $query = sprintf(
+            "mimeType='application/vnd.google-apps.folder' and name='%s' and '%s' in parents and trashed=false",
+            $escapedName,
+            $parentId
+        );
+
+        $response = $this->driveService->files->listFiles([
+            'q' => $query,
+            'fields' => 'files(id)',
+            'pageSize' => 1,
+            'supportsAllDrives' => true,
+        ]);
+
+        if (count($response->getFiles()) > 0) {
+            $folderId = $response->getFiles()[0]->getId();
+            $this->folderCache[$cacheKey] = $folderId;
+            return $folderId;
+        }
+
+        $folderMetadata = new DriveFile([
+            'name' => $folderName,
+            'mimeType' => 'application/vnd.google-apps.folder',
+            'parents' => [$parentId],
+        ]);
+
+        $folder = $this->driveService->files->create($folderMetadata, [
+            'fields' => 'id',
+            'supportsAllDrives' => true,
+        ]);
+
+        $folderId = $folder->getId();
+        $this->folderCache[$cacheKey] = $folderId;
+
+        return $folderId;
+    }
+
+
 }

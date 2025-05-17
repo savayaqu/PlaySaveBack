@@ -82,7 +82,7 @@ class GoogleDriveController extends Controller
 
         $cloudService = CloudService::query()->where('name', 'Google Drive')->first();
 
-        $userCloudService = UserCloudService::query()->updateOrCreate(
+        UserCloudService::query()->updateOrCreate(
             [
                 'cloud_service_id' => $cloudService->id,
                 'external_user_id' => $externalUserId,
@@ -105,8 +105,14 @@ class GoogleDriveController extends Controller
      */
     public function generateUploadUrl(UploadSaveRequest $request): JsonResponse
     {
+        $timings = [];
+        $startTime = microtime(true);
+
         $user = auth()->user();
         $game = $this->resolveGame($request);
+
+        $timings['auth_and_resolve_game'] = microtime(true) - $startTime;
+        $startTime = microtime(true);
 
         // Проверка существующей версии
         $existSave = $user->saves()
@@ -116,6 +122,9 @@ class GoogleDriveController extends Controller
             })
             ->where('version', $request->version)
             ->exists();
+
+        $timings['check_existing_save'] = microtime(true) - $startTime;
+        $startTime = microtime(true);
 
         if ($existSave) {
             throw new ConflictException();
@@ -136,6 +145,9 @@ class GoogleDriveController extends Controller
 
         $save = Save::create($saveData);
 
+        $timings['create_save_record'] = microtime(true) - $startTime;
+        $startTime = microtime(true);
+
         // Генерируем URL для загрузки
         $cloudService = CloudService::where('name', 'Google Drive')->first();
         $service = $user->userCloudService()
@@ -143,7 +155,14 @@ class GoogleDriveController extends Controller
             ->where('status', CloudStatus::Active)
             ->firstOrFail();
 
+        $timings['find_cloud_service'] = microtime(true) - $startTime;
+        $startTime = microtime(true);
+
+
         $googleDriveService = new GoogleDriveService($service);
+        $timings['create_service'] = microtime(true) - $startTime;
+
+        $startTime = microtime(true);
 
         $folderPath = "PlaySaveBack/{$game->name}/{$request->version}";
         $uploadUrl = $googleDriveService->generateResumableUploadUrl(
@@ -151,29 +170,27 @@ class GoogleDriveController extends Controller
             folderPath: $folderPath
         );
 
+        $timings['generate_upload_url'] = microtime(true) - $startTime;
+        $timings['total_time'] = array_sum($timings);
+
         return response()->json([
             'upload_url' => $uploadUrl,
             'save_id' => $save->id,
-            'expires_at' => now()->addHours(1)->toIso8601String()
+            'expires_at' => now()->addHours(1)->toIso8601String(),
+            'timings' => $timings
         ]);
     }
     /**
      * Подтверждает успешную загрузку файла
      */
-    public function confirmUpload(ConfirmUploadSave $request, Save $save): JsonResponse
+    public function confirmUpload(Save $save, ConfirmUploadSave $request): JsonResponse
     {
-        $request->validate([
-            'file_id' => 'required|string',
-            'file_hash' => 'required|string'
-        ]);
-
         $user = auth()->user();
         $cloudService = CloudService::where('name', 'Google Drive')->first();
         $service = $user->userCloudService()
             ->where('cloud_service_id', $cloudService->id)
             ->where('status', CloudStatus::Active)
             ->firstOrFail();
-
         $save->update([
             'file_id' => $request->file_id,
             'hash' => $request->file_hash,
@@ -192,13 +209,8 @@ class GoogleDriveController extends Controller
         return Game::query()->findOrFail($request->game_id);
     }
     // Генерация ссылки на перезапись сохранения
-    public function generateOverwriteUrl(Save $save, Request $request)
+    public function generateOverwriteUrl(Save $save, OverwriteSaveRequest $request): JsonResponse
     {
-        $request->validate([
-            'file_name' => 'required|string',
-            'file_size' => 'required|integer'
-        ]);
-
         $user = auth()->user();
         $cloudService = CloudService::where('name', 'Google Drive')->first();
         $service = $user->userCloudService()
@@ -215,7 +227,7 @@ class GoogleDriveController extends Controller
             'expires_at' => now()->addHours(1)->toIso8601String()
         ]);
     }
-    // Скаичвание сохранения
+    // Скачивание сохранения
     public function downloadFile(Save $save)
     {
         $user = auth()->user();
@@ -237,7 +249,7 @@ class GoogleDriveController extends Controller
         ]);
     }
     // Поделиться сохранением
-    public function shareFile(Save $save)
+    public function shareFile(Save $save): JsonResponse
     {
         $user = auth()->user();
         if($save->user_id != $user->id)
@@ -254,7 +266,7 @@ class GoogleDriveController extends Controller
         return response()->json(['url' => $url]);
     }
     // Удаление сохранения
-    public function deleteFile(Save $save)
+    public function deleteFile(Save $save): JsonResponse
     {
         $user = auth()->user();
         if($save->user_id != $user->id)
@@ -270,10 +282,10 @@ class GoogleDriveController extends Controller
 
         $save->delete();
 
-        return response()->json(['message' => 'File deleted successfully'], 200);
+        return response()->json(null, 204);
     }
     // Отключение GoogleDrive
-    public function disconnect(UserCloudService $userCloudService)
+    public function disconnect(UserCloudService $userCloudService): JsonResponse
     {
         $user = auth()->user();
 

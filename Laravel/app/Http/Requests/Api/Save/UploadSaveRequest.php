@@ -10,7 +10,7 @@ class UploadSaveRequest extends ApiRequest
     public function rules(): array
     {
         return [
-            'file_size' => 'required|string',
+            'file_size' => 'required|integer',
             'file_name' => 'required|string',
             'version' => 'required|string',
             'side_game_id' => 'nullable|integer|exists:libraries,side_game_id',

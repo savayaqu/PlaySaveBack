@@ -11,7 +11,7 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('user_cloud_service', function (Blueprint $table) {
+        Schema::create('user_cloud_services', function (Blueprint $table) {
             $table->id();
             $table->text('access_token')->nullable();
             $table->text('refresh_token')->nullable();
@@ -30,6 +30,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('user_cloud_service');
+        Schema::dropIfExists('user_cloud_services');
     }
 };

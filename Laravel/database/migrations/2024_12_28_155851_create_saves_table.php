@@ -23,7 +23,7 @@ return new class extends Migration
             $table->foreignId('user_id')->constrained();
             $table->foreignId('game_id')->nullable()->constrained('games');
             $table->foreignId('side_game_id')->nullable()->constrained('side_games', 'id')->cascadeOnDelete();
-            $table->foreignId('user_cloud_service_id')->nullable()->constrained('user_cloud_service', 'id');
+            $table->foreignId('user_cloud_service_id')->nullable()->constrained('user_cloud_services', 'id');
             $table->unique(['user_id', 'game_id', 'version']);
             $table->unique(['user_id', 'side_game_id', 'version']);
             $table->timestamps();

@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class UserCloudService extends Model
 {
-    protected $table = 'user_cloud_service';
+    protected $table = 'user_cloud_services';
     protected $fillable = [
         'access_token',
         'refresh_token',
