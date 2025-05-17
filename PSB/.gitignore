@@ -3,3 +3,5 @@ bin
 obj
 .vs
 /Properties/PublishProfiles/win-x64.pubxml.user
+/Properties/PublishProfiles/FolderProfile.pubxml
+/Properties/PublishProfiles/FolderProfile.pubxml.user
