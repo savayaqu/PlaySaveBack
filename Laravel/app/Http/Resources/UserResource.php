@@ -2,8 +2,6 @@
 
 namespace App\Http\Resources;
 
-use App\Enums\UserVisibility;
-use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
@@ -26,7 +24,6 @@ class UserResource extends JsonResource
             $this->mergeWhen($isThis, [
                 'login' => $this->login,
                 'email' => $this->email,
-                'visibility' => $this->visibility,
                 'library' => $this->whenLoaded('libraries', fn() =>
                 $this->when($this->libraries->isNotEmpty(), fn() => LibraryResource::collection($this->libraries))
                 ),

@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Exceptions\ApiException;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Api\User\UpdateProfileRequest;
 use App\Http\Resources\CloudServiceResource;
@@ -11,6 +12,7 @@ use App\Http\Resources\UserResource;
 use App\Models\CloudService;
 use App\Models\User;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 
@@ -29,7 +31,12 @@ class UserController extends Controller
         if (!$user instanceof User) {
             throw new \RuntimeException('Authenticated user is not an instance of User model.');
         }
-
+        if($request->current_password != null)
+        {
+            if (!Hash::check($request->current_password, $user->password)) {
+                throw new ApiException('Invalid current password', 401);
+            }
+        }
         $data = $request->validated();
         $storage = Storage::disk('public');
 

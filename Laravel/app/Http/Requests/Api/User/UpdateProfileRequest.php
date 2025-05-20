@@ -10,9 +10,9 @@ class UpdateProfileRequest extends ApiRequest
     {
         return [
             'email' => 'nullable|email|max:255|unique:users,email,' . auth()->id(),
-            'current_password' => 'string',
-            'new_password' => 'string|min:6|confirmed',
-            'new_password_confirmation' => 'string|min:6',
+            'current_password' => 'required_with:new_password|string',
+            'new_password' => 'nullable|string|min:6|confirmed',
+            'new_password_confirmation' => 'nullable|string|min:6|required_with:new_password',
             'nickname' => 'string|unique:users,nickname|max:64',
             'header' => [
                 'sometimes',
@@ -30,7 +30,6 @@ class UpdateProfileRequest extends ApiRequest
                 'required_without:avatar_file',
             ],
             'avatar_file' => 'sometimes|nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048|required_without:avatar',
-            'visibility' => 'integer|min:1|max:3'
         ];
     }
 

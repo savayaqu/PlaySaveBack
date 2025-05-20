@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Api\SideGame\SideGameRequest;
 use App\Http\Resources\GameResource;
 use App\Http\Resources\LibraryResource;
 use App\Http\Resources\SaveResource;
@@ -18,22 +19,15 @@ use Illuminate\Support\Facades\Http;
 class SideGameController extends Controller
 {
     // Добавление сторонней игры
-    public function addSideGame(Request $request): JsonResponse
+    public function addSideGame(SideGameRequest $request): JsonResponse
     {
         $user = auth()->user();
-
-        $validatedData = $request->validate([
-            'name' => 'required|string|max:255',
-        ]);
-
-        $sideGame = SideGame::create(['user_id' => $user->id,...$validatedData]);
+        $sideGame = $user->sideGames()->firstOrCreate($request->validated());
         $library = Library::query()->firstOrCreate([
             'user_id' => $user->id,
             'side_game_id' => $sideGame->id,
-        ]);
-        $library->load('sideGame');
+        ])->load('sideGame');
         return response()->json(LibraryResource::make($library), 201);
-
     }
     /**
      * Получить конкретную стороннюю игру.
@@ -41,7 +35,7 @@ class SideGameController extends Controller
     public function getSideGame(SideGame $sideGame): JsonResponse
     {
         $user = auth()->user();
-        $library = Library::query()->where('side_game_id', $sideGame->id)->where('user_id', $user->id)->first();
+        $library = $user->libraries()->where('side_game_id', $sideGame->id)->firstOrFail();
         $saves = $user->saves()->where('side_game_id',$sideGame->id)->get();
         return response()->json([
             'side_game' => SideGameResource::make($sideGame),
@@ -53,7 +47,9 @@ class SideGameController extends Controller
 
     public function removeSideGame(SideGame $sideGame): JsonResponse
     {
-        $sideGame->delete();
+        $user = auth()->user();
+        $user->sideGames()->findOrFail($sideGame->id)->delete();
+        //$sideGame->delete();
         return response()->json(null, 204);
     }
 }

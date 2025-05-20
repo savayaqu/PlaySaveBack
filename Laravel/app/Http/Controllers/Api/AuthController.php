@@ -69,7 +69,7 @@ class AuthController extends Controller
         {
             $user->tokens()->delete();
         }
-        return response()->json(UserResource::make($user), 200);
+        return response()->json(UserResource::make($user));
     }
     // Выход
     public function logout(Request $request): JsonResponse
