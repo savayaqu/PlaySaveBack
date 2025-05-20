@@ -14,7 +14,7 @@
             <FontIcon HorizontalAlignment="Center" VerticalAlignment="Center" Glyph="&#xE711;" />
         </Button>
         <StackPanel Orientation="Horizontal" BorderThickness="1" BorderBrush="Gray" CornerRadius="5" Spacing="12">
-            <Image Stretch="Fill" Height="50" Width="50" Source="{x:Bind UpdateEmailViewModel.User.Avatar, Mode=TwoWay}"/>
+            <Image Stretch="Fill" Height="50" Width="50" Source="{x:Bind UpdateEmailViewModel.User.Avatar, Mode=OneWay}"/>
             <StackPanel VerticalAlignment="Center">
                 <TextBlock Text="{x:Bind UpdateEmailViewModel.User.Nickname}"/>
                 <TextBlock Text="{x:Bind UpdateEmailViewModel.User.Login}"/>

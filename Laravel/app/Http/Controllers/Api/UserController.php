@@ -31,14 +31,18 @@ class UserController extends Controller
         if (!$user instanceof User) {
             throw new \RuntimeException('Authenticated user is not an instance of User model.');
         }
-        if($request->current_password != null)
-        {
+
+        if ($request->current_password != null) {
             if (!Hash::check($request->current_password, $user->password)) {
                 throw new ApiException('Invalid current password', 401);
             }
         }
+
         $data = $request->validated();
         $storage = Storage::disk('public');
+
+        // Генерация уникального идентификатора для файлов
+        $uniqueId = uniqid();
 
         // Обработка аватара
         if ($request->hasFile('avatar_file')) {
@@ -51,10 +55,13 @@ class UserController extends Controller
                 }
             }
 
-            // Сохраняем новый аватар
+            // Сохраняем новый аватар с уникальным именем
+            $extension = $request->file('avatar_file')->getClientOriginalExtension();
+            $filename = "avatar_{$uniqueId}.{$extension}";
+
             $path = $request->file('avatar_file')->storeAs(
                 $user->login,
-                'avatar.' . $request->file('avatar_file')->getClientOriginalExtension(),
+                $filename,
                 'public'
             );
             $data['avatar'] = $path;
@@ -71,10 +78,13 @@ class UserController extends Controller
                 }
             }
 
-            // Сохраняем новый хедер
+            // Сохраняем новый хедер с уникальным именем
+            $extension = $request->file('header_file')->getClientOriginalExtension();
+            $filename = "header_{$uniqueId}.{$extension}";
+
             $path = $request->file('header_file')->storeAs(
                 $user->login,
-                'header.' . $request->file('header_file')->getClientOriginalExtension(),
+                $filename,
                 'public'
             );
             $data['header'] = $path;

@@ -115,7 +115,7 @@
                            Width="95" 
                            Source="{x:Bind ProfileViewModel.User.Avatar, Mode=OneWay}"/>
 
-                        <TextBlock Text="{x:Bind ProfileViewModel.User.Nickname}" 
+                        <TextBlock Text="{x:Bind ProfileViewModel.User.Nickname, Mode=OneWay}" 
                                FontWeight="SemiBold" 
                                FontSize="28" 
                                VerticalAlignment="Center"/>

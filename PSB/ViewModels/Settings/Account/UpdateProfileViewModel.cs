@@ -115,7 +115,6 @@ namespace PSB.ViewModels
                     AuthData.User = body;
                     ProfileViewModel.User = AuthData.User;
                     OnPropertyChanged(nameof(ProfileViewModel));
-                    App.DialogService!.HideDialog();
                 }
             }
             catch (Exception ex)
