@@ -1,3 +1,4 @@
+using Microsoft.UI.Windowing;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Navigation;
@@ -15,7 +16,6 @@ namespace PSB
         public ProfileViewModel ProfileViewModel { get; set; }
         public AccountViewModel AccountViewModel { get; set; }
 
-        private readonly NavigationService _navigationService;
         public Frame ContentFrameControl => ContentFrame;
         public NavigationView NavigationViewControl => NavView;
         public TextBlock HeaderTextBlock => HeaderText;
@@ -33,9 +33,22 @@ namespace PSB
             CatalogViewModel = new CatalogViewModel();
 
             // Инициализируем сервисы
-            //_navigationService = new NavigationService(ContentFrame, NavView, HeaderText);
             NotificationService.Initialize(GlobalInfoBar, RootGrid);
             ContentFrame.Navigated += ContentFrame_Navigated;
+
+            // Установка минизмального значения окна
+            AppWindow.Resize(new Windows.Graphics.SizeInt32(1100, 550));
+            AppWindow.SetIcon("Assets/Tiles/GalleryIcon.ico");
+            AppWindow.TitleBar.PreferredTheme = TitleBarTheme.UseDefaultAppMode;
+
+            OverlappedPresenter presenter = OverlappedPresenter.Create();
+            presenter.PreferredMinimumWidth = 1100;
+            presenter.PreferredMinimumHeight = 550;
+
+            AppWindow.SetPresenter(presenter);
+
+
+
 
         }
         private void BackButton_Click(object sender, RoutedEventArgs e)

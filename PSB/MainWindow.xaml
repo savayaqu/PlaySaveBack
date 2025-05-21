@@ -10,6 +10,10 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     mc:Ignorable="d"
     Title="PSB">
+    <Window.SystemBackdrop>
+        <MicaBackdrop />
+    </Window.SystemBackdrop>
+
     <Grid x:Name="RootGrid">
 
         <NavigationView
@@ -24,7 +28,7 @@
             IsTitleBarAutoPaddingEnabled="False"
             IsPaneToggleButtonVisible="False"
             IsPaneOpen="True"
-        Background="{StaticResource AcrylicBackgroundFillColorBaseBrush}">
+        >
 
         <!-- Заголовок с кнопкой "Назад" -->
             <NavigationView.Header>

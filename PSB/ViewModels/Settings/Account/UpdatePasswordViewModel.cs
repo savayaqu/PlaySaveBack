@@ -1,9 +1,12 @@
 ﻿using System.Diagnostics;
+using System.Net;
 using System.Net.Http;
+using System.Text.Json;
 using System.Threading.Tasks;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using PSB.Api.Request;
+using PSB.Api.Response;
 using PSB.Models;
 using PSB.Services;
 using PSB.Utils;
@@ -23,6 +26,10 @@ namespace PSB.ViewModels
         [ObservableProperty]
         [NotifyCanExecuteChangedFor(nameof(UpdatePasswordCommand))]
         public partial string? NewPasswordConfirmation { get; set; } = "";
+        [ObservableProperty] public partial string? ErrorNewPass { get; set; } = null;
+        [ObservableProperty] public partial string? ErrorNewPassConf { get; set; } = null;
+        [ObservableProperty] public partial string? Error { get; set; } = null;
+
         private bool CanUpdate() => CurrentPassword != "" && NewPassword != "" && NewPasswordConfirmation != "";
 
         [RelayCommand(CanExecute = nameof(CanUpdate))]
@@ -36,6 +43,26 @@ namespace PSB.ViewModels
             {
                 App.DialogService!.HideDialog();
                 NotificationService.ShowSuccess("Пароль обновлён");
+            }
+            else if (res.StatusCode == HttpStatusCode.UnprocessableContent)
+            {
+                // Получаем содержимое ответа как строку
+                var errorContent = await res.Content.ReadAsStringAsync();
+
+                // Десериализуем JSON-строку в объект ErrorResponse
+                var errorResponse = JsonSerializer.Deserialize<ErrorResponse>(errorContent);
+                Debug.WriteLine(errorResponse);
+                Debug.WriteLine(errorResponse.ToString());
+                // Устанавливаем ошибку
+                ErrorNewPass = errorResponse.Errors["new_password"][0];
+                ErrorNewPassConf = errorResponse.Errors["new_password_confirmation"][0];
+                return;
+            }
+            else if(res.StatusCode == HttpStatusCode.Unauthorized)
+            {
+
+                Error = "Invalid current password";
+                return;
             }
         }
     }

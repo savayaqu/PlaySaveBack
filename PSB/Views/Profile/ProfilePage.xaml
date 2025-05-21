@@ -11,8 +11,7 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
     xmlns:selectors="using:PSB.Selectors" xmlns:models="using:PSB.Models"
-    mc:Ignorable="d"
-    Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
+    mc:Ignorable="d">
 
     <Page.Resources>
         <!-- Шаблон для основной игры -->
@@ -178,7 +177,7 @@
                     <TextBlock Text="Статистика" 
                          Style="{StaticResource SubtitleTextBlockStyle}"
                          Margin="0,0,0,16"/>
-                    <StackPanel BorderBrush="Blue" BorderThickness="2" Padding="25" Spacing="10">
+                    <StackPanel BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="2" Padding="15" Spacing="10">
                         <TextBlock Text="Всего сыграно"/>
                         <StackPanel Orientation="Horizontal" Spacing="4">
                             <FontIcon Glyph="&#xE823;" />
@@ -187,13 +186,12 @@
                     </StackPanel>
                     <TextBlock Text="Недавняя активность" 
                         Style="{StaticResource SubtitleTextBlockStyle}"
-                        Margin="0,0,0,16"/>
-                    <StackPanel BorderBrush="Blue" BorderThickness="2" Padding="20" Spacing="10">
+                        Margin="0,16,0,16"/>
+                    <StackPanel BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="2" Padding="10" Spacing="10">
                         <ListView ItemsSource="{x:Bind ProfileViewModel.GamesRecentlyPlayed, Mode=OneWay}" SelectionMode="None">
                             <ListView.ItemContainerStyle>
                                 <Style TargetType="ListViewItem">
                                     <Setter Property="Margin" Value="0,0,0,10"/>
-                                    <!-- Отступ снизу 10px -->
                                     <Setter Property="Padding" Value="0"/>
                                     <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
                                     <Setter Property="Background" Value="Transparent"/>
@@ -202,7 +200,7 @@
                             <ListView.ItemTemplate>
                                 <DataTemplate x:DataType="models:RecentlyPlayed">
                                     <Button HorizontalContentAlignment="Left" HorizontalAlignment="Stretch" Command="{Binding ElementName=profilePage, Path=ProfileViewModel.SelectGameCommand, Mode=OneWay}" CommandParameter="{Binding UnifiedGame}" Background="Transparent">
-                                        <StackPanel  Orientation="Horizontal" Spacing="15" Padding="0,10,10,10">
+                                        <StackPanel  Orientation="Horizontal" Spacing="15" Padding="0,10,10,0">
                                             <Viewbox Height="32" Width="32">
                                                 <ContentControl Content="{Binding UnifiedImage}" 
                                                                 HorizontalAlignment="Center"

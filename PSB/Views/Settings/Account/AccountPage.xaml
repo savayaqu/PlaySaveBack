@@ -8,13 +8,13 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
     xmlns:models="using:PSB.Models"
     xmlns:vm="using:PSB.ViewModels"
-    mc:Ignorable="d"
-    Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
+    mc:Ignorable="d">
 
     <StackPanel Orientation="Vertical" Padding="16" Spacing="12">
         <TextBlock Text="Аккаунт" Style="{StaticResource TitleTextBlockStyle}"/>
-        <TextBlock Style="{StaticResource BodyStrongTextBlockStyle}" Text="Текущий email: "/>
-        <TextBlock Text="{x:Bind ProfileViewModel.User.Email, Mode=TwoWay}"/>
+        <TextBlock Style="{StaticResource BodyStrongTextBlockStyle}" Text="Текущий email: " Visibility="{x:Bind ProfileViewModel.User.Email,Converter={StaticResource EmptyToVisibilityConverter}}"/>
+        <TextBlock Text="{x:Bind ProfileViewModel.User.Email, Mode=TwoWay}" Visibility="{x:Bind ProfileViewModel.User.Email,Converter={StaticResource EmptyToVisibilityConverter}}"/>
+        <TextBlock Style="{StaticResource BodyStrongTextBlockStyle}" Text="Электронная почта не привязана" Visibility="{x:Bind ProfileViewModel.User.Email,Converter={StaticResource EmptyToVisibilityConverter}, ConverterParameter=True}"/>
         <StackPanel Orientation="Horizontal" Spacing="8">
             <Button Command="{x:Bind AccountViewModel.UpdateEmailCommand}">
                 <StackPanel Orientation="Horizontal" VerticalAlignment="Center" Spacing="8">

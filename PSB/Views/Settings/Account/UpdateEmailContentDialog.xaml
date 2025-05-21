@@ -8,10 +8,19 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     mc:Ignorable="d"
     Background="{ThemeResource ApplicationPageBackgroundThemeBrush}"
-    Title="Обновление почты">
+    Title="Обновление почты"
+    CornerRadius="10">
     <StackPanel Spacing="16">
-        <Button BorderThickness="0" Background="Transparent" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,-40,0,0" Click="Button_Click">
-            <FontIcon HorizontalAlignment="Center" VerticalAlignment="Center" Glyph="&#xE711;" />
+        <!-- Close button -->
+        <Button 
+    BorderThickness="0" 
+    Background="Transparent" 
+    HorizontalAlignment="Right" 
+    VerticalAlignment="Top" 
+    Margin="0,-35,0,0" 
+    Click="Button_Click"
+    ToolTipService.ToolTip="Закрыть">
+            <FontIcon Glyph="&#xE711;" FontSize="12"/>
         </Button>
         <StackPanel Orientation="Horizontal" BorderThickness="1" BorderBrush="Gray" CornerRadius="5" Spacing="12">
             <Image Stretch="Fill" Height="50" Width="50" Source="{x:Bind UpdateEmailViewModel.User.Avatar, Mode=OneWay}"/>
@@ -22,11 +31,13 @@
         </StackPanel>
         <HyperlinkButton x:Name="nav" Click="Nav_Click" Content="Хотите обновить пароль?"/>
         <StackPanel Spacing="6">
-            <TextBlock Text="Текущая почта:"/>
-            <TextBlock Text="{x:Bind UpdateEmailViewModel.User.Email, Mode=OneWay}"/>
+            <TextBlock Style="{StaticResource BodyStrongTextBlockStyle}" Text="Текущая почта:" Visibility="{x:Bind UpdateEmailViewModel.User.Email,Converter={StaticResource EmptyToVisibilityConverter}}"/>
+            <TextBlock Style="{StaticResource BodyStrongTextBlockStyle}" Text="Электронная почта отсутствует" Visibility="{x:Bind UpdateEmailViewModel.User.Email,Converter={StaticResource EmptyToVisibilityConverter}, ConverterParameter=True}"/>
+
+            <TextBlock Text="{x:Bind UpdateEmailViewModel.User.Email, Mode=OneWay}" Visibility="{x:Bind UpdateEmailViewModel.User.Email,Converter={StaticResource EmptyToVisibilityConverter}}"/>
             <TextBox PlaceholderText="Новая почта" Text="{x:Bind UpdateEmailViewModel.Email, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
             <TextBlock Text="{x:Bind UpdateEmailViewModel.ErrorEmail, Mode=OneWay}"
-                       Visibility="{x:Bind UpdateEmailViewModel.ErrorEmail, Converter={StaticResource StringToVisibilityConverter}}"
+                       Visibility="{x:Bind UpdateEmailViewModel.ErrorEmail, Converter={StaticResource EmptyToVisibilityConverter}}"
                        Foreground="{StaticResource SystemFillColorAttentionBrush}"/>
         </StackPanel>
         <Button HorizontalAlignment="Center" Content="Обновить почту" Command="{x:Bind UpdateEmailViewModel.UpdateEmailCommand, Mode=OneTime}"/>
