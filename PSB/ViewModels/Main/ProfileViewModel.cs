@@ -34,11 +34,6 @@ namespace PSB.ViewModels
             _ = LoadProfileAsync();
             _ = LoadLibraryAsync();
             _ = LoadStatistic();
-            // Подписываемся на события изменения коллекции
-            Libraries.CollectionChanged += (sender, args) =>
-            {
-                _ = LoadStatistic();
-            };
         }
 
         [RelayCommand]
@@ -83,6 +78,8 @@ namespace PSB.ViewModels
             {
                 TotalPlayed = body.TotalPlayed;
                 GamesRecentlyPlayed = [.. body.RecentlyPlayed];
+                OnPropertyChanged(nameof(GamesRecentlyPlayed));
+
             }
 
         }

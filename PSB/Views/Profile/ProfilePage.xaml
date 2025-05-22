@@ -184,10 +184,11 @@
                             <TextBlock Text="{x:Bind ProfileViewModel.TotalPlayed, Converter={StaticResource TimePlayedConverter}}"/>
                         </StackPanel>
                     </StackPanel>
-                    <TextBlock Text="Недавняя активность" 
+                    <TextBlock Text="Недавняя активность"
                         Style="{StaticResource SubtitleTextBlockStyle}"
                         Margin="0,16,0,16"/>
-                    <StackPanel BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="2" Padding="10" Spacing="10">
+                    <TextBlock Visibility="{x:Bind ProfileViewModel.GamesRecentlyPlayed, Converter={StaticResource EmptyToVisibilityConverter}, ConverterParameter=True}" Text="Вы еще ни разу ничего не запускали"/>
+                    <StackPanel Visibility="{x:Bind ProfileViewModel.GamesRecentlyPlayed, Converter={StaticResource EmptyToVisibilityConverter}}" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="2" Padding="10" Spacing="10">
                         <ListView ItemsSource="{x:Bind ProfileViewModel.GamesRecentlyPlayed, Mode=OneWay}" SelectionMode="None">
                             <ListView.ItemContainerStyle>
                                 <Style TargetType="ListViewItem">
