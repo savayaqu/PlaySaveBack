@@ -36,5 +36,19 @@ namespace PSB.Views.Settings.Account
         {
             this.Hide();
         }
+        private void PasswordBox_PasswordChanged(object sender, RoutedEventArgs e)
+        {
+            UpdatePasswordViewModel.Error = null;
+        }
+
+        private void NewPassword_PasswordChanged(object sender, RoutedEventArgs e)
+        {
+            UpdatePasswordViewModel.ErrorNewPass = null;
+        }
+
+        private void ConfirmPassword_PasswordChanged(object sender, RoutedEventArgs e)
+        {
+            UpdatePasswordViewModel.ErrorNewPassConf = null;
+        }
     }
 }
