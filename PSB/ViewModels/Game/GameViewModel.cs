@@ -22,6 +22,7 @@ using static System.Net.Mime.MediaTypeNames;
 using Windows.ApplicationModel.DataTransfer;
 using static PSB.Utils.Fetch;
 using System.Text.Encodings.Web;
+using Microsoft.UI.Xaml;
 
 namespace PSB.ViewModels
 {
@@ -46,7 +47,7 @@ namespace PSB.ViewModels
         public event Action? GameLoaded;
 
         [ObservableProperty]
-        [NotifyCanExecuteChangedFor(nameof(LaunchGameCommand))]
+        [NotifyCanExecuteChangedFor(nameof(PlayOrCloseCommand))]
         public partial Boolean ExeExists { get; set; } = false;
 
         [ObservableProperty]
@@ -59,8 +60,19 @@ namespace PSB.ViewModels
         [NotifyCanExecuteChangedFor(nameof(OverwriteSaveCommand))]
         [NotifyCanExecuteChangedFor(nameof(CreateSaveCommand))]
         public partial Boolean VersionExists { get; set; } = false;
-        public bool CanLaunchGame() => ExeExists && !App.GameLaunchService!.IsGameLaunched;
-
+        public string PlayButtonText => App.GameLaunchService!.IsGameRunning(Game) ? "ЗАКРЫТЬ" : "ИГРАТЬ";
+        public string PlayButtonIcon => App.GameLaunchService!.IsGameRunning(Game) ? "\uE711" : "\uE768";
+        public Style CurrentButtonStyle =>
+        App.GameLaunchService!.IsGameRunning(Game)
+        ? (Style)Microsoft.UI.Xaml.Application.Current.Resources["AccentButtonStyle"]
+        : (Style)Microsoft.UI.Xaml.Application.Current.Resources["PlayButtonStyle"];
+        private void OnGameStatusChanged(object sender, EventArgs e)
+        {
+            OnPropertyChanged(nameof(PlayButtonText));
+            OnPropertyChanged(nameof(PlayButtonIcon));
+            PlayOrCloseCommand.NotifyCanExecuteChanged();
+        }
+        public bool CanPlayOrClose => ExeExists;
         partial void OnFolderPathChanged(string value)
         {
             if(string.IsNullOrEmpty(value))
@@ -101,8 +113,10 @@ namespace PSB.ViewModels
             {
                 GameLoaded?.Invoke();
             }, TaskScheduler.FromCurrentSynchronizationContext());
+            App.GameLaunchService!.GameStatusChanged += OnGameStatusChanged;
 
         }
+
         [RelayCommand(CanExecute = nameof(CanCreateOverwriteSave))]
         private async Task CreateSave()
         {
@@ -363,8 +377,20 @@ namespace PSB.ViewModels
             }
         }
 
-        [RelayCommand(CanExecute = nameof(CanLaunchGame))]
-        public async Task LaunchGame()
+        [RelayCommand(CanExecute = nameof(ExeExists))]
+        public async Task PlayOrClose()
+        {
+            if (App.GameLaunchService!.IsGameRunning(Game))
+            {
+                CloseGame();
+            }
+            else
+            {
+                await LaunchGameAsync();
+            }
+        }
+
+        private async Task LaunchGameAsync()
         {
             try
             {
@@ -374,47 +400,76 @@ namespace PSB.ViewModels
                     return;
                 }
 
-                var result = await App.GameLaunchService!.LaunchGameAsync(FilePath);
+                var result = await App.GameLaunchService!.LaunchGameAsync(FilePath, Game);
 
                 if (!result.Launched)
                     return;
 
-                TimeSpan playTime = result.EndTime - result.StartTime;
-                uint secondsPlayed = (uint)playTime.TotalSeconds;
-
-                Library.TimePlayed = (Library.TimePlayed ?? 0) + secondsPlayed;
-                Library.LastPlayedAt = result.EndTime;
-                OnPropertyChanged(nameof(Library));
-
-                try
-                {
-                    GameDataManager.SaveGame(Game);
-                    LibraryDataManager<IGame>.SaveLibrary(Game, Library);
-                    if (Saves != null)
-                    {
-                        SavesDataManager<IGame>.SaveSaves(Game, [.. Saves]);
-                    }
-                    UpdateLibraryDetails(Library);
-                    LastPlayedGameManager.SaveLastPlayedGame(Game, Library);
-                    await FetchAsync(
-                        HttpMethod.Patch,
-                        $"library/{Type}/{GameId}/update",
-                        new UpdateLibraryGameRequest(Library.TimePlayed, result.EndTime.ToString("yyyy-MM-dd HH:mm:ss")),
-                        serialize: true
-                    );
-                    _ = App.MainWindow!.ProfileViewModel.LoadStatistic();
-                    var libraryToUpdate = AuthData.Libraries.FirstOrDefault(lib => lib.Id == Library.Id);
-                    libraryToUpdate.TimePlayed = Library.TimePlayed;
-                    libraryToUpdate.LastPlayedAt = Library.LastPlayedAt;
-                }
-                catch (HttpRequestException ex)
-                {
-                    Debug.WriteLine("Ошибка соединения: " + ex.Message);
-                }
+                await HandleSuccessfulGameSession(result);
             }
             catch (Exception ex)
             {
                 Debug.WriteLine($"Ошибка: {ex.Message}");
+            }
+            finally
+            {
+                PlayOrCloseCommand.NotifyCanExecuteChanged();
+                OnPropertyChanged(nameof(PlayButtonText));
+                OnPropertyChanged(nameof(PlayButtonIcon));
+            }
+        }
+
+        private void CloseGame()
+        {
+            try
+            {
+                App.GameLaunchService!.CloseGame(Game);
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"Ошибка при закрытии игры: {ex.Message}");
+            }
+            finally
+            {
+                PlayOrCloseCommand.NotifyCanExecuteChanged();
+                OnPropertyChanged(nameof(PlayButtonText));
+                OnPropertyChanged(nameof(PlayButtonIcon));
+            }
+        }
+
+        private async Task HandleSuccessfulGameSession(GameSessionResult result)
+        {
+            TimeSpan playTime = result.EndTime - result.StartTime;
+            uint secondsPlayed = (uint)playTime.TotalSeconds;
+
+            Library.TimePlayed = (Library.TimePlayed ?? 0) + secondsPlayed;
+            Library.LastPlayedAt = result.EndTime;
+            OnPropertyChanged(nameof(Library));
+
+            try
+            {
+                GameDataManager.SaveGame(Game);
+                LibraryDataManager<IGame>.SaveLibrary(Game, Library);
+                if (Saves != null)
+                {
+                    SavesDataManager<IGame>.SaveSaves(Game, [.. Saves]);
+                }
+                UpdateLibraryDetails(Library);
+                LastPlayedGameManager.SaveLastPlayedGame(Game, Library);
+                await FetchAsync(
+                    HttpMethod.Patch,
+                    $"library/{Type}/{GameId}/update",
+                    new UpdateLibraryGameRequest(Library.TimePlayed, result.EndTime.ToString("yyyy-MM-dd HH:mm:ss")),
+                    serialize: true
+                );
+                _ = App.MainWindow!.ProfileViewModel.LoadStatistic();
+                var libraryToUpdate = AuthData.Libraries.FirstOrDefault(lib => lib.Id == Library.Id);
+                libraryToUpdate.TimePlayed = Library.TimePlayed;
+                libraryToUpdate.LastPlayedAt = Library.LastPlayedAt;
+            }
+            catch (HttpRequestException ex)
+            {
+                Debug.WriteLine("Ошибка соединения: " + ex.Message);
             }
         }
 

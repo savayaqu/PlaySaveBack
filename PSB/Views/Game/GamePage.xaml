@@ -65,10 +65,14 @@
                             <StackPanel Grid.Column="0" Orientation="Horizontal" Spacing="16" Padding="16">
                                 <StackPanel>
                                     <!-- Кнопка "Играть" -->
-                                    <Button Style="{StaticResource PlayButtonStyle}" Grid.Column="0" Padding="16,8" Command="{x:Bind GameViewModel.LaunchGameCommand, Mode=OneTime}" Visibility="{x:Bind GameViewModel.InLibrary, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}, ConverterParameter=False}">
+                                    <Button Style="{x:Bind GameViewModel.CurrentButtonStyle, Mode=OneWay}" 
+        Grid.Column="0" 
+        Padding="16,8" 
+        Command="{x:Bind GameViewModel.PlayOrCloseCommand, Mode=OneTime}"
+        Visibility="{x:Bind GameViewModel.InLibrary, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}, ConverterParameter=False}">
                                         <StackPanel Orientation="Horizontal" Spacing="8">
-                                            <FontIcon Glyph="&#xE768;" FontSize="16"/>
-                                            <TextBlock Text="ИГРАТЬ" FontWeight="Bold" />
+                                            <FontIcon Glyph="{x:Bind GameViewModel.PlayButtonIcon, Mode=OneWay}" FontSize="16"/>
+                                            <TextBlock Text="{x:Bind GameViewModel.PlayButtonText, Mode=OneWay}" FontWeight="Bold" />
                                         </StackPanel>
                                     </Button>
                                 </StackPanel>
