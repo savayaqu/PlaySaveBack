@@ -37,7 +37,7 @@
             <TextBlock Text="{x:Bind UpdateEmailViewModel.User.Email, Mode=OneWay}" Visibility="{x:Bind UpdateEmailViewModel.User.Email,Converter={StaticResource EmptyToVisibilityConverter}}"/>
             <TextBox PlaceholderText="Новая почта" Text="{x:Bind UpdateEmailViewModel.Email, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
             <TextBlock Text="{x:Bind UpdateEmailViewModel.ErrorEmail, Mode=OneWay}"
-                       Visibility="{x:Bind UpdateEmailViewModel.ErrorEmail, Converter={StaticResource EmptyToVisibilityConverter}}"
+                       Visibility="{x:Bind UpdateEmailViewModel.ErrorEmail, Converter={StaticResource EmptyToVisibilityConverter}, Mode=OneWay}"
                        Foreground="{StaticResource SystemFillColorAttentionBrush}"/>
         </StackPanel>
         <Button HorizontalAlignment="Center" Content="Обновить почту" Command="{x:Bind UpdateEmailViewModel.UpdateEmailCommand, Mode=OneTime}"/>
