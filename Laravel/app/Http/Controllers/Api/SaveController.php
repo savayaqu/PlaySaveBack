@@ -4,15 +4,13 @@ namespace App\Http\Controllers\Api;
 
 use App\Enums\CloudStatus;
 use App\Http\Controllers\Controller;
-use App\Http\Requests\Api\Save\OverwriteSaveRequest;
+use App\Http\Requests\Api\Save\UpdateSaveRequest;
 use App\Http\Resources\SaveResource;
 use App\Models\CloudService;
 use App\Models\Game;
 use App\Models\Save;
 use App\Models\SideGame;
-use App\Models\UserCloudService;
 use App\Services\GoogleDriveService;
-use Illuminate\Http\Request;
 
 class SaveController extends Controller
 {
@@ -43,7 +41,7 @@ class SaveController extends Controller
         return response()->json(['saves' => SaveResource::collection($saves)]);
     }
     // Перезапись сохранения
-    public function updateSave(Save $save, OverwriteSaveRequest $request)
+    public function updateSave(Save $save, UpdateSaveRequest $request)
     {
         $user = auth()->user();
         $cloudService = CloudService::query()
