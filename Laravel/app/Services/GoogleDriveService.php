@@ -68,26 +68,16 @@ class GoogleDriveService
 
     public function generateResumableUploadUrl(string $fileName, string $folderPath): string
     {
-        $timing = [];
-        $startOverall = microtime(true);
-
         try {
-            $start = microtime(true);
             $folderId = $this->createFolderStructure($folderPath);
-            $timing['create_folder_structure'] = round(microtime(true) - $start, 4);
 
-            $start = microtime(true);
             $fileMetadata = new DriveFile([
                 'name' => $fileName,
                 'parents' => [$folderId]
             ]);
-            $timing['build_metadata'] = round(microtime(true) - $start, 4);
 
-            $start = microtime(true);
             $httpClient = $this->driveService->getClient()->authorize();
-            $timing['authorize_client'] = round(microtime(true) - $start, 4);
 
-            $start = microtime(true);
             $uri = 'https://www.googleapis.com/upload/drive/v3/files?' . http_build_query([
                     'uploadType' => 'resumable',
                     'fields' => 'id',
@@ -102,26 +92,19 @@ class GoogleDriveService
                 ],
                 json_encode($fileMetadata)
             );
-            $timing['build_request'] = round(microtime(true) - $start, 4);
-
-            $start = microtime(true);
             $response = $httpClient->send($request);
-            $timing['send_request'] = round(microtime(true) - $start, 4);
 
-            $start = microtime(true);
             $location = $response->getHeaderLine('Location');
             if (empty($location)) {
                 throw new ApiException('Google Drive did not return upload URL');
             }
-            $timing['parse_location'] = round(microtime(true) - $start, 4);
-
-            $timing['generate_upload_url'] = round(microtime(true) - $startOverall, 4);
-
-            //dd($timing);
 
             return $location;
         } catch (\Exception $e) {
-            throw new ApiException('Failed to generate upload URL: ' . $e->getMessage());
+            throw ApiException::fromException(
+                $e,
+                'Failed to generate upload URL: '
+            );
         }
     }
 
@@ -169,18 +152,23 @@ class GoogleDriveService
 
             return $location;
         } catch (\Exception $e) {
-            throw new ApiException('Failed to generate overwrite URL: ' . $e->getMessage());
+            throw ApiException::fromException(
+                $e,
+                'Failed to generate overwrite URL: '
+            );
         }
+
     }
 
     public function deleteFile($fileId)
     {
         try {
             $this->driveService->files->delete($fileId);
-        } catch (\Google\Service\Exception $e) {
-            throw GoogleApiException::fromGoogleException($e);
         } catch (\Exception $e) {
-            throw new ApiException('Failed to deleteFile: ' . $e->getMessage(), $e->getCode());
+            throw ApiException::fromException(
+                $e,
+                'Failed to delete file: '
+            );
         }
     }
 
@@ -196,10 +184,11 @@ class GoogleDriveService
 
             $file = $this->driveService->files->get($fileId, ['fields' => 'webViewLink']);
             return $file->getWebViewLink();
-        } catch (\Google\Service\Exception $e) {
-            throw GoogleApiException::fromGoogleException($e);
         } catch (\Exception $e) {
-            throw new ApiException('Failed to shareFile: ' . $e->getMessage(), $e->getCode());
+            throw ApiException::fromException(
+                $e,
+                'Failed to share file: '
+            );
         }
     }
 
@@ -214,10 +203,11 @@ class GoogleDriveService
                 'mimeType' => $fileMetadata->getMimeType(),
                 'fileName' => $fileMetadata->getName(),
             ];
-        } catch (\Google\Service\Exception $e) {
-            throw GoogleApiException::fromGoogleException($e);
         } catch (\Exception $e) {
-            throw new ApiException('Failed to downloadFile: ' . $e->getMessage(), $e->getCode());
+            throw ApiException::fromException(
+                $e,
+                'Failed to generate download file: '
+            );
         }
     }
     /**
@@ -242,7 +232,10 @@ class GoogleDriveService
             // Возвращаем первую родительскую папку (файл может быть в нескольких папках)
             return $file->getParents()[0];
         } catch (\Exception $e) {
-            throw new ApiException('Failed to get parent folder: ' . $e->getMessage());
+            throw ApiException::fromException(
+                $e,
+                'Failed to get parent folder: '
+            );
         }
     }
 
@@ -266,7 +259,10 @@ class GoogleDriveService
                 'supportsAllDrives' => true
             ]);
         } catch (\Exception $e) {
-            throw new ApiException('Failed to rename folder: ' . $e->getMessage());
+            throw ApiException::fromException(
+                $e,
+                'Failed to rename folder: '
+            );
         }
     }
 

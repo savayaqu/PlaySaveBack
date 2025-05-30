@@ -56,6 +56,7 @@ namespace PSB.ViewModels
                 if (res.IsSuccessStatusCode)
                 {
                     SavesDataManager<IGame>.RemoveAllSavesByCloudServiceId(cloudService.UserCloudServiceId);
+                    AuthData.ConnectedCloudServices.Remove(cloudService);
                     _ = MainWindow.Instance!.AccountViewModel.LoadCloudServicesAsync();
                     NotificationService.ShowSuccess("Google Drive успешно отключен\n Все сохранения скрыты, зайдите повторно, чтобы они появились");
                 }

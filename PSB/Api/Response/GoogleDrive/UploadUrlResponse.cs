@@ -11,6 +11,5 @@ namespace PSB.Api.Response.GoogleDrive
     {
         [JsonPropertyName("upload_url")] public required string UploadUrl { get; set; }
         [JsonPropertyName("save_id")] public required ulong SaveId{ get; set; }
-        [JsonPropertyName("expires_at")] public required DateTime ExpiresAt{ get; set; }
     }
 }

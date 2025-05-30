@@ -244,7 +244,12 @@ namespace PSB.ViewModels
         {
             if (save.IsSynced == true || SelectedCloudService == null)
                 return;
-
+            // Вывод в консоль в формате JSON
+            // Сериализуем объект save в JSON с отступами
+            string saveJson = System.Text.Json.JsonSerializer.Serialize(
+                save,
+                new System.Text.Json.JsonSerializerOptions { WriteIndented = true }
+            ); Debug.WriteLine("Sync save: " + saveJson); Debug.WriteLine(save.FileName);
             try
             {
                 SaveVersion = save.Version;

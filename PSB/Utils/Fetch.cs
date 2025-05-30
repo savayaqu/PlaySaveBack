@@ -99,6 +99,7 @@ namespace PSB.Utils
                                     NotificationService.ShowError("Перезайдите в аккаунт");
                                 }
                             }
+                            else NotificationService.ShowError(responseBodyErr.Message);
                         }
                         catch (Exception ex)
                         {

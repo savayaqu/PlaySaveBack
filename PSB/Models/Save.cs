@@ -30,7 +30,7 @@ namespace PSB.Models
         [JsonConverter(typeof(CustomDateTimeConverter))]
         public DateTime UpdatedAt { get; set; }
 
-        [JsonIgnore] public string? ZipPath { get; set; }
+        public string? ZipPath { get; set; }
         [JsonIgnore] public string? Backup { get; set; }
         public DateTime? LastRestored { get; set; }
         [JsonIgnore]

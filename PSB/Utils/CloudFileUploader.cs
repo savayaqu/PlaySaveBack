@@ -33,8 +33,6 @@ namespace PSB.Utils
                 return cloudService.Name switch
                 {
                     "Google Drive" => await UploadToGoogleDriveAsync(save, game, version, description),
-                    //"Dropbox" => await UploadToDropboxAsync(save, game, version, description),
-                    //"OneDrive" => await UploadToOneDriveAsync(save, game, version, description),
                     _ => throw new NotSupportedException($"Service {cloudService.Name} not supported")
                 };
             }
@@ -91,7 +89,7 @@ namespace PSB.Utils
             }
             catch (Exception ex)
             {
-                NotificationService.ShowError($"Overwrite failed: {ex.Message}");
+                NotificationService.ShowError($"Failed: {ex.Message}");
                 return (false, null);
             }
 

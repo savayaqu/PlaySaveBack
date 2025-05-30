@@ -105,48 +105,53 @@ class GoogleDriveController extends Controller
      */
     public function generateUploadUrl(UploadSaveRequest $request): JsonResponse
     {
-        $timings = [];
-        $startTime = microtime(true);
-
         $user = auth()->user();
         $game = $this->resolveGame($request);
 
-        $timings['auth_and_resolve_game'] = microtime(true) - $startTime;
-        $startTime = microtime(true);
-
-        // Проверка существующей версии
-        $existSave = $user->saves()
+        // Проверяем существующее сохранение
+        $existingSave = $user->saves()
             ->where(function($q) use ($game) {
                 $q->where('game_id', $game->id)
                     ->orWhere('side_game_id', $game->id);
             })
             ->where('version', $request->version)
-            ->exists();
+            ->first(); // Получаем запись, а не просто exists()
 
-        $timings['check_existing_save'] = microtime(true) - $startTime;
-        $startTime = microtime(true);
+        if ($existingSave) {
+            // Если у сохранения заполнены критические поля — конфликт
+            if (
+                !empty($existingSave->file_id) ||
+                !empty($existingSave->hash) ||
+                !empty($existingSave->last_sync_at) ||
+                !empty($existingSave->user_cloud_service_id)
+            ) {
+                throw new ConflictException("Сохранение уже синхронизировано с облаком.");
+            }
 
-        if ($existSave) {
-            throw new ConflictException();
+            // Если поля пустые — обновляем запись и разрешаем загрузку
+            $existingSave->update([
+                'file_name' => $request->file_name,
+                'size' => $request->file_size,
+                'description' => $request->description,
+            ]);
+
+            $save = $existingSave;
+        } else {
+            // Создаем новую запись, если сохранения нет
+            $saveData = [
+                'version' => $request->version,
+                'description' => $request->description,
+                'user_id' => $user->id,
+                'file_name' => $request->file_name,
+                'size' => $request->file_size,
+            ];
+
+            $game instanceof Game
+                ? $saveData['game_id'] = $game->id
+                : $saveData['side_game_id'] = $game->id;
+
+            $save = Save::create($saveData);
         }
-
-        // Создаем запись о файле до загрузки
-        $saveData = [
-            'version' => $request->version,
-            'description' => $request->description,
-            'user_id' => $user->id,
-            'file_name' => $request->file_name,
-            'size' => $request->file_size,
-        ];
-
-        $game instanceof Game
-            ? $saveData['game_id'] = $game->id
-            : $saveData['side_game_id'] = $game->id;
-
-        $save = Save::create($saveData);
-
-        $timings['create_save_record'] = microtime(true) - $startTime;
-        $startTime = microtime(true);
 
         // Генерируем URL для загрузки
         $cloudService = CloudService::where('name', 'Google Drive')->first();
@@ -155,14 +160,7 @@ class GoogleDriveController extends Controller
             ->where('status', CloudStatus::Active)
             ->firstOrFail();
 
-        $timings['find_cloud_service'] = microtime(true) - $startTime;
-        $startTime = microtime(true);
-
-
         $googleDriveService = new GoogleDriveService($service);
-        $timings['create_service'] = microtime(true) - $startTime;
-
-        $startTime = microtime(true);
 
         $folderPath = "PlaySaveBack/{$game->name}/{$request->version}";
         $uploadUrl = $googleDriveService->generateResumableUploadUrl(
@@ -170,14 +168,9 @@ class GoogleDriveController extends Controller
             folderPath: $folderPath
         );
 
-        $timings['generate_upload_url'] = microtime(true) - $startTime;
-        $timings['total_time'] = array_sum($timings);
-
         return response()->json([
             'upload_url' => $uploadUrl,
             'save_id' => $save->id,
-            'expires_at' => now()->addHours(1)->toIso8601String(),
-            'timings' => $timings
         ]);
     }
     /**
