@@ -14,6 +14,9 @@
 		<LangVersion>preview</LangVersion>
 	</PropertyGroup>
 	<ItemGroup>
+	  <Content Remove="Assets\logo.svg" />
+	</ItemGroup>
+	<ItemGroup>
 		<None Remove="ContentDialogs\GameSettingsContentDialog.xaml" />
 		<None Remove="Styles\ButtonStyles.xaml" />
 		<None Remove="ViewModels\Auth\PinContentDialog.xaml" />
@@ -189,5 +192,6 @@
 		<HoursBetweenUpdateChecks>0</HoursBetweenUpdateChecks>
 		<PackageCertificateThumbprint>DB0A7DA06BC383772C842B4E914A003C45E29FD8</PackageCertificateThumbprint>
 		<AppInstallerUri>https://github.com/savayaqu/PlaySaveBack/releases/latest</AppInstallerUri>
+		<ApplicationIcon>Assets\logo.ico</ApplicationIcon>
 	</PropertyGroup>
 </Project>

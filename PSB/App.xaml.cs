@@ -70,7 +70,6 @@ namespace PSB
 
         private static void ProcessDeepLink(Uri uri)
         {
-            // Вариант 1: Без await (если не нужно ждать завершения)
             MainWindow?.DispatcherQueue.TryEnqueue(() =>
             {
                 if (uri.Scheme == "playsaveback" && uri.Host == "google-oauth")
@@ -91,7 +90,7 @@ namespace PSB
             {
                 ExtendsContentIntoTitleBar = true
             };
-
+            //MainWindow.AppWindow.SetIcon("Assets/logo.ico");
             NavigationService = new NavigationService(
                 MainWindow.ContentFrameControl,
                 MainWindow.NavigationViewControl,
