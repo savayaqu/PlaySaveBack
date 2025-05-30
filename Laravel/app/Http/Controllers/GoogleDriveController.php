@@ -179,6 +179,8 @@ class GoogleDriveController extends Controller
     public function confirmUpload(Save $save, ConfirmUploadSave $request): JsonResponse
     {
         $user = auth()->user();
+        if($save->user_id != $user->id)
+            throw new ForbiddenException();
         $cloudService = CloudService::where('name', 'Google Drive')->first();
         $service = $user->userCloudService()
             ->where('cloud_service_id', $cloudService->id)
@@ -205,6 +207,8 @@ class GoogleDriveController extends Controller
     public function generateOverwriteUrl(Save $save, OverwriteSaveRequest $request): JsonResponse
     {
         $user = auth()->user();
+        if($save->user_id != $user->id)
+            throw new ForbiddenException();
         $cloudService = CloudService::where('name', 'Google Drive')->first();
         $service = $user->userCloudService()
             ->where('cloud_service_id', $cloudService->id)
