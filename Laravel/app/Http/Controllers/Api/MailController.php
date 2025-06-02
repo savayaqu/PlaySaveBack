@@ -60,7 +60,7 @@ class MailController extends Controller
         // Проверяем токен
         $savedToken = Cache::get('password_reset_token_' . $request->email);
 
-        if (!$savedToken || $savedToken !== $request->token) {
+        if (!$savedToken || $savedToken !== $request->reset_token) {
             throw new ApiException("Invalid or expired token", 403);
         }
         // Обновляем пароль

@@ -79,6 +79,9 @@
 		<Page Update="Views\Auth\LoginPage.xaml">
 			<Generator>MSBuild:Compile</Generator>
 		</Page>
+		<Page Update="Views\Auth\RestoreFromMailPage.xaml">
+		  <SubType>Designer</SubType>
+		</Page>
 	</ItemGroup>
 	<ItemGroup>
 		<Page Update="Views\Auth\RestoreFromKeyPage.xaml">

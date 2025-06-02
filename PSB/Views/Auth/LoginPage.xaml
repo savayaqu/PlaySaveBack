@@ -41,7 +41,7 @@
                 <Button.Flyout>
                     <MenuFlyout Placement="BottomEdgeAlignedRight">
                         <MenuFlyoutItem Text="Восстановить с помощью ключа" Icon="Permissions" Command="{x:Bind LoginViewModel.NavigateCommand}" CommandParameter="RestoreFromKey"/>
-                        <MenuFlyoutItem Text="Восстановить через email" Icon="Mail" Tag="RestoreFromEmail"/>
+                        <MenuFlyoutItem Text="Восстановить через email" Icon="Mail" Command="{x:Bind LoginViewModel.NavigateCommand}"  CommandParameter="RestoreFromMail"/>
                     </MenuFlyout>
                 </Button.Flyout>
             </Button>

@@ -10,7 +10,7 @@ class RestoreFromMailRequest extends ApiRequest
     {
         return [
             'reset_token' => 'required|string',
-            'mail' => 'required|string|email|exists:users,email',
+            'email' => 'required|string|email|exists:users,email',
             'new_password' => 'required|string|min:6|confirmed',
             'new_password_confirmation' => 'required|string|min:6',
             'logout' => 'boolean',

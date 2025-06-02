@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Page
+    x:Class="PSB.Views.Auth.RestoreFromMailPage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:local="using:PSB.Views.Auth"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    mc:Ignorable="d"
+    Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
+    <ScrollView Padding="40" VerticalAlignment="Top" HorizontalAlignment="Center">
+        <StackPanel Spacing="16">
+            <!-- Заголовок -->
+            <TextBlock Text="Восстановление пароля"
+                   Style="{StaticResource TitleTextBlockStyle}"
+                   HorizontalAlignment="Center"
+                   Padding="0,40,0,36"
+                   VerticalAlignment="Top"/>
+            <StackPanel Spacing="6">
+                <Grid ColumnSpacing="6" ColumnDefinitions="Auto,*,Auto">
+                    <!-- Иконка -->
+                    <FontIcon 
+                        Glyph="&#xE715;" 
+                        VerticalAlignment="Center"/>
+
+                    <!-- Поле ввода -->
+                    <TextBox 
+                        Grid.Column="1"
+                        PlaceholderText="Электронная почта" 
+                        Text="{x:Bind RestoreFromMailViewModel.Email, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
+
+                    <!-- Кнопка с динамическим контентом -->
+                    <Button 
+                         Grid.Column="2"
+                         Content="{x:Bind RestoreFromMailViewModel.TimerText, Mode=OneWay}" 
+                         Command="{x:Bind RestoreFromMailViewModel.SendCodeCommand}"
+                         Visibility="{x:Bind RestoreFromMailViewModel.IsSendForm, Mode=OneWay}"
+                         MinWidth="100"/>
+                </Grid>
+                <TextBlock Text="{x:Bind RestoreFromMailViewModel.EmailError, Mode=OneWay}"
+                    Foreground="{StaticResource AccentFillColorSelectedTextBackgroundBrush}"
+                    TextWrapping="WrapWholeWords"
+                    Visibility="{x:Bind RestoreFromMailViewModel.EmailError, Mode=OneWay, Converter={StaticResource StringToVisibilityConverter}}"/>
+            </StackPanel>
+            <StackPanel Visibility="{x:Bind RestoreFromMailViewModel.IsConfirmForm, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}">
+                <Grid ColumnDefinitions="*,Auto" ColumnSpacing="6">
+                    <TextBox PlaceholderText="Введите код" Text="{x:Bind RestoreFromMailViewModel.Code, Mode=TwoWay}"/>
+                    <Button MinWidth="100" Grid.Column="1" Content="Подтвердить" Command="{x:Bind RestoreFromMailViewModel.ConfirmCodeCommand, Mode=OneWay}"/>
+                </Grid>
+                
+                <TextBlock Text="{x:Bind RestoreFromMailViewModel.CodeError, Mode=OneWay}"
+                    Foreground="{StaticResource AccentFillColorSelectedTextBackgroundBrush}"
+                    TextWrapping="WrapWholeWords"
+                    Visibility="{x:Bind RestoreFromMailViewModel.CodeError, Mode=OneWay, Converter={StaticResource StringToVisibilityConverter}}"/>
+            </StackPanel>
+            <StackPanel Spacing="6" Visibility="{x:Bind RestoreFromMailViewModel.IsRestoreForm, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}">
+                <StackPanel Spacing="6">
+                    <PasswordBox PlaceholderText="Новый пароль" Password="{x:Bind RestoreFromMailViewModel.NewPassword, Mode=TwoWay}"/>
+
+                    <TextBlock Text="{x:Bind RestoreFromMailViewModel.NewPasswordError, Mode=OneWay}"
+            Foreground="{StaticResource AccentFillColorSelectedTextBackgroundBrush}"
+            TextWrapping="WrapWholeWords"
+            Visibility="{x:Bind RestoreFromMailViewModel.NewPasswordError, Mode=OneWay, Converter={StaticResource StringToVisibilityConverter}}"/>
+                </StackPanel>
+
+                <StackPanel Spacing="6">
+                    <PasswordBox PlaceholderText="Подтвердите ваш пароль" Password="{x:Bind RestoreFromMailViewModel.NewPasswordConfirmation, Mode=TwoWay}"/>
+
+                    <TextBlock Text="{x:Bind RestoreFromMailViewModel.NewPasswordConfirmationError, Mode=OneWay}"
+            TextWrapping="WrapWholeWords"
+            Foreground="{StaticResource AccentFillColorSelectedTextBackgroundBrush}"
+            Visibility="{x:Bind RestoreFromMailViewModel.NewPasswordConfirmationError, Mode=OneWay, Converter={StaticResource StringToVisibilityConverter}}"/>
+                </StackPanel>
+
+                <CheckBox Content="Отключить предыдущие сессии" IsChecked="{x:Bind RestoreFromMailViewModel.LogoutBool, Mode=TwoWay}"/>
+                <Button Content="Восстановить пароль" Command="{x:Bind RestoreFromMailViewModel.RestoreCommand}" HorizontalAlignment="Center"/>
+
+            </StackPanel>
+           
+
+            <TextBlock Text="{x:Bind RestoreFromMailViewModel.Error, Mode=OneWay}"
+                   TextWrapping="WrapWholeWords"
+                   Foreground="{StaticResource AccentFillColorSelectedTextBackgroundBrush}"
+                   Visibility="{x:Bind RestoreFromMailViewModel.Error, Mode=OneWay, Converter={StaticResource StringToVisibilityConverter}}"/>
+
+
+            <Button Margin="15" Padding="10" Command="{x:Bind RestoreFromMailViewModel.NavigateToLoginCommand}" HorizontalAlignment="Center" Style="{StaticResource AccentButtonStyle}">
+                <StackPanel Orientation="Horizontal" Spacing="6">
+                    <FontIcon Glyph="&#xE80F;" />
+                    <TextBlock Text="Вернуться ко входу"/>
+                </StackPanel>
+            </Button>
+        </StackPanel>
+    </ScrollView>
+</Page>

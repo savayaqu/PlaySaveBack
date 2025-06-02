@@ -29,6 +29,9 @@ namespace PSB.Services
                 case "RestoreFromKey":
                     pageType = typeof(RestoreFromKeyPage);
                     break;
+                case "RestoreFromMail":
+                    pageType = typeof(RestoreFromMailPage);
+                    break;
                 default:
                     pageType = typeof(LoginPage);
                     break;

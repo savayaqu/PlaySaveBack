@@ -23,7 +23,7 @@ namespace PSB.ViewModels.Auth
         [ObservableProperty][NotifyCanExecuteChangedFor(nameof(RestoreCommand))] public partial string? Key { get; set; } = string.Empty;
         [ObservableProperty][NotifyCanExecuteChangedFor(nameof(RestoreCommand))] public partial string? NewPassword { get; set; } = string.Empty;
         [ObservableProperty][NotifyCanExecuteChangedFor(nameof(RestoreCommand))] public partial string? NewPasswordConfirmation { get; set; } = string.Empty;
-        [ObservableProperty]public partial bool LogoutBool { get; set; } = false;
+        [ObservableProperty] public partial bool LogoutBool { get; set; } = false;
         [ObservableProperty] public partial Dictionary<string, string> Errors { get; set; } = new();
         [ObservableProperty] public partial string? Error { get; set; } = string.Empty;
         public string? LoginError => Errors.TryGetValue("login", out var error) ? error : null;
