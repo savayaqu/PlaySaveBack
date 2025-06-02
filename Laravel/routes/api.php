@@ -20,7 +20,7 @@ Route::controller(MailController::class)->group(function () {
     Route::prefix('mail')->group(function () {
         Route::post('send', 'sendResetCode'); // Отправка кода на почту
         Route::post('verify', 'verifyCode'); // Подтверждение кода
-        Route::post('restore', 'restoreFromMail'); // Подтверждение кода
+        Route::post('restore', 'restoreFromMail'); // Восстановление через почту
     });
 });
 Route::middleware('auth:sanctum')->group(function () {
