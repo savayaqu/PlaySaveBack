@@ -6,6 +6,7 @@ use App\Http\Controllers\Api\SaveController;
 use App\Http\Controllers\Api\UserController;
 use App\Http\Controllers\Api\LibraryController;
 use App\Http\Controllers\Api\SideGameController;
+use App\Http\Controllers\Api\MailController;
 use App\Http\Controllers\GoogleDriveController;
 use Illuminate\Support\Facades\Route;
 
@@ -14,6 +15,13 @@ Route::controller(AuthController::class)->group(function () {
     Route::post('login',   'signIn');  // Авторизация
     Route::post('restore-from-key', 'restoreFromKey'); // Восстановление с помощью ключа
     Route::middleware('auth:sanctum')->get('logout', 'logout'); // Выход
+});
+Route::controller(MailController::class)->group(function () {
+    Route::prefix('mail')->group(function () {
+        Route::post('send', 'sendResetCode'); // Отправка кода на почту
+        Route::post('verify', 'verifyCode'); // Подтверждение кода
+        Route::post('restore', 'restoreFromMail'); // Подтверждение кода
+    });
 });
 Route::middleware('auth:sanctum')->group(function () {
     Route::controller(UserController::class)->group(function () {
