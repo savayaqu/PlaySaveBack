@@ -115,56 +115,6 @@
 					"response": []
 				},
 				{
-					"name": "Авторизация администратора",
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"exec": [
-									"pm.environment.set(\"token\", pm.response.json().token);"
-								],
-								"type": "text/javascript",
-								"packages": {}
-							}
-						}
-					],
-					"request": {
-						"method": "POST",
-						"header": [],
-						"body": {
-							"mode": "urlencoded",
-							"urlencoded": [
-								{
-									"key": "email",
-									"value": "zcomn@mail.ru",
-									"type": "text",
-									"disabled": true
-								},
-								{
-									"key": "password",
-									"value": "Admin123!",
-									"type": "text"
-								},
-								{
-									"key": "identifier",
-									"value": "admin",
-									"type": "text"
-								}
-							]
-						},
-						"url": {
-							"raw": "{{api}}/login",
-							"host": [
-								"{{api}}"
-							],
-							"path": [
-								"login"
-							]
-						}
-					},
-					"response": []
-				},
-				{
 					"name": "Выход",
 					"protocolProfileBehavior": {
 						"disableBodyPruning": true
@@ -241,6 +191,121 @@
 							],
 							"path": [
 								"restore-from-key"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Почта",
+			"item": [
+				{
+					"name": "Отправление кода на почту",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "urlencoded",
+							"urlencoded": [
+								{
+									"key": "email",
+									"value": "zcomn@mail.ru",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{api}}/mail/send",
+							"host": [
+								"{{api}}"
+							],
+							"path": [
+								"mail",
+								"send"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Подтверждение кода",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "urlencoded",
+							"urlencoded": [
+								{
+									"key": "email",
+									"value": "zcomn@mail.ru",
+									"type": "text"
+								},
+								{
+									"key": "code",
+									"value": "3H98ok",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{api}}/mail/verify",
+							"host": [
+								"{{api}}"
+							],
+							"path": [
+								"mail",
+								"verify"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Восстановление с помощью почты",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "urlencoded",
+							"urlencoded": [
+								{
+									"key": "email",
+									"value": "admin@mail.ru",
+									"type": "text"
+								},
+								{
+									"key": "reset_token",
+									"value": "sdfsfsdf",
+									"type": "text"
+								},
+								{
+									"key": "new_password",
+									"value": "Admin123!",
+									"type": "text"
+								},
+								{
+									"key": "new_password_confirmation",
+									"value": "Admin123!",
+									"type": "text"
+								},
+								{
+									"key": "logout",
+									"value": "1",
+									"type": "text",
+									"disabled": true
+								}
+							]
+						},
+						"url": {
+							"raw": "{{api}}/mail/restore",
+							"host": [
+								"{{api}}"
+							],
+							"path": [
+								"mail",
+								"restore"
 							]
 						}
 					},
@@ -427,7 +492,7 @@
 							"response": []
 						},
 						{
-							"name": "Добавить/убрать игру в избранное",
+							"name": "Переключение статуса избранного для игры",
 							"request": {
 								"method": "PATCH",
 								"header": [],
@@ -446,7 +511,7 @@
 							"response": []
 						},
 						{
-							"name": "Обновить данные игры в библиотеки",
+							"name": "Обновление данных игры в библиотеке",
 							"request": {
 								"method": "PATCH",
 								"header": [],
@@ -467,14 +532,14 @@
 									]
 								},
 								"url": {
-									"raw": "{{api}}/library/game/44651/update",
+									"raw": "{{api}}/library/game/2/update",
 									"host": [
 										"{{api}}"
 									],
 									"path": [
 										"library",
 										"game",
-										"44651",
+										"2",
 										"update"
 									]
 								}
@@ -486,22 +551,6 @@
 							"request": {
 								"method": "DELETE",
 								"header": [],
-								"body": {
-									"mode": "urlencoded",
-									"urlencoded": [
-										{
-											"key": "time_played",
-											"value": "454536",
-											"type": "text",
-											"disabled": true
-										},
-										{
-											"key": "last_played_at",
-											"value": "2025-02-28 16:01:45",
-											"type": "text"
-										}
-									]
-								},
 								"url": {
 									"raw": "{{api}}/library/game/2",
 									"host": [
@@ -522,7 +571,7 @@
 					"name": "Сторонняя игра",
 					"item": [
 						{
-							"name": "Добавить/убрать стороннюю игру в избранное",
+							"name": "Переключение статуса избранного для сторонней игры",
 							"request": {
 								"method": "PATCH",
 								"header": [],
@@ -541,7 +590,7 @@
 							"response": []
 						},
 						{
-							"name": "Изменить данные сторонней игры в библиотеки",
+							"name": "Обновление данных сторонней игры в библиотеке",
 							"request": {
 								"method": "PATCH",
 								"header": [],
@@ -562,13 +611,13 @@
 									]
 								},
 								"url": {
-									"raw": "{{api}}/library/game/44651/update",
+									"raw": "{{api}}/library/sidegame/44651/update",
 									"host": [
 										"{{api}}"
 									],
 									"path": [
 										"library",
-										"game",
+										"sidegame",
 										"44651",
 										"update"
 									]
@@ -596,6 +645,203 @@
 									"key": "limit",
 									"value": "0"
 								}
+							]
+						}
+					},
+					"response": []
+				}
+			],
+			"auth": {
+				"type": "bearer",
+				"bearer": [
+					{
+						"key": "token",
+						"value": "{{token}}",
+						"type": "string"
+					}
+				]
+			},
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"type": "text/javascript",
+						"packages": {},
+						"exec": [
+							""
+						]
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"type": "text/javascript",
+						"packages": {},
+						"exec": [
+							""
+						]
+					}
+				}
+			]
+		},
+		{
+			"name": "Игры",
+			"item": [
+				{
+					"name": "Получение списка игр",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{api}}/games?name=test",
+							"host": [
+								"{{api}}"
+							],
+							"path": [
+								"games"
+							],
+							"query": [
+								{
+									"key": "name",
+									"value": "test"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Получение игры",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{api}}/games/{game}",
+							"host": [
+								"{{api}}"
+							],
+							"path": [
+								"games",
+								"{game}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Получение пути до сохранений игры",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{api}}/games/{game}/path",
+							"host": [
+								"{{api}}"
+							],
+							"path": [
+								"games",
+								"{game}",
+								"path"
+							]
+						}
+					},
+					"response": []
+				}
+			],
+			"auth": {
+				"type": "bearer",
+				"bearer": [
+					{
+						"key": "token",
+						"value": "{{token}}",
+						"type": "string"
+					}
+				]
+			},
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"type": "text/javascript",
+						"packages": {},
+						"exec": [
+							""
+						]
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"type": "text/javascript",
+						"packages": {},
+						"exec": [
+							""
+						]
+					}
+				}
+			]
+		},
+		{
+			"name": "Сторонние игры",
+			"item": [
+				{
+					"name": "Добавление сторонней игры",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "urlencoded",
+							"urlencoded": [
+								{
+									"key": "name",
+									"value": "",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{api}}/sidegames",
+							"host": [
+								"{{api}}"
+							],
+							"path": [
+								"sidegames"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Получение сторонней игры",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{api}}/sidegames/{sidegame}",
+							"host": [
+								"{{api}}"
+							],
+							"path": [
+								"sidegames",
+								"{sidegame}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Удаление сторонней игры",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{api}}/sidegames/{sidegame}",
+							"host": [
+								"{{api}}"
+							],
+							"path": [
+								"sidegames",
+								"{sidegame}"
 							]
 						}
 					},
@@ -697,33 +943,45 @@
 							"response": []
 						},
 						{
-							"name": "Скачать сохранение",
-							"protocolProfileBehavior": {
-								"disableBodyPruning": true
-							},
+							"name": "Подтверждение синхронизации в GoogleDrive",
 							"request": {
-								"method": "GET",
+								"method": "POST",
 								"header": [],
 								"body": {
-									"mode": "formdata",
-									"formdata": [
+									"mode": "urlencoded",
+									"urlencoded": [
 										{
-											"key": "file",
-											"type": "file",
-											"src": []
-										},
-										{
-											"key": "version",
-											"value": "1",
+											"key": "file_id",
+											"value": "1XK9k4jWH7rruWDck4QAMgIAxwEr03mC1",
 											"type": "text"
 										},
 										{
-											"key": "game_id",
-											"value": "661",
+											"key": "file_hash",
+											"value": "9d0770367cda4fb4abb115c58d6d404f8d0cd3e45e168b4615b027fe786b78c0",
 											"type": "text"
 										}
 									]
 								},
+								"url": {
+									"raw": "{{api}}/saves/1/google-drive/confirm-upload",
+									"host": [
+										"{{api}}"
+									],
+									"path": [
+										"saves",
+										"1",
+										"google-drive",
+										"confirm-upload"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Скачивание сохранение",
+							"request": {
+								"method": "GET",
+								"header": [],
 								"url": {
 									"raw": "{{api}}/saves/{save}/google-drive/download",
 									"host": [
@@ -741,32 +999,9 @@
 						},
 						{
 							"name": "Поделиться сохранением",
-							"protocolProfileBehavior": {
-								"disableBodyPruning": true
-							},
 							"request": {
 								"method": "GET",
 								"header": [],
-								"body": {
-									"mode": "formdata",
-									"formdata": [
-										{
-											"key": "file",
-											"type": "file",
-											"src": []
-										},
-										{
-											"key": "version",
-											"value": "1",
-											"type": "text"
-										},
-										{
-											"key": "game_id",
-											"value": "661",
-											"type": "text"
-										}
-									]
-								},
 								"url": {
 									"raw": "{{api}}/saves/{save}/google-drive/share",
 									"host": [
@@ -828,21 +1063,16 @@
 								"method": "POST",
 								"header": [],
 								"body": {
-									"mode": "formdata",
-									"formdata": [
+									"mode": "urlencoded",
+									"urlencoded": [
 										{
-											"key": "file",
-											"type": "file",
-											"src": []
-										},
-										{
-											"key": "version",
-											"value": "1",
+											"key": "file_name",
+											"value": "",
 											"type": "text"
 										},
 										{
-											"key": "game_id",
-											"value": "661",
+											"key": "file_size",
+											"value": "",
 											"type": "text"
 										}
 									]
@@ -935,13 +1165,13 @@
 							]
 						},
 						"url": {
-							"raw": "{{api}}/saves/1",
+							"raw": "{{api}}/saves/27",
 							"host": [
 								"{{api}}"
 							],
 							"path": [
 								"saves",
-								"1"
+								"27"
 							]
 						}
 					},
@@ -1010,51 +1240,6 @@
 					"response": []
 				},
 				{
-					"name": "Генерация URL для загрузки",
-					"request": {
-						"method": "POST",
-						"header": [],
-						"body": {
-							"mode": "formdata",
-							"formdata": []
-						},
-						"url": {
-							"raw": "{{api}}/google-drive/generate-upload-url",
-							"host": [
-								"{{api}}"
-							],
-							"path": [
-								"google-drive",
-								"generate-upload-url"
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "Подтверждение загрузки",
-					"request": {
-						"method": "POST",
-						"header": [],
-						"body": {
-							"mode": "formdata",
-							"formdata": []
-						},
-						"url": {
-							"raw": "{{api}}/google-drive/confirm-upload/{save}",
-							"host": [
-								"{{api}}"
-							],
-							"path": [
-								"google-drive",
-								"confirm-upload",
-								"{save}"
-							]
-						}
-					},
-					"response": []
-				},
-				{
 					"name": "Ответ от GoogleDrive",
 					"protocolProfileBehavior": {
 						"disableBodyPruning": true
@@ -1097,203 +1282,6 @@
 								"google-drive",
 								"disconnect",
 								"{userCloudService}"
-							]
-						}
-					},
-					"response": []
-				}
-			],
-			"auth": {
-				"type": "bearer",
-				"bearer": [
-					{
-						"key": "token",
-						"value": "{{token}}",
-						"type": "string"
-					}
-				]
-			},
-			"event": [
-				{
-					"listen": "prerequest",
-					"script": {
-						"type": "text/javascript",
-						"packages": {},
-						"exec": [
-							""
-						]
-					}
-				},
-				{
-					"listen": "test",
-					"script": {
-						"type": "text/javascript",
-						"packages": {},
-						"exec": [
-							""
-						]
-					}
-				}
-			]
-		},
-		{
-			"name": "Игры",
-			"item": [
-				{
-					"name": "Просмотр всех игр",
-					"request": {
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "{{api}}/games?name=test",
-							"host": [
-								"{{api}}"
-							],
-							"path": [
-								"games"
-							],
-							"query": [
-								{
-									"key": "name",
-									"value": "test"
-								}
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "Просмотр игры",
-					"request": {
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "{{api}}/games/{game}",
-							"host": [
-								"{{api}}"
-							],
-							"path": [
-								"games",
-								"{game}"
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "Просмотр пути до сохранений",
-					"request": {
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "{{api}}/games/{game}/paths",
-							"host": [
-								"{{api}}"
-							],
-							"path": [
-								"games",
-								"{game}",
-								"paths"
-							]
-						}
-					},
-					"response": []
-				}
-			],
-			"auth": {
-				"type": "bearer",
-				"bearer": [
-					{
-						"key": "token",
-						"value": "{{token}}",
-						"type": "string"
-					}
-				]
-			},
-			"event": [
-				{
-					"listen": "prerequest",
-					"script": {
-						"type": "text/javascript",
-						"packages": {},
-						"exec": [
-							""
-						]
-					}
-				},
-				{
-					"listen": "test",
-					"script": {
-						"type": "text/javascript",
-						"packages": {},
-						"exec": [
-							""
-						]
-					}
-				}
-			]
-		},
-		{
-			"name": "Сторонние игры",
-			"item": [
-				{
-					"name": "Добавление сторонней игры",
-					"request": {
-						"method": "POST",
-						"header": [],
-						"body": {
-							"mode": "urlencoded",
-							"urlencoded": [
-								{
-									"key": "name",
-									"value": "",
-									"type": "text"
-								}
-							]
-						},
-						"url": {
-							"raw": "{{api}}/sidegames",
-							"host": [
-								"{{api}}"
-							],
-							"path": [
-								"sidegames"
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "Просмотр сторонней игры",
-					"request": {
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "{{api}}/sidegames/{sidegame}",
-							"host": [
-								"{{api}}"
-							],
-							"path": [
-								"sidegames",
-								"{sidegame}"
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "Удаление сторонней игры",
-					"request": {
-						"method": "DELETE",
-						"header": [],
-						"url": {
-							"raw": "{{api}}/sidegames/{sidegame}",
-							"host": [
-								"{{api}}"
-							],
-							"path": [
-								"sidegames",
-								"{sidegame}"
 							]
 						}
 					},

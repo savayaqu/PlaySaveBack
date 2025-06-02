@@ -190,11 +190,12 @@
 		<AppxAutoIncrementPackageRevision>True</AppxAutoIncrementPackageRevision>
 		<AppxSymbolPackageEnabled>False</AppxSymbolPackageEnabled>
 		<GenerateTestArtifacts>True</GenerateTestArtifacts>
-		<AppxBundle>Always</AppxBundle>
+		<AppxBundle>Auto</AppxBundle>
 		<AppxBundlePlatforms>x64</AppxBundlePlatforms>
 		<HoursBetweenUpdateChecks>0</HoursBetweenUpdateChecks>
 		<PackageCertificateThumbprint>DB0A7DA06BC383772C842B4E914A003C45E29FD8</PackageCertificateThumbprint>
 		<AppInstallerUri>https://github.com/savayaqu/PlaySaveBack/releases/latest</AppInstallerUri>
 		<ApplicationIcon>Assets\logo.ico</ApplicationIcon>
+		<AppxPackageDir>W:\Vihlop\</AppxPackageDir>
 	</PropertyGroup>
 </Project>
