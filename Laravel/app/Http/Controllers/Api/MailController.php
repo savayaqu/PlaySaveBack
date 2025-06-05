@@ -73,6 +73,6 @@ class MailController extends Controller
         // Очищаем кеш
         Cache::forget('password_reset_' . $request->email);
         Cache::forget('password_reset_token_' . $request->email);
-        return response()->json(UserResource::make($user));
+        return response()->json(null, 204);
     }
 }

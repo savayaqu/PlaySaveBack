@@ -10,6 +10,7 @@ use App\Http\Requests\Api\Auth\SignInRequest;
 use App\Http\Requests\Api\Auth\SignUpRequest;
 use App\Http\Resources\UserResource;
 use App\Models\User;
+use App\Traits\ThrottlesLogins;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -18,6 +19,8 @@ use Illuminate\Support\Str;
 
 class AuthController extends Controller
 {
+    use ThrottlesLogins; // Подключаем трейт
+
     // Регистрация
     public function signUp(SignUpRequest $request): JsonResponse
     {
@@ -31,22 +34,36 @@ class AuthController extends Controller
         return response()->json(['user' => UserResource::make($user), 'token' => $token, 'key' => $key], 201);
     }
     // Авторизация
+
     public function signIn(SignInRequest $request): JsonResponse
     {
-        $identifier = $request->input('identifier'); // Может быть email или login
+        // Проверяем, не заблокирован ли пользователь из-за частых попыток
+        $this->ensureIsNotRateLimited($request);
+
+        $identifier = $request->input('identifier');
         $password = $request->input('password');
-        // Определяем, является ли идентификатор email'ом
         $field = filter_var($identifier, FILTER_VALIDATE_EMAIL) ? 'email' : 'login';
-        // Попытка аутентификации
+
         if (!Auth::attempt([$field => $identifier, 'password' => $password])) {
+            // Увеличиваем счетчик неудачных попыток
+            $this->incrementLoginAttempts($request);
+
+            // Задержка для замедления брутфорса (по желанию)
+            $this->applyBruteForceDelay(2); // 2 секунды
+
             throw new ApiException('Invalid credentials', 401);
         }
+
+        // Сбрасываем счетчик после успешного входа
+        $this->clearLoginAttempts($request);
+
         $user = Auth::user();
         if (!$user instanceof User) {
             throw new UnauthorizedException();
         }
-        // Создаем токен
+
         $token = $user->createToken(Str::random(100))->plainTextToken;
+
         return response()->json([
             'user' => UserResource::make($user),
             'token' => $token,
@@ -64,7 +81,7 @@ class AuthController extends Controller
         {
             $user->tokens()->delete();
         }
-        return response()->json(UserResource::make($user));
+        return response()->json(null, 204);
     }
     // Выход
     public function logout(Request $request): JsonResponse
