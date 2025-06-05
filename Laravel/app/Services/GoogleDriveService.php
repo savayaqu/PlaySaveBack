@@ -7,6 +7,7 @@ use Google\Client;
 use Google\Service\Drive;
 use Google\Service\Drive\DriveFile;
 use Google\Service\Drive\Permission;
+use GuzzleHttp\Psr7\Request;
 use Illuminate\Support\Facades\Crypt;
 
 class GoogleDriveService
@@ -211,7 +212,7 @@ class GoogleDriveService
     }
 
     // Скачивание файла
-    public function downloadFile($fileId)
+    public function downloadFile($fileId): array
     {
         try {
             $fileMetadata = $this->driveService->files->get($fileId, ['fields' => 'mimeType, name']);
