@@ -1,9 +1,8 @@
-﻿using System;
-using System.Diagnostics;
+﻿using PSB.Converters;
+using PSB.Utils;
+using System;
 using System.Linq;
 using System.Text.Json.Serialization;
-using PSB.Converters;
-using PSB.Utils;
 
 namespace PSB.Models
 {
@@ -38,7 +37,7 @@ namespace PSB.Models
         {
             get
             {
-              return AuthData.ConnectedCloudServices.FirstOrDefault(ccc => ccc.UserCloudServiceId == UserCloudServiceId && ccc.IsConnected);
+                return AuthData.ConnectedCloudServices.FirstOrDefault(ccc => ccc.UserCloudServiceId == UserCloudServiceId && ccc.IsConnected);
             }
         }
         [JsonIgnore]

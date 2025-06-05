@@ -1,15 +1,15 @@
-﻿using System.Diagnostics;
-using System.Net;
-using System.Net.Http;
-using System.Text.Json;
-using System.Threading.Tasks;
-using CommunityToolkit.Mvvm.ComponentModel;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using PSB.Api.Request;
 using PSB.Api.Response;
 using PSB.Models;
 using PSB.Services;
 using PSB.Utils;
+using System.Diagnostics;
+using System.Net;
+using System.Net.Http;
+using System.Text.Json;
+using System.Threading.Tasks;
 using static PSB.Utils.Fetch;
 namespace PSB.ViewModels
 {
@@ -58,7 +58,7 @@ namespace PSB.ViewModels
                 ErrorNewPassConf = errorResponse.Errors["new_password_confirmation"][0];
                 return;
             }
-            else if(res.StatusCode == HttpStatusCode.Unauthorized)
+            else if (res.StatusCode == HttpStatusCode.Unauthorized)
             {
 
                 Error = "Invalid current password";

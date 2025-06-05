@@ -1,5 +1,5 @@
-﻿using System.Text.Json.Serialization;
-using PSB.Models;
+﻿using PSB.Models;
+using System.Text.Json.Serialization;
 
 namespace PSB.Interfaces
 {

@@ -1,7 +1,4 @@
-using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
-using Microsoft.UI.Xaml.Input;
-using PSB.Models;
 using PSB.ViewModels;
 
 // To learn more about WinUI, the WinUI project structure,

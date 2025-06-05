@@ -1,13 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.Diagnostics;
-using System.IO;
-using System.Linq;
-using System.Net.Http;
-using System.Text.Json;
-using System.Threading.Tasks;
-using CommunityToolkit.Mvvm.ComponentModel;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using PSB.Api.Request;
 using PSB.Api.Response;
@@ -18,10 +9,15 @@ using PSB.Models;
 using PSB.Services;
 using PSB.Utils;
 using PSB.Utils.Game;
-using static System.Net.Mime.MediaTypeNames;
+using System;
+using System.Collections.ObjectModel;
+using System.Diagnostics;
+using System.IO;
+using System.Linq;
+using System.Net.Http;
+using System.Threading.Tasks;
 using Windows.ApplicationModel.DataTransfer;
 using static PSB.Utils.Fetch;
-using System.Text.Encodings.Web;
 
 namespace PSB.ViewModels
 {
@@ -63,7 +59,7 @@ namespace PSB.ViewModels
 
         partial void OnFolderPathChanged(string value)
         {
-            if(string.IsNullOrEmpty(value))
+            if (string.IsNullOrEmpty(value))
             {
                 FolderSavesExists = false;
             }
@@ -255,7 +251,7 @@ namespace PSB.ViewModels
                 SaveVersion = save.Version;
                 SaveDescription = save.Description;
                 IsUploading = true;
-                (bool uploadSuccess, Save? updatedSave ) = await CloudFileUploader.UploadFileAsync(
+                (bool uploadSuccess, Save? updatedSave) = await CloudFileUploader.UploadFileAsync(
                     save,
                     SelectedCloudService,
                     Game,
@@ -303,7 +299,7 @@ namespace PSB.ViewModels
         [RelayCommand(CanExecute = nameof(FolderSavesExists))]
         public async Task RestoreSave(Save save)
         {
-            if(save.IsSynced == false)
+            if (save.IsSynced == false)
             {
                 string folderPath = PathDataManager<IGame>.GetSavesFolderPath(Game);
                 Helpers.ZipHelper.RestoreFromZip(save.ZipPath, folderPath);
@@ -322,7 +318,7 @@ namespace PSB.ViewModels
                 // 1. Загрузка с повторными попытками
                 Debug.WriteLine("Начинаем загрузку архива...");
                 Debug.WriteLine("FileId сохранения " + save.FileId);
-                if(save.FileId == null)
+                if (save.FileId == null)
                 {
                     Debug.WriteLine("save.FileId is null" + save.FileId);
                     return;
@@ -449,7 +445,7 @@ namespace PSB.ViewModels
             }
             App.LibraryService!.UpdateLibraryMenu();
         }
-  
+
         [RelayCommand]
         public async Task DeleteSave(Save save)
         {
@@ -467,7 +463,7 @@ namespace PSB.ViewModels
             {
                 IsUploading = true;
                 // Отправляем запрос на удаление файла
-                var res = await FetchAsync(HttpMethod.Delete,$"saves/{save.Id}/google-drive/delete");
+                var res = await FetchAsync(HttpMethod.Delete, $"saves/{save.Id}/google-drive/delete");
 
                 if (res.IsSuccessStatusCode)
                 {
@@ -507,7 +503,7 @@ namespace PSB.ViewModels
                     (var res, var body) = await FetchAsync<ShareSaveResponse>(HttpMethod.Get, $"saves/{save.Id}/google-drive/share");
                     if (res.IsSuccessStatusCode)
                     {
-                        if(body != null)
+                        if (body != null)
                         {
                             var dataPackage = new DataPackage();
                             dataPackage.SetText(body.Url);
@@ -556,14 +552,14 @@ namespace PSB.ViewModels
 
             if (!res.IsSuccessStatusCode || body == null)
                 return;
-          
+
             // Сохраняем локальные несинхронизированные сохранения
             var localSaves = Saves?.Where(s => !s.IsSynced).ToList() ?? [];
 
-           
+
             // Очистка коллекции
             Saves.Clear();
-            
+
             // Добавление сохранений с сервера
             foreach (var item in body.Save)
             {
@@ -575,7 +571,7 @@ namespace PSB.ViewModels
             {
                 Saves.Add(localSave);
             }
-           
+
             // Сохраняем сохранения с использованием нового менеджера
             SavesDataManager<IGame>.SaveSaves(Game, [.. Saves]);
         }

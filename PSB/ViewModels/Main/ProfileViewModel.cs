@@ -1,11 +1,4 @@
-﻿using System;
-using System.Collections.ObjectModel;
-using System.Diagnostics;
-using System.Globalization;
-using System.IO;
-using System.Net.Http;
-using System.Threading.Tasks;
-using CommunityToolkit.Mvvm.ComponentModel;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using PSB.Api.Request;
 using PSB.Api.Response;
@@ -15,6 +8,12 @@ using PSB.Models;
 using PSB.Utils;
 using PSB.Utils.Game;
 using PSB.Views.Profile;
+using System;
+using System.Collections.ObjectModel;
+using System.Diagnostics;
+using System.IO;
+using System.Net.Http;
+using System.Threading.Tasks;
 using Windows.Storage.Pickers;
 using static PSB.Utils.Fetch;
 

@@ -1,5 +1,4 @@
 ﻿using System.Text.Json.Serialization;
-using PSB.Models;
 
 namespace PSB.Api.Response
 {

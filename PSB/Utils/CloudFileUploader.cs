@@ -1,20 +1,14 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Diagnostics.CodeAnalysis;
-using System.IO;
-using System.Linq;
-using System.Net.Http;
-using System.Net.Http.Json;
-using System.Text;
-using System.Threading.Tasks;
-using PSB.Api.Request;
+﻿using PSB.Api.Request;
 using PSB.Api.Request.GoogleDrive;
 using PSB.Api.Response.GoogleDrive;
 using PSB.Helpers;
 using PSB.Interfaces;
 using PSB.Models;
 using PSB.Services;
-using Windows.Gaming.Input;
+using System;
+using System.IO;
+using System.Net.Http;
+using System.Threading.Tasks;
 using static PSB.Utils.Fetch;
 
 namespace PSB.Utils
@@ -94,7 +88,7 @@ namespace PSB.Utils
             }
 
         }
-        public static async Task<(bool Success, Save? UpdatedSave)> OverwriteFileAsync(Save existingSave,string newFilePath,string version,string description)
+        public static async Task<(bool Success, Save? UpdatedSave)> OverwriteFileAsync(Save existingSave, string newFilePath, string version, string description)
         {
             try
             {
@@ -126,7 +120,7 @@ namespace PSB.Utils
                 var (updateResponse, updatedSave) = await FetchAsync<Save>(
                     HttpMethod.Patch,
                     $"saves/{existingSave.Id}",
-                    new UpdateSaveRequest(version, description, ZipHelper.CalculateFileHash(newFilePath), DateTime.Now),true);
+                    new UpdateSaveRequest(version, description, ZipHelper.CalculateFileHash(newFilePath), DateTime.Now), true);
 
                 return (updateResponse.IsSuccessStatusCode, updatedSave);
             }

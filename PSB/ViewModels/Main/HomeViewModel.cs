@@ -6,11 +6,9 @@ using PSB.Interfaces;
 using PSB.Models;
 using PSB.Utils.Game;
 using System;
-using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.Linq;
-using Windows.Devices.Enumeration;
 
 namespace PSB.ViewModels
 {
@@ -31,10 +29,10 @@ namespace PSB.ViewModels
         {
             LoadLocalSaves();
             LastPlayedGame = LastPlayedGameManager.LoadLastPlayedGame();
-            if(LastPlayedGame != null)
+            if (LastPlayedGame != null)
             {
                 var icon = IconFromExe.GetIconElement(PathDataManager<IGame>.GetFilePath(LastPlayedGame.Game));
-                if (icon != null) 
+                if (icon != null)
                 {
                     GameIcon = icon;
                 }

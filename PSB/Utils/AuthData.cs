@@ -1,13 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using PSB.Api.Response;
+using PSB.Models;
 using System.Collections.ObjectModel;
-using System.Diagnostics;
 using System.Net.Http;
 using System.Text.Json;
 using System.Threading.Tasks;
-using PSB.Api.Response;
-using PSB.Models;
-using PSB.Views.Auth;
 using Windows.Storage;
 using static PSB.Utils.Fetch;
 using User = PSB.Models.User;

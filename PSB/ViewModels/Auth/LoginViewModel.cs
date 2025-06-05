@@ -1,16 +1,14 @@
-﻿using System.Collections.Generic;
-using System.Diagnostics;
-using System.Net;
-using System.Net.Http;
-using System.Text.Json;
-using System.Threading.Tasks;
-using CommunityToolkit.Mvvm.ComponentModel;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using Microsoft.UI.Xaml.Controls;
 using PSB.Api.Request;
 using PSB.Api.Response;
 using PSB.Services;
 using PSB.Utils;
+using System.Collections.Generic;
+using System.Diagnostics;
+using System.Net;
+using System.Net.Http;
+using System.Threading.Tasks;
 using static PSB.Utils.Fetch;
 
 namespace PSB.ViewModels
@@ -49,11 +47,11 @@ namespace PSB.ViewModels
                     Debug.WriteLine(PasswordError);
                     return;
                 }
-                if(res.StatusCode == HttpStatusCode.Unauthorized)
+                if (res.StatusCode == HttpStatusCode.Unauthorized)
                 {
                     Error = "Invalid credentials";
                 }
-                
+
                 if (res.IsSuccessStatusCode && body != null)
                 {
                     AuthData.SaveAndOpenMainWindow(body.Token, body.User);

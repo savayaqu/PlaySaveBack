@@ -1,21 +1,18 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.ComponentModel;
-using System.Diagnostics;
-using System.Linq;
-using System.Net;
-using System.Net.Http;
-using System.Runtime.CompilerServices;
-using System.Threading;
-using System.Threading.Tasks;
-using CommunityToolkit.Mvvm.ComponentModel;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using Microsoft.UI.Dispatching;
 using PSB.Api.Response;
 using PSB.Helpers;
 using PSB.Models;
 using PSB.Views;
+using System;
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.Diagnostics;
+using System.Linq;
+using System.Net;
+using System.Net.Http;
+using System.Threading;
+using System.Threading.Tasks;
 using static PSB.Utils.Fetch;
 
 
@@ -237,7 +234,7 @@ namespace PSB.ViewModels
                 Debug.WriteLine("Search was canceled");
             }
         }
-        
+
         private bool CanGoToPreviousPage() => CurrentPage > 1;
         private bool CanGoToNextPage() => CurrentPage < TotalPages;
         partial void OnCurrentPageChanged(int? value)

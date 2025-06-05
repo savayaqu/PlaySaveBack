@@ -1,11 +1,11 @@
-﻿using System.Collections.Generic;
-using System.Linq;
-using Microsoft.UI.Xaml.Controls;
+﻿using Microsoft.UI.Xaml.Controls;
 using PSB.Helpers;
 using PSB.Interfaces;
 using PSB.Models;
 using PSB.Utils.Game;
 using PSB.ViewModels;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace PSB.Services
 {

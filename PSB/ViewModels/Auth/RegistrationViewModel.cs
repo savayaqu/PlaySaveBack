@@ -1,11 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Net;
-using System.Net.Http;
-using System.Text.Json;
-using System.Threading.Tasks;
-using CommunityToolkit.Mvvm.ComponentModel;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Microsoft.UI.Xaml.Controls;
 using PSB.Api.Request;
@@ -13,7 +6,13 @@ using PSB.Api.Response;
 using PSB.Services;
 using PSB.Utils;
 using PSB.Views.Auth;
+using System;
+using System.Collections.Generic;
+using System.Net;
+using System.Net.Http;
+using System.Text.Json;
 using System.Text.Json.Nodes;
+using System.Threading.Tasks;
 using static PSB.Utils.Fetch;
 
 namespace PSB.ViewModels.Auth
@@ -70,7 +69,7 @@ namespace PSB.ViewModels.Auth
                     ShowKeyDialog(_lastSuccessfulResponse);
                     return;
                 }
-               
+
                 // Отправляем запрос на сервер
                 (var res, var body) = await FetchAsync<SignUpResponse>(
                     HttpMethod.Post, "register",

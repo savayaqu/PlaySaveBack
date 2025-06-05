@@ -1,22 +1,14 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq;
-using System.Net;
-using System.Net.Http;
-using System.Text;
-using System.Threading.Tasks;
-using CommunityToolkit.Mvvm.ComponentModel;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Microsoft.UI.Xaml;
-using Microsoft.UI.Xaml.Controls;
-using PSB.Api.Request;
 using PSB.Api.Request.Mail;
 using PSB.Api.Response;
-using PSB.Models;
 using PSB.Services;
-using PSB.Utils;
-using Windows.Web;
+using System;
+using System.Collections.Generic;
+using System.Net;
+using System.Net.Http;
+using System.Threading.Tasks;
 using static PSB.Utils.Fetch;
 
 namespace PSB.ViewModels.Auth
@@ -31,7 +23,7 @@ namespace PSB.ViewModels.Auth
         [ObservableProperty][NotifyCanExecuteChangedFor(nameof(RestoreCommand))] public partial string? ResetToken { get; set; } = string.Empty;
         [ObservableProperty][NotifyCanExecuteChangedFor(nameof(RestoreCommand))] public partial string? NewPassword { get; set; } = string.Empty;
         [ObservableProperty][NotifyCanExecuteChangedFor(nameof(RestoreCommand))] public partial string? NewPasswordConfirmation { get; set; } = string.Empty;
-        [ObservableProperty]public partial bool LogoutBool { get; set; } = false;
+        [ObservableProperty] public partial bool LogoutBool { get; set; } = false;
         [ObservableProperty] public partial Dictionary<string, string> Errors { get; set; } = new();
         [ObservableProperty] public partial string? Error { get; set; } = string.Empty;
         public string? EmailError => Errors.TryGetValue("email", out var error) ? error : null;

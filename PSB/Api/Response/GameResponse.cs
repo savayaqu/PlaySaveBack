@@ -1,6 +1,6 @@
-﻿using System.Collections.Generic;
+﻿using PSB.Models;
+using System.Collections.Generic;
 using System.Text.Json.Serialization;
-using PSB.Models;
 
 namespace PSB.Api.Response
 {

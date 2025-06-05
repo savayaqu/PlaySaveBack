@@ -1,6 +1,6 @@
-﻿using System;
+﻿using PSB.Converters;
+using System;
 using System.Text.Json.Serialization;
-using PSB.Converters;
 
 namespace PSB.Models
 {

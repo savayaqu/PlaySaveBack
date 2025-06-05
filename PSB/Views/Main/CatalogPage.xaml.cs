@@ -1,12 +1,12 @@
-using System;
-using System.Linq;
-using System.Threading.Tasks;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Media.Animation;
 using Microsoft.UI.Xaml.Navigation;
 using PSB.Models;
 using PSB.ViewModels;
+using System;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace PSB.Views
 {

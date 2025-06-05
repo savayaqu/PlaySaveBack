@@ -2,11 +2,7 @@ using Microsoft.UI;
 using Microsoft.UI.Windowing;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
-using Microsoft.UI.Xaml.Controls.Primitives;
-using Microsoft.UI.Xaml.Media.Animation;
-using PSB.Services;
 using PSB.ViewModels;
-using PSB.Views.Settings;
 using Windows.Graphics;
 
 

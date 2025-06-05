@@ -19,11 +19,11 @@ namespace PSB.Selectors
                 else if (library.Game != null)
                     return MainGameTemplate!;
             }
-            if(item is IGame game)
+            if (item is IGame game)
             {
-                if(game.Type == "sidegame")
+                if (game.Type == "sidegame")
                     return SideGameTemplate!;
-                else if(game.Type == "game")
+                else if (game.Type == "game")
                     return MainGameTemplate!;
             }
 

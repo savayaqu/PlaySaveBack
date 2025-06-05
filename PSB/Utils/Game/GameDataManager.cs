@@ -1,6 +1,6 @@
-﻿using System;
+﻿using PSB.Interfaces;
+using System;
 using System.Diagnostics;
-using PSB.Interfaces;
 
 namespace PSB.Utils.Game
 {

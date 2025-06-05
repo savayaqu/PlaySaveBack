@@ -1,6 +1,6 @@
-﻿using System;
-using Microsoft.UI.Dispatching;
+﻿using Microsoft.UI.Dispatching;
 using Microsoft.UI.Xaml.Controls;
+using System;
 
 namespace PSB.Services
 {

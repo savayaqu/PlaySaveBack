@@ -1,11 +1,6 @@
 ﻿using PSB.Interfaces;
 using PSB.Models;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Text.Json;
-using System.Threading.Tasks;
 using Windows.Storage;
 
 namespace PSB.Utils.Game
@@ -14,13 +9,13 @@ namespace PSB.Utils.Game
     {
         private static readonly string CacheKey = $"{AuthData.User!.Id}_LastPlayedGame";
 
-       
+
         public static void SaveLastPlayedGame(IGame game, Library library)
         {
             var model = new LastPlayedGame
             {
                 Game = game,
-                Library = library 
+                Library = library
             };
             var json = JsonSerializer.Serialize(model);
             ApplicationData.Current.LocalSettings.Values[CacheKey] = json;

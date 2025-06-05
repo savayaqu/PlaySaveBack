@@ -1,6 +1,6 @@
-﻿using System.Collections.Generic;
+﻿using PSB.Interfaces;
+using System.Collections.Generic;
 using System.Text.Json.Serialization;
-using PSB.Interfaces;
 
 namespace PSB.Models
 {

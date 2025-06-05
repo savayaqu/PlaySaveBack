@@ -10,7 +10,7 @@ namespace PSB.Views
         public HomePage()
         {
             HomeViewModel = new HomeViewModel();
-            if(HomeViewModel.LastPlayedGame != null)
+            if (HomeViewModel.LastPlayedGame != null)
             {
                 GameViewModel = new GameViewModel(HomeViewModel.LastPlayedGame.Game.Id, HomeViewModel.LastPlayedGame.Game.Type);
             }

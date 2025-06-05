@@ -1,9 +1,9 @@
-﻿using System;
+﻿using Microsoft.UI.Xaml.Media.Imaging;
+using System;
 using System.Diagnostics;
 using System.Drawing;
 using System.IO;
 using System.Threading.Tasks;
-using Microsoft.UI.Xaml.Media.Imaging;
 
 namespace PSB.Helpers
 {

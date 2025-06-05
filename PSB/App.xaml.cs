@@ -1,13 +1,11 @@
-﻿using System;
-using System.Diagnostics;
-using System.Threading.Tasks;
-using Microsoft.UI.Xaml;
+﻿using Microsoft.UI.Xaml;
 using Microsoft.Windows.AppLifecycle;
 using PSB.Helpers;
 using PSB.Interfaces;
 using PSB.Services;
 using PSB.Utils;
 using PSB.Views.Auth;
+using System;
 using Windows.ApplicationModel.Activation;
 namespace PSB
 {
@@ -47,7 +45,7 @@ namespace PSB
 
             // Подписываемся на события активации (включая deep links)
             instance.Activated += OnAppActivated;
-            if(AuthData.User != null)
+            if (AuthData.User != null)
             {
                 // Инициализируем главное окно
                 InitializeMainWindow();
@@ -56,7 +54,7 @@ namespace PSB
             {
                 InitializeAuthWindow();
             }
-            
+
         }
 
         private void OnAppActivated(object? sender, AppActivationArguments args)
@@ -128,7 +126,7 @@ namespace PSB
                 AuthWindow.Close();
                 AuthWindow = null;
             }
-            if(RegistrationWindow != null)
+            if (RegistrationWindow != null)
             {
                 RegistrationWindow.Close();
                 RegistrationWindow = null;

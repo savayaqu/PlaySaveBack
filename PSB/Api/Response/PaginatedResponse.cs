@@ -13,9 +13,9 @@ namespace PSB.Api.Response
     public class PaginationLinks
     {
         [JsonPropertyName("first")] public string? First { get; set; }
-        [JsonPropertyName("last")]  public string? Last { get; set; }
-        [JsonPropertyName("prev")]  public string? Prev { get; set; }
-        [JsonPropertyName("next")]  public string? Next { get; set; }
+        [JsonPropertyName("last")] public string? Last { get; set; }
+        [JsonPropertyName("prev")] public string? Prev { get; set; }
+        [JsonPropertyName("next")] public string? Next { get; set; }
     }
 
     public class PaginationMeta

@@ -6,7 +6,7 @@ namespace PSB.Views.Settings.Account
 {
     public sealed partial class UpdateEmailContentDialog : ContentDialog
     {
-        public UpdateEmailViewModel UpdateEmailViewModel { get;  private set; }
+        public UpdateEmailViewModel UpdateEmailViewModel { get; private set; }
         public UpdateEmailContentDialog()
         {
             UpdateEmailViewModel = new UpdateEmailViewModel(); // Передаем ссылку на текущий диалог

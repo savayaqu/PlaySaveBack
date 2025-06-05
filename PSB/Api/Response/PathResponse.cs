@@ -4,6 +4,6 @@ namespace PSB.Api.Response
 {
     public class PathResponse
     {
-        [JsonPropertyName("path")] public required string Path{ get; set; }
+        [JsonPropertyName("path")] public required string Path { get; set; }
     }
 }

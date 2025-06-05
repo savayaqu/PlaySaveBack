@@ -1,11 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.Diagnostics;
-using System.Linq;
-using System.Net.Http;
-using System.Threading.Tasks;
-using CommunityToolkit.Mvvm.ComponentModel;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using PSB.Api.Response;
 using PSB.Interfaces;
@@ -14,6 +7,12 @@ using PSB.Services;
 using PSB.Utils;
 using PSB.Utils.Game;
 using PSB.Views.Settings.Account;
+using System;
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.Diagnostics;
+using System.Net.Http;
+using System.Threading.Tasks;
 using Windows.System;
 using static PSB.Utils.Fetch;
 using User = PSB.Models.User;
@@ -72,7 +71,7 @@ namespace PSB.ViewModels
                 foreach (var item in body)
                 {
                     CloudServices.Add(item);
-                    if(item.IsConnected)
+                    if (item.IsConnected)
                         AuthData.ConnectedCloudServices.Add(item);
                 }
             }
@@ -83,7 +82,7 @@ namespace PSB.ViewModels
             Debug.WriteLine("нажата");
             if (cloudService.Name == "Google Drive")
             {
-                if(cloudService.IsConnected == false || cloudService.IsTokenExpired())
+                if (cloudService.IsConnected == false || cloudService.IsTokenExpired())
                 {
                     await ConnectionGoogleDrive();
                 }

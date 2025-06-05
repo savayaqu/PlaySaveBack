@@ -1,15 +1,14 @@
-﻿using System.Net;
-using System.Net.Http;
-using System.Text.Json;
-using System.Threading.Tasks;
-using CommunityToolkit.Mvvm.ComponentModel;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using Microsoft.UI.Xaml.Controls;
 using PSB.Api.Request;
 using PSB.Api.Response;
 using PSB.Models;
 using PSB.Services;
 using PSB.Utils;
+using System.Net;
+using System.Net.Http;
+using System.Text.Json;
+using System.Threading.Tasks;
 using static PSB.Utils.Fetch;
 namespace PSB.ViewModels
 {

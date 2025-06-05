@@ -1,7 +1,7 @@
-﻿using System;
-using System.Text.Json.Serialization;
-using PSB.Converters;
+﻿using PSB.Converters;
 using PSB.Models;
+using System;
+using System.Text.Json.Serialization;
 
 namespace PSB.Api.Response
 {
