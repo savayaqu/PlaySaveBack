@@ -21,7 +21,7 @@ class AuthController extends Controller
     // Регистрация
     public function signUp(SignUpRequest $request): JsonResponse
     {
-        $key = random_int(100000, 999999);
+        $key = Str::random(6);
         $user = User::query()->create([
             ...$request->validated(),
             'key' => $key,
