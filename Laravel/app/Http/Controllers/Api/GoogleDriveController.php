@@ -1,10 +1,11 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Api;
 
 use App\Enums\CloudStatus;
 use App\Exceptions\ConflictException;
 use App\Exceptions\ForbiddenException;
+use App\Http\Controllers\Controller;
 use App\Http\Requests\Api\Save\ConfirmUploadSave;
 use App\Http\Requests\Api\Save\OverwriteSaveRequest;
 use App\Http\Requests\Api\Save\UploadSaveRequest;
@@ -32,7 +33,7 @@ class GoogleDriveController extends Controller
 
         $payload = $parts[1];
 
-        // Добавим padding для base64 (если не кратно 4)
+        // Добавление padding для base64 (если не кратно 4)
         $payload .= str_repeat('=', 4 - strlen($payload) % 4);
 
         $json = base64_decode(strtr($payload, '-_', '+/'));
@@ -100,9 +101,7 @@ class GoogleDriveController extends Controller
         return redirect('auth/success');
     }
 
-    /**
-     * Генерирует URL для прямой загрузки файла в Google Drive
-     */
+    // Генерация URL для прямой загрузки файла в Google Drive
     public function generateUploadUrl(UploadSaveRequest $request): JsonResponse
     {
         $user = auth()->user();
@@ -125,7 +124,7 @@ class GoogleDriveController extends Controller
                 !empty($existingSave->last_sync_at) ||
                 !empty($existingSave->user_cloud_service_id)
             ) {
-                throw new ConflictException("Сохранение уже синхронизировано с облаком.");
+                throw new ConflictException();
             }
 
             // Если поля пустые — обновляем запись и разрешаем загрузку
@@ -173,9 +172,8 @@ class GoogleDriveController extends Controller
             'save_id' => $save->id,
         ]);
     }
-    /**
-     * Подтверждает успешную загрузку файла
-     */
+
+    // Подтверждение успешной загрузки файла
     public function confirmUpload(Save $save, ConfirmUploadSave $request): JsonResponse
     {
         $user = auth()->user();

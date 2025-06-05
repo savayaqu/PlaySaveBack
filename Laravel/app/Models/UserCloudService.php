@@ -4,6 +4,8 @@ namespace App\Models;
 
 use App\Enums\CloudStatus;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class UserCloudService extends Model
 {
@@ -23,15 +25,15 @@ class UserCloudService extends Model
     protected $attributes = [
         'status' => CloudStatus::Inactive,
     ];
-    public function user()
+    public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
     }
-    public function cloudService()
+    public function cloudService(): BelongsTo
     {
         return $this->belongsTo(CloudService::class);
     }
-    public function saves()
+    public function saves(): HasMany
     {
         return $this->hasMany(Save::class);
     }

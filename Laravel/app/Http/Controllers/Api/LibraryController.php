@@ -5,7 +5,6 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Api\Library\EditLibraryGameRequest;
 use App\Http\Resources\LibraryResource;
-use App\Http\Resources\UserResource;
 use App\Models\Game;
 use App\Models\Library;
 use App\Models\SideGame;

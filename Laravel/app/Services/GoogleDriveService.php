@@ -3,7 +3,6 @@
 namespace App\Services;
 
 use App\Exceptions\ApiException;
-use App\Exceptions\GoogleApiException;
 use Google\Client;
 use Google\Service\Drive;
 use Google\Service\Drive\DriveFile;
@@ -12,20 +11,26 @@ use Illuminate\Support\Facades\Crypt;
 
 class GoogleDriveService
 {
+    // Google API клиент
     private $client;
+    // Сервис для работы с Google Drive
     private $driveService;
+    // Данные пользовательского облачного сервиса
     private $userCloudService;
-    private array $folderCache = []; // Кэш: "parentId:name" => id
+    // Кэш для хранения ID папок
+    private array $folderCache;
 
-
+    // Конструктор
     public function __construct($userCloudService)
     {
         $this->userCloudService = $userCloudService;
         $this->initializeClient();
     }
 
+    // Инициализация клиента
     private function initializeClient(): void
     {
+        // Настройка клиента Google API с использованием credentials из .env
         $this->client = new Client();
         $this->client->setClientId(env('GOOGLE_DRIVE_CLIENT_ID'));
         $this->client->setClientSecret(env('GOOGLE_DRIVE_CLIENT_SECRET'));
@@ -34,27 +39,34 @@ class GoogleDriveService
         $this->driveService = new Drive($this->client);
     }
 
+    // Установка токена доступа
     private function setAccessToken(): void
     {
+        // Расшифровка токенов
         $accessToken = Crypt::decryptString($this->userCloudService->access_token);
         $refreshToken = Crypt::decryptString($this->userCloudService->refresh_token);
 
+        // Установка токенов
         $this->client->setAccessToken([
             'access_token' => $accessToken,
             'refresh_token' => $refreshToken,
             'expires_in' => $this->userCloudService->expires_at->diffInSeconds(now()),
         ]);
 
+        // Обновление токена при необходимости
         if ($this->client->isAccessTokenExpired()) {
             $this->refreshToken();
         }
     }
 
+    // Обновление токена
     private function refreshToken(): void
     {
+        // Обновление токена доступа с помощью refresh token
         $refreshToken = Crypt::decryptString($this->userCloudService->refresh_token);
         $newToken = $this->client->fetchAccessTokenWithRefreshToken($refreshToken);
 
+        // Сохранение новых токенов
         $this->userCloudService->update([
             'access_token' => Crypt::encryptString($newToken['access_token']),
             'expires_at' => now()->addSeconds($newToken['expires_in']),
@@ -66,6 +78,7 @@ class GoogleDriveService
         $this->client->setAccessToken($newToken);
     }
 
+    // Генерация URL для загрузки файла с возможностью возобновления
     public function generateResumableUploadUrl(string $fileName, string $folderPath): string
     {
         try {
@@ -83,7 +96,7 @@ class GoogleDriveService
                     'fields' => 'id',
                     'supportsAllDrives' => 'true'
                 ]);
-            $request = new \GuzzleHttp\Psr7\Request(
+            $request = new Request(
                 'POST',
                 $uri,
                 [
@@ -108,6 +121,7 @@ class GoogleDriveService
         }
     }
 
+    // Генерация URL для перезаписи существующего файла
     public function generateResumableOverwriteUrl(string $fileId, string $fileName): string
     {
         try {
@@ -126,8 +140,8 @@ class GoogleDriveService
                 ]);
 
             // 3. Создаем PSR-7 запрос (PATCH для обновления)
-            $request = new \GuzzleHttp\Psr7\Request(
-                'PATCH', // Важно использовать PATCH вместо POST
+            $request = new Request(
+                'PATCH',
                 $uri,
                 [
                     'Content-Type' => 'application/json',
@@ -160,6 +174,7 @@ class GoogleDriveService
 
     }
 
+    // Удаление файла по ID
     public function deleteFile($fileId)
     {
         try {
@@ -172,6 +187,7 @@ class GoogleDriveService
         }
     }
 
+    // Настройка доступа к файлу (публичный доступ для чтения)
     public function shareFile($fileId)
     {
         try {
@@ -182,7 +198,9 @@ class GoogleDriveService
 
             $this->driveService->permissions->create($fileId, $permission);
 
+            // Возвращает публичную ссылку на файл
             $file = $this->driveService->files->get($fileId, ['fields' => 'webViewLink']);
+
             return $file->getWebViewLink();
         } catch (\Exception $e) {
             throw ApiException::fromException(
@@ -192,12 +210,14 @@ class GoogleDriveService
         }
     }
 
+    // Скачивание файла
     public function downloadFile($fileId)
     {
         try {
             $fileMetadata = $this->driveService->files->get($fileId, ['fields' => 'mimeType, name']);
             $fileContent = $this->driveService->files->get($fileId, ['alt' => 'media']);
 
+            // Возвращает содержимое файла, MIME-тип и имя файла
             return [
                 'content' => $fileContent->getBody(),
                 'mimeType' => $fileMetadata->getMimeType(),
@@ -210,13 +230,8 @@ class GoogleDriveService
             );
         }
     }
-    /**
-     * Получает ID родительской папки для указанного файла
-     *
-     * @param string $fileId ID файла в Google Drive
-     * @return string|null ID родительской папки или null, если файл в корне
-     * @throws ApiException
-     */
+
+    // Получение ID родительской папки для файла
     public function getFileParentFolderId(string $fileId): ?string
     {
         try {
@@ -239,14 +254,7 @@ class GoogleDriveService
         }
     }
 
-    /**
-     * Переименовывает папку в Google Drive
-     *
-     * @param string $folderId ID папки
-     * @param string $newName Новое название папки
-     * @return DriveFile Обновленная папка
-     * @throws ApiException
-     */
+    // Переименование папки
     public function renameFolder(string $folderId, string $newName): DriveFile
     {
         try {
@@ -266,14 +274,7 @@ class GoogleDriveService
         }
     }
 
-    /**
-     * Получает родительскую папку файла и переименовывает её
-     *
-     * @param string $fileId ID файла
-     * @param string $newFolderName Новое название папки
-     * @return string ID переименованной папки
-     * @throws ApiException Если файл не имеет родительской папки или произошла ошибка
-     */
+    // Получение и переименование родительской папки файла
     public function getAndRenameParentFolder(string $fileId, string $newFolderName): string
     {
         $parentId = $this->getFileParentFolderId($fileId);
@@ -286,6 +287,8 @@ class GoogleDriveService
 
         return $parentId;
     }
+
+    // Создание структуры папок по заданному пути
     private function createFolderStructure(string $path): string
     {
         $cacheKey = 'gdrive_folder_' . md5($path);
@@ -301,7 +304,7 @@ class GoogleDriveService
         });
     }
 
-
+    // Получение ID существующей папки или создание новой
     public function getOrCreateFolder(string $folderName, string $parentId = 'root'): string
     {
         $cacheKey = $parentId . ':' . $folderName;
@@ -345,6 +348,4 @@ class GoogleDriveService
 
         return $folderId;
     }
-
-
 }

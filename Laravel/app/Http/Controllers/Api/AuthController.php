@@ -15,13 +15,9 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
-use Random\RandomException;
 
 class AuthController extends Controller
 {
-    /**
-     * @throws RandomException
-     */
     // Регистрация
     public function signUp(SignUpRequest $request): JsonResponse
     {

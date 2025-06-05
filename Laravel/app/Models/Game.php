@@ -3,7 +3,9 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Support\Facades\Http;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class Game extends Model
 {
@@ -13,15 +15,15 @@ class Game extends Model
         'game_code'
     ];
 
-    public function saves()
+    public function saves(): HasMany
     {
         return $this->hasMany(Save::class);
     }
-    public function user()
+    public function user(): BelongsToMany
     {
         return $this->belongsToMany(User::class);
     }
-    public function path()
+    public function path(): HasOne
     {
         return $this->hasOne(Path::class);
     }

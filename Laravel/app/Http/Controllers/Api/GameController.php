@@ -13,6 +13,7 @@ use Illuminate\Http\Request;
 
 class GameController extends Controller
 {
+    // Получение игр
     public function getGames(Request $request): JsonResponse
     {
         $name = $request->query('name');
@@ -24,6 +25,8 @@ class GameController extends Controller
         ->appends(['name' => $name]);
         return GameResource::collection($games)->response();
     }
+
+    // Получение игры
     public function getGame(Game $game): JsonResponse
     {
         $user = auth()->user();
@@ -35,6 +38,8 @@ class GameController extends Controller
             'saves' => $saves->isEmpty() ? null : SaveResource::collection($saves),
         ]);
     }
+
+    // Получение пути к папке сохранений
     public function getPath(Game $game): JsonResponse
     {
         $path = $game->path()->firstOrFail();
