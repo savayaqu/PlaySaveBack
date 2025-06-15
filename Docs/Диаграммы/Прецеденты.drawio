@@ -1,6 +1,6 @@
 <mxfile host="Electron" agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) draw.io/26.2.2 Chrome/134.0.6998.178 Electron/35.1.2 Safari/537.36" version="26.2.2">
   <diagram id="pAf-59QJGZfnyUv0g2Xw" name="Прецеденты в А4">
-    <mxGraphModel dx="628" dy="875" grid="0" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="0" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
+    <mxGraphModel dx="185" dy="603" grid="0" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="0" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
       <root>
         <mxCell id="0" />
         <mxCell id="1" parent="0" />
@@ -22,34 +22,8 @@
         <mxCell id="wswd_qLIWPmoVBlSCdII-43" value="Синхронизация сохранения" style="ellipse;whiteSpace=wrap;html=1;" parent="wswd_qLIWPmoVBlSCdII-131" vertex="1">
           <mxGeometry x="18.75" y="175" width="135" height="55" as="geometry" />
         </mxCell>
-        <mxCell id="wswd_qLIWPmoVBlSCdII-133" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;fillColor=#f8cecc;strokeColor=#b85450;curved=0;dashed=1;dashPattern=8 8;strokeWidth=2;" parent="wswd_qLIWPmoVBlSCdII-131" source="wswd_qLIWPmoVBlSCdII-103" target="wswd_qLIWPmoVBlSCdII-43" edge="1">
-          <mxGeometry relative="1" as="geometry">
-            <Array as="points">
-              <mxPoint x="220" y="268" />
-              <mxPoint x="220" y="203" />
-            </Array>
-          </mxGeometry>
-        </mxCell>
-        <mxCell id="wswd_qLIWPmoVBlSCdII-143" value="include" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" parent="wswd_qLIWPmoVBlSCdII-133" vertex="1" connectable="0">
-          <mxGeometry x="0.0332" relative="1" as="geometry">
-            <mxPoint as="offset" />
-          </mxGeometry>
-        </mxCell>
         <mxCell id="wswd_qLIWPmoVBlSCdII-103" value="Скачивание сохранения" style="ellipse;whiteSpace=wrap;html=1;" parent="wswd_qLIWPmoVBlSCdII-131" vertex="1">
           <mxGeometry x="16.25" y="240" width="135" height="50" as="geometry" />
-        </mxCell>
-        <mxCell id="wswd_qLIWPmoVBlSCdII-132" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;fillColor=#f8cecc;strokeColor=#b85450;dashed=1;dashPattern=8 8;curved=0;strokeWidth=2;" parent="wswd_qLIWPmoVBlSCdII-131" source="wswd_qLIWPmoVBlSCdII-130" target="wswd_qLIWPmoVBlSCdII-43" edge="1">
-          <mxGeometry relative="1" as="geometry">
-            <Array as="points">
-              <mxPoint x="-40" y="323" />
-              <mxPoint x="-40" y="203" />
-            </Array>
-          </mxGeometry>
-        </mxCell>
-        <mxCell id="wswd_qLIWPmoVBlSCdII-142" value="include" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" parent="wswd_qLIWPmoVBlSCdII-132" vertex="1" connectable="0">
-          <mxGeometry x="0.1207" y="2" relative="1" as="geometry">
-            <mxPoint as="offset" />
-          </mxGeometry>
         </mxCell>
         <mxCell id="wswd_qLIWPmoVBlSCdII-130" value="Поделиться сохранением" style="ellipse;whiteSpace=wrap;html=1;" parent="wswd_qLIWPmoVBlSCdII-131" vertex="1">
           <mxGeometry x="18.75" y="297.5" width="135" height="50" as="geometry" />
@@ -214,7 +188,7 @@
         <mxCell id="wswd_qLIWPmoVBlSCdII-83" value="Восстановление по почте" style="ellipse;whiteSpace=wrap;html=1;" parent="wswd_qLIWPmoVBlSCdII-80" vertex="1">
           <mxGeometry x="21.470588235294116" y="32.19512195121951" width="127.05882352941177" height="44.26829268292683" as="geometry" />
         </mxCell>
-        <mxCell id="wswd_qLIWPmoVBlSCdII-85" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;dashed=1;dashPattern=8 8;curved=0;fillColor=#d5e8d4;strokeColor=#005700;" parent="1" source="wswd_qLIWPmoVBlSCdII-6" target="wswd_qLIWPmoVBlSCdII-82" edge="1">
+        <mxCell id="wswd_qLIWPmoVBlSCdII-85" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;dashed=1;dashPattern=8 8;curved=0;fillColor=#d5e8d4;strokeColor=#005700;strokeWidth=2;" parent="1" source="wswd_qLIWPmoVBlSCdII-6" target="wswd_qLIWPmoVBlSCdII-82" edge="1">
           <mxGeometry relative="1" as="geometry">
             <Array as="points">
               <mxPoint x="1363" y="1125" />
@@ -222,12 +196,12 @@
             </Array>
           </mxGeometry>
         </mxCell>
-        <mxCell id="wswd_qLIWPmoVBlSCdII-88" value="extend" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" parent="wswd_qLIWPmoVBlSCdII-85" vertex="1" connectable="0">
+        <mxCell id="wswd_qLIWPmoVBlSCdII-88" value="include" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" parent="wswd_qLIWPmoVBlSCdII-85" vertex="1" connectable="0">
           <mxGeometry x="0.1971" y="-3" relative="1" as="geometry">
-            <mxPoint x="-13" y="-3" as="offset" />
+            <mxPoint x="-10" y="-3" as="offset" />
           </mxGeometry>
         </mxCell>
-        <mxCell id="wswd_qLIWPmoVBlSCdII-86" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;dashed=1;dashPattern=8 8;curved=0;fillColor=#d5e8d4;strokeColor=#005700;" parent="1" source="wswd_qLIWPmoVBlSCdII-6" target="wswd_qLIWPmoVBlSCdII-83" edge="1">
+        <mxCell id="wswd_qLIWPmoVBlSCdII-86" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;dashed=1;dashPattern=8 8;curved=0;fillColor=#d5e8d4;strokeColor=#005700;strokeWidth=2;" parent="1" source="wswd_qLIWPmoVBlSCdII-6" target="wswd_qLIWPmoVBlSCdII-83" edge="1">
           <mxGeometry relative="1" as="geometry">
             <Array as="points">
               <mxPoint x="1286" y="1125" />
@@ -235,9 +209,9 @@
             </Array>
           </mxGeometry>
         </mxCell>
-        <mxCell id="wswd_qLIWPmoVBlSCdII-87" value="extend" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" parent="wswd_qLIWPmoVBlSCdII-86" vertex="1" connectable="0">
+        <mxCell id="wswd_qLIWPmoVBlSCdII-87" value="include" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" parent="wswd_qLIWPmoVBlSCdII-86" vertex="1" connectable="0">
           <mxGeometry x="0.2254" relative="1" as="geometry">
-            <mxPoint x="33" y="-5" as="offset" />
+            <mxPoint x="40" y="-6" as="offset" />
           </mxGeometry>
         </mxCell>
         <mxCell id="wswd_qLIWPmoVBlSCdII-105" value="" style="endArrow=none;html=1;rounded=1;edgeStyle=orthogonalEdgeStyle;fillColor=#0050ef;strokeColor=#001DBC;" parent="1" target="wswd_qLIWPmoVBlSCdII-8" edge="1">
