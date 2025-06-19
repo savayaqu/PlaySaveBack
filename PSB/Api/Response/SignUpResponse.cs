@@ -7,6 +7,6 @@ namespace PSB.Api.Response
     {
         [JsonPropertyName("token")] public required string Token { get; set; }
         [JsonPropertyName("user")] public required User User { get; set; }
-        [JsonPropertyName("key")] public int Key { get; set; }
+        [JsonPropertyName("key")] public required string Key { get; set; }
     }
 }

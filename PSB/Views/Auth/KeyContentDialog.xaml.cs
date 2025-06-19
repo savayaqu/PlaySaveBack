@@ -11,7 +11,7 @@ namespace PSB.Views.Auth
     /// </summary>
     public sealed partial class KeyContentDialog : ContentDialog
     {
-        public KeyContentDialog(int key)
+        public KeyContentDialog(string key)
         {
             this.InitializeComponent();
             TextBlockKey.Text = key.ToString();
