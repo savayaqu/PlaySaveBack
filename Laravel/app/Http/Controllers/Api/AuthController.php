@@ -10,7 +10,6 @@ use App\Http\Requests\Api\Auth\SignInRequest;
 use App\Http\Requests\Api\Auth\SignUpRequest;
 use App\Http\Resources\UserResource;
 use App\Models\User;
-use App\Traits\ThrottlesLogins;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -19,8 +18,6 @@ use Illuminate\Support\Str;
 
 class AuthController extends Controller
 {
-    use ThrottlesLogins; // Подключаем трейт
-
     // Регистрация
     public function signUp(SignUpRequest $request): JsonResponse
     {
@@ -37,26 +34,13 @@ class AuthController extends Controller
 
     public function signIn(SignInRequest $request): JsonResponse
     {
-        // Проверяем, не заблокирован ли пользователь из-за частых попыток
-        $this->ensureIsNotRateLimited($request);
-
         $identifier = $request->input('identifier');
         $password = $request->input('password');
         $field = filter_var($identifier, FILTER_VALIDATE_EMAIL) ? 'email' : 'login';
 
         if (!Auth::attempt([$field => $identifier, 'password' => $password])) {
-            // Увеличиваем счетчик неудачных попыток
-            $this->incrementLoginAttempts($request);
-
-            // Задержка для замедления брутфорса (по желанию)
-            $this->applyBruteForceDelay(2); // 2 секунды
-
             throw new ApiException('Invalid credentials', 401);
         }
-
-        // Сбрасываем счетчик после успешного входа
-        $this->clearLoginAttempts($request);
-
         $user = Auth::user();
         if (!$user instanceof User) {
             throw new UnauthorizedException();
