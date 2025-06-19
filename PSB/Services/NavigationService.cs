@@ -11,9 +11,11 @@ namespace PSB.Services
 {
     public class NavigationService
     {
+        // Основные UI-компоненты для навигации
         private readonly Frame _frame;
         private readonly NavigationView _navView;
         private readonly TextBlock _headerText;
+        // Словарь для связи тегов страниц с их типами
         private readonly Dictionary<string, Type> _pages = new()
         {
             { "HomePage", typeof(HomePage) },
@@ -21,6 +23,7 @@ namespace PSB.Services
             { "SettingsPage", typeof(SettingsPage) },
             { "ProfilePage", typeof(ProfilePage) },
         };
+        // Словарь заголовков для страниц
         private readonly Dictionary<string, string> _pageTitles = new()
         {
             { "HomePage", "Главная" },
@@ -32,18 +35,21 @@ namespace PSB.Services
         {
             return _frame.Content as Page;
         }
+        // Конструктор с инъекцией зависимостей
         public NavigationService(Frame frame, NavigationView navView, TextBlock headerText)
         {
             _frame = frame;
             _navView = navView;
             _headerText = headerText;
 
+            // Подписка на события навигации
             _frame.Navigated += OnNavigated;
             _navView.SelectionChanged += OnNavigationViewSelectionChanged;
         }
-
+        // Основной метод навигации по тегу страницы
         public void Navigate(string pageTag)
         {
+            // Проверка входных данных
             if (string.IsNullOrEmpty(pageTag))
             {
                 Debug.WriteLine("Page tag is null or empty.");
@@ -52,36 +58,44 @@ namespace PSB.Services
 
             try
             {
+                // Специальная обработка страниц игр
                 if (pageTag.StartsWith("Game_") || pageTag.StartsWith("SideGame_"))
                 {
+                    // Извлекаем ID и название игры из тега
                     ulong gameId = ExtractGameId(pageTag);
                     string gameName = ExtractGameName(pageTag);
                     string type = pageTag.StartsWith("Game_") ? "Game" : "SideGame";
 
-                    if (_frame.Content is GamePage currentGamePage && currentGamePage.GameViewModel?.GameId == gameId)
+                    // Оптимизация: не перезагружаем страницу, если уже на ней
+                    if (_frame.Content is GamePage currentGamePage &&
+                        currentGamePage.GameViewModel?.GameId == gameId)
                     {
                         Debug.WriteLine("GamePage уже загружена для этой игры. Обновляем выделение в меню.");
                         _headerText.Text = gameName;
                         return;
                     }
 
+                    // Подготовка параметров навигации
                     var parameters = new GameNavigationParameters
                     {
                         Type = type,
                         GameId = gameId
                     };
 
+                    // Выполняем навигацию
                     _frame.Navigate(typeof(GamePage), parameters);
                     _headerText.Text = gameName;
                     return;
                 }
 
+                // Обработка обычных страниц
                 if (_pages.TryGetValue(pageTag, out var pageType))
                 {
                     _frame.Navigate(pageType);
+                    // Устанавливаем заголовок из словаря или используем тег как fallback
                     _headerText.Text = _pageTitles.TryGetValue(pageTag, out var title)
                                    ? title
-                                   : pageTag; // fallback на оригинальное название
+                                   : pageTag;
                 }
                 else
                 {
