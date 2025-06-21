@@ -82,13 +82,18 @@ namespace PSB
             });
         }
 
-        private static void InitializeMainWindow()
+        private static void InitializeMainWindow(Window? previousWindow = null)
         {
             MainWindow = new MainWindow
             {
                 ExtendsContentIntoTitleBar = true
             };
-            //MainWindow.AppWindow.SetIcon("Assets/logo.ico");
+
+            if (previousWindow != null)
+            {
+                ApplyWindowPosition(previousWindow, MainWindow);
+            }
+
             NavigationService = new NavigationService(
                 MainWindow.ContentFrameControl,
                 MainWindow.NavigationViewControl,
@@ -101,26 +106,67 @@ namespace PSB
 
             MainWindow.Activate();
         }
-        private static void InitializeAuthWindow()
+
+        private static void InitializeAuthWindow(Window? previousWindow = null)
         {
             AuthWindow = new AuthWindow
             {
                 ExtendsContentIntoTitleBar = true
             };
+
+            if (previousWindow != null)
+            {
+                ApplyWindowPosition(previousWindow, AuthWindow);
+            }
+
             AuthNavigationService = new AuthNavigationService(AuthWindow.ContentFrame);
             AuthWindow.Activate();
         }
-        private static void InitializeRegistrationWindow()
+
+        private static void InitializeRegistrationWindow(Window? previousWindow = null)
         {
             RegistrationWindow = new RegistrationWindow
             {
                 ExtendsContentIntoTitleBar = true
             };
+
+            if (previousWindow != null)
+            {
+                ApplyWindowPosition(previousWindow, RegistrationWindow);
+            }
+
             RegistrationWindow.Activate();
         }
+
+        private static void ApplyWindowPosition(Window source, Window target)
+        {
+            var hWnd = WinRT.Interop.WindowNative.GetWindowHandle(source);
+            var windowId = Microsoft.UI.Win32Interop.GetWindowIdFromWindow(hWnd);
+            var appWindow = Microsoft.UI.Windowing.AppWindow.GetFromWindowId(windowId);
+
+            var targetHwnd = WinRT.Interop.WindowNative.GetWindowHandle(target);
+            var targetWindowId = Microsoft.UI.Win32Interop.GetWindowIdFromWindow(targetHwnd);
+            var targetAppWindow = Microsoft.UI.Windowing.AppWindow.GetFromWindowId(targetWindowId);
+
+            // Получаем только позицию окна (без изменения размера)
+            var position = appWindow.Position;
+            var size = targetAppWindow.Size; // Сохраняем текущий размер нового окна
+
+            // Создаем RectInt32 с новой позицией и текущим размером
+            var newRect = new Windows.Graphics.RectInt32(
+                position.X,
+                position.Y,
+                size.Width,
+                size.Height);
+
+            targetAppWindow.MoveAndResize(newRect);
+        }
+
         public static void SwitchToMain()
         {
-            InitializeMainWindow();
+            Window? previousWindow = AuthWindow ?? (Window?)RegistrationWindow;
+            InitializeMainWindow(previousWindow);
+
             if (AuthWindow != null)
             {
                 AuthWindow.Close();
@@ -132,27 +178,30 @@ namespace PSB
                 RegistrationWindow = null;
             }
         }
+
         public static void SwitchToLoginFromMain()
         {
-            InitializeAuthWindow();
+            InitializeAuthWindow(MainWindow);
             if (MainWindow != null)
             {
                 MainWindow.Close();
                 MainWindow = null;
             }
         }
+
         public static void SwitchToRegistrationFromLogin()
         {
-            InitializeRegistrationWindow();
+            InitializeRegistrationWindow(AuthWindow);
             if (AuthWindow != null)
             {
                 AuthWindow.Close();
                 AuthWindow = null;
             }
         }
+
         public static void SwitchToLoginFromRegistration()
         {
-            InitializeAuthWindow();
+            InitializeAuthWindow(RegistrationWindow);
             if (RegistrationWindow != null)
             {
                 RegistrationWindow.Close();

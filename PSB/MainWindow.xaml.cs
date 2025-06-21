@@ -5,6 +5,7 @@ using Microsoft.UI.Xaml.Navigation;
 using PSB.Services;
 using PSB.ViewModels;
 using PSB.Views;
+using Windows.Graphics;
 
 namespace PSB
 {
@@ -45,9 +46,10 @@ namespace PSB
 
             AppWindow.SetPresenter(presenter);
 
-
-
-
+            // Центруем приложение
+            var area = DisplayArea.GetFromWindowId(AppWindow.Id, DisplayAreaFallback.Nearest)?.WorkArea;
+            if (area == null) return;
+            AppWindow.Move(new PointInt32((area.Value.Width - AppWindow.Size.Width) / 2, (area.Value.Height - AppWindow.Size.Height) / 2));
         }
         private void BackButton_Click(object sender, RoutedEventArgs e)
         {
