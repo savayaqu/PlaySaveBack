@@ -22,7 +22,8 @@ namespace PSB.Views.Auth
             var hwnd = WinRT.Interop.WindowNative.GetWindowHandle(this);
             var windowId = Win32Interop.GetWindowIdFromWindow(hwnd);
             var appWindow = AppWindow.GetFromWindowId(windowId);
-
+            // Устанавливаем иконку
+            AppWindow.SetIcon("Assets/Logo.ico");
             // Устанавливаем фиксированный размер
             appWindow.Resize(new SizeInt32(500, 600));
             // Получаем текущий Presenter или создаем новый

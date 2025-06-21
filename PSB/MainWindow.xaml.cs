@@ -37,7 +37,8 @@ namespace PSB
 
             // Установка минизмального значения окна
             AppWindow.Resize(new Windows.Graphics.SizeInt32(1100, 550));
-            AppWindow.SetIcon("Assets/Tiles/GalleryIcon.ico");
+            // Устанавливаем иконку
+            AppWindow.SetIcon("Assets/Logo.ico");
             AppWindow.TitleBar.PreferredTheme = TitleBarTheme.UseDefaultAppMode;
 
             OverlappedPresenter presenter = OverlappedPresenter.Create();

@@ -38,6 +38,8 @@ namespace PSB.Views.Auth
                     newPresenter.IsMaximizable = false;
                 }
             }
+            // Устанавливаем иконку
+            AppWindow.SetIcon("Assets/Logo.ico");
         }
     }
 }
